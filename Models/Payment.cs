@@ -14,6 +14,7 @@ namespace Blink_API.Models
         [Required]
         [StringLength(50)]
         public string PaymentStatus { get; set; }
+        public DateTime PaymentDate { get; set; }
 
         public virtual OrderHeader OrderHeader { get; set; }
         public bool IsDeleted { get; set; } = false;
