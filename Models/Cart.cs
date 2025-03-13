@@ -8,7 +8,7 @@ namespace Blink_API.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int CartId { get; set; }
-        public DateTime CreationDate { get; set; }
+        
         public virtual ICollection<CartDetail> CartDetails { get; set; } = new HashSet<CartDetail>();
         
         public virtual OrderHeader OrderHeader { get; set; }
