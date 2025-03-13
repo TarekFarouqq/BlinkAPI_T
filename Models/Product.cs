@@ -34,13 +34,14 @@ namespace Blink_API.Models
         [ForeignKey("SupplierId")]
         public virtual ApplicationUser User { get; set; }
 
-        public virtual ICollection<WishList> WishLists { get; set; } = new HashSet<WishList>();
+        //public virtual ICollection<WishList> WishLists { get; set; } = new HashSet<WishList>();
         public virtual ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
         public virtual ICollection<ProductImage> ProductImages { get; set; } = new HashSet<ProductImage>();
 
         public virtual ICollection<TransactionProduct> TransactionProducts { get; set; } = new HashSet<TransactionProduct>();
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new HashSet<OrderDetail>();
         public virtual ICollection<CartDetail> CartDetails { get; set; } = new HashSet<CartDetail>();
+        public virtual ICollection<WishListDetail> WishListDetails { get; set; } = new HashSet<WishListDetail>();
         public virtual ICollection<ProductDiscount> ProductDiscounts { get; set; } = new HashSet<ProductDiscount>();
         public virtual ICollection<StockProductInventory> StockProductInventories { get; set; } = new HashSet<StockProductInventory>();
 

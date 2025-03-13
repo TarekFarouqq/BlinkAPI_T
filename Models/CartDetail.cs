@@ -6,6 +6,9 @@ namespace Blink_API.Models
     public class CartDetail
     {
         public int Quantity { get; set; }
+        public bool IsDeleted { get; set; } = false;
+
+        public DateTime CreationDate { get; set; }
         [Required]
         public int ProductId { get; set; }
 
@@ -16,7 +19,6 @@ namespace Blink_API.Models
         [ForeignKey("CartId")]
         public virtual Cart Cart { get; set; }
 
-        // fleunt pk
     }
 }
 

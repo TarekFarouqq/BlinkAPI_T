@@ -21,5 +21,8 @@ namespace Blink_API.Config
                 .HasForeignKey(cd => cd.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
+
+
+
     }
 }
