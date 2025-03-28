@@ -5,7 +5,8 @@ namespace Blink_API.Models
 {
     public class ReviewComment
     {
-        
+        // id is not identity !!!!!!!
+
         public int CommentId { get; set; }
         [Required]
         public int ReviewId { get; set; }
@@ -16,7 +17,5 @@ namespace Blink_API.Models
         public virtual Review Review { get; set; }
         public bool IsDeleted { get; set; } = false;
 
-
-        // Fluent composite
     }
 }
