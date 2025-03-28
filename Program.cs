@@ -49,6 +49,10 @@ namespace Blink_API
             app.MapControllers();
 
             app.Run();
+
+
+            // Jimmy is herez
+
         }
     }
 }
