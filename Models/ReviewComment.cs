@@ -16,7 +16,5 @@ namespace Blink_API.Models
         public virtual Review Review { get; set; }
         public bool IsDeleted { get; set; } = false;
 
-
-        // Fluent composite
     }
 }
