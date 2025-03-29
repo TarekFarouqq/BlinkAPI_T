@@ -1,6 +1,7 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using AutoMapper;
 using Blink_API.DTOs.Product;
+using Blink_API.DTOs.Category;
 using Blink_API.Models;
 
 namespace Blink_API.MapperConfigs
@@ -9,6 +10,8 @@ namespace Blink_API.MapperConfigs
     {
         public MapperConfig()
         {
+            CreateMap<Category, ParentCategoryDTO>().ReverseMap();
+            CreateMap<Category, ChildCategoryDTO>().ReverseMap();
             CreateMap<Product, ProductDetailsDTO>()
                 .ForMember(dest => dest.SupplierName, option => option.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
                 .ForMember(dest => dest.BrandName, option => option.MapFrom(src => src.Brand.BrandName))

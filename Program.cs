@@ -1,7 +1,7 @@
-
 using Blink_API.MapperConfigs;
 using Blink_API.Models;
 using Blink_API.Repositories;
+using Blink_API.Services;
 using Blink_API.Services.Product;
 using Blink_API.UnitOfWorks;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +22,12 @@ namespace Blink_API
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores <BlinkDbContext>();
 
+            // add category repo
+            builder.Services.AddScoped<CategoryRepo>();
+            //addonf category services 
+            builder.Services.AddScoped<CategoryService>();
+            // Add Mapper
+            builder.Services.AddAutoMapper(typeof(MapperConfig));
 
             //Add UnitOfWork
             builder.Services.AddScoped<UnitOfWork>();
@@ -35,7 +41,6 @@ namespace Blink_API
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
-            builder.Services.AddAutoMapper(typeof(MapperConfig));
             builder.Services.AddCors(Options =>
             {
                 Options.AddDefaultPolicy(builder =>
