@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Blink_API.DTOs.Product;
-using Blink_API.UnitOfWorks;
 
 namespace Blink_API.Services.Product
 {
