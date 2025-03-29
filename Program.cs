@@ -2,9 +2,13 @@ using Blink_API.MapperConfigs;
 using Blink_API.Models;
 using Blink_API.Repositories;
 using Blink_API.Services;
+using Blink_API.Services.AuthServices;
 using Blink_API.Services.Product;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Blink_API
 {
@@ -15,11 +19,11 @@ namespace Blink_API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddDbContext <BlinkDbContext> (s => 
+            builder.Services.AddDbContext<BlinkDbContext>(s =>
             { s.UseSqlServer(builder.Configuration.GetConnectionString("conString")); });
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores <BlinkDbContext>();
+                .AddEntityFrameworkStores<BlinkDbContext>();
 
             // add category repo
             builder.Services.AddScoped<CategoryRepo>();
@@ -35,39 +39,63 @@ namespace Blink_API
             //Add ProductService
             builder.Services.AddScoped<ProductService>();
 
+            #region Add AUTH SERVICES
 
-
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
-            builder.Services.AddCors(Options =>
+            builder.Services.AddScoped(typeof(IAuthServices), typeof(AuthServices));
+           
+            builder.Services.AddAuthentication(options =>
             {
-                Options.AddDefaultPolicy(builder =>
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options => {
+                options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                });
+                    ValidateAudience = true,
+                    ValidAudience = builder.Configuration["JWT:ValidAudience"],
+                    ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"])),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromDays(double.Parse(builder.Configuration["JWT:DurationInDays"]))
+
+
+                };
             });
-            var app = builder.Build();
+                #endregion
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-                app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
+                builder.Services.AddControllers();
+                // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+                builder.Services.AddOpenApi();
+                builder.Services.AddCors(Options =>
+                {
+                    Options.AddDefaultPolicy(builder =>
+                    {
+                        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    });
+                });
+                var app = builder.Build();
+
+                // Configure the HTTP request pipeline.
+                if (app.Environment.IsDevelopment())
+                {
+                    app.MapOpenApi();
+                    app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
+                }
+
+                app.UseHttpsRedirection();
+                app.UseAuthentication();
+                app.UseAuthorization();
+                app.UseCors();
+
+                app.MapControllers();
+
+                app.Run();
+
+
+                // Jimmy is herez
+
             }
-
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-            app.UseCors();
-
-            app.MapControllers();
-
-            app.Run();
-
-
-            // Jimmy is herez
-
-        }
     }
-}
+    }
+
