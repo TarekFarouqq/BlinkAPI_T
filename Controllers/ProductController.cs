@@ -1,4 +1,4 @@
-﻿using Blink_API.Services;
+﻿using Blink_API.Services.Product;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blink_API.Controllers
