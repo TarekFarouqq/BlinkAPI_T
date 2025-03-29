@@ -22,6 +22,5 @@ namespace Blink_API.UnitOfWorks
                 return productRepo;
              }
         }
-
     }
 }
