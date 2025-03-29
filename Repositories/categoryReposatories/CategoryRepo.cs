@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories
 {
-    public class CategoryRepo
+    public class CategoryRepo:GenericRepo<Category,int>
     {
         private readonly BlinkDbContext _db;
-        public CategoryRepo(BlinkDbContext db)
+        public CategoryRepo(BlinkDbContext db):base(db)
         {
             _db = db;
         }
