@@ -1,6 +1,9 @@
 
 using Blink_API.MapperConfigs;
 using Blink_API.Models;
+using Blink_API.Repositories;
+using Blink_API.Services;
+using Blink_API.UnitOfWorks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +21,15 @@ namespace Blink_API
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores <BlinkDbContext>();
-           
+
+
+            //Add UnitOfWork
+            builder.Services.AddScoped<UnitOfWork>();
+            //Add ProductRepo
+            builder.Services.AddScoped<ProductRepo>();
+            //Add ProductService
+            builder.Services.AddScoped<ProductService>();
+
 
 
             builder.Services.AddControllers();
