@@ -38,6 +38,14 @@ namespace Blink_API.Controllers
             }
             return Ok(categories);
         }
-      
+        [HttpGet("GetChildCategoryById")]
+        public async Task<ActionResult> GetChildCategoryById(int id)
+        {
+            var category = await categoryService.GetChildCategoryById(id);
+            if (category == null) return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}";
+            category.CategoryImage = baseUrl + category.CategoryImage.Replace("wwwroot", "");
+            return Ok(category);
+        }
     }
 }

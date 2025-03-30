@@ -25,5 +25,11 @@ namespace Blink_API.Services
             var resultMapping = mapper.Map<List<ChildCategoryDTO>>(categories); 
             return resultMapping;
         }
+        public async Task<ChildCategoryDTO> GetChildCategoryById(int id)
+        {
+            var category = await unitOfWork.CategoryRepo.GetChildCategoryById(id);
+            var resultMapping= mapper.Map<ChildCategoryDTO>(category);
+            return resultMapping;
+        }
     }
 }
