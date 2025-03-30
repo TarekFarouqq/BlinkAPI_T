@@ -83,6 +83,8 @@ namespace Blink_API
                     app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
                 }
 
+            app.UseStaticFiles();
+
                 app.UseHttpsRedirection();
                 app.UseAuthentication();
                 app.UseAuthorization();
