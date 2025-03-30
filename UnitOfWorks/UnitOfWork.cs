@@ -1,5 +1,6 @@
 ﻿using Blink_API.Models;
 using Blink_API.Repositories;
+using Blink_API.Repositories.DiscountRepos;
 
 namespace Blink_API
 {
@@ -8,6 +9,7 @@ namespace Blink_API
         private readonly BlinkDbContext db;
         ProductRepo productRepo;
         CategoryRepo categoryRepo;
+        DiscountRepo discountRepo;
         public UnitOfWork(BlinkDbContext _db)
         {
             db = _db;
@@ -32,6 +34,17 @@ namespace Blink_API
                     categoryRepo = new CategoryRepo (db);
                 }
                 return categoryRepo;
+            }
+        }
+        public DiscountRepo DiscountRepo
+        {
+            get
+            {
+                if (discountRepo == null)
+                {
+                    discountRepo = new DiscountRepo(db);
+                }
+                return discountRepo;
             }
         }
 
