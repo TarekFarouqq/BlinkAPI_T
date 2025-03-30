@@ -23,7 +23,11 @@ namespace Blink_API.MapperConfigs
                     Rate = r.Rate,
                     ReviewComment = r.ReviewComments.Select(rc => rc.Content).ToList()
                 })))
-                .ForMember(dest=>dest.CountOfRates,option=>option.MapFrom(src=>src.Reviews.Select(r=>r.ReviewId).Count()))
+                .ForMember(dest => dest.CountOfRates, option => option.MapFrom(src => src.Reviews.Select(r => r.ReviewId).Count()))
+                .ForMember(dest => dest.ProductPrice, option => 
+                option.MapFrom(src => src.StockProductInventories.Any() == true ? src.StockProductInventories.Average(p => p.StockUnitPrice):0))
+                .ForMember(dest=>dest.StockQuantity,option=>
+                option.MapFrom(src=>src.StockProductInventories.Any()==true? src.StockProductInventories.Sum(s=>s.StockQuantity) : 0 ))
                 .ReverseMap();
         }
     }
