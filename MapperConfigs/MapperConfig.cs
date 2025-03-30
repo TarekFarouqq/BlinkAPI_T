@@ -3,6 +3,7 @@ using AutoMapper;
 using Blink_API.DTOs.Product;
 using Blink_API.DTOs.Category;
 using Blink_API.Models;
+using Blink_API.DTOs.DiscountDTO;
 
 namespace Blink_API.MapperConfigs
 {
@@ -29,6 +30,16 @@ namespace Blink_API.MapperConfigs
                 .ForMember(dest=>dest.StockQuantity,option=>
                 option.MapFrom(src=>src.StockProductInventories.Any()==true? src.StockProductInventories.Sum(s=>s.StockQuantity) : 0 ))
                 .ReverseMap();
+            CreateMap<Discount, DiscountDetailsDTO>()
+                .ForMember(dest=>dest.DiscountProducts,option=>option.MapFrom(src=>src.ProductDiscounts.Select(dp=>new DiscountProductDetailsDTO
+                {
+                    DiscountId=dp.DiscountId,
+                    ProductId = dp.ProductId,
+                    DiscountAmount=dp.DiscountAmount,
+                    IsDeleted=dp.IsDeleted
+                })))
+                .ReverseMap();
+            CreateMap<ProductDiscount, DiscountProductDetailsDTO>().ReverseMap();
         }
     }
 }
