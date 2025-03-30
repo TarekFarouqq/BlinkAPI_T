@@ -13,6 +13,7 @@ namespace Blink_API.Repositories
         public override async Task<List<Product>> GetAll()
         {
             return await db.Products
+                .AsNoTracking()
                 .Include(u=>u.User)
                 .Include(b=>b.Brand)
                 .Include(c=>c.Category)
@@ -26,6 +27,7 @@ namespace Blink_API.Repositories
         public override async Task<Product?> GetById(int id)
         {
             return await db.Products
+                .AsNoTracking()
                 .Include(u => u.User)
                 .Include(b => b.Brand)
                 .Include(c => c.Category)
