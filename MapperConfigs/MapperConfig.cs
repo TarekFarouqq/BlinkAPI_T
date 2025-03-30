@@ -23,6 +23,7 @@ namespace Blink_API.MapperConfigs
                     Rate = r.Rate,
                     ReviewComment = r.ReviewComments.Select(rc => rc.Content).ToList()
                 })))
+                .ForMember(dest=>dest.CountOfRates,option=>option.MapFrom(src=>src.Reviews.Select(r=>r.ReviewId).Count()))
                 .ReverseMap();
         }
     }

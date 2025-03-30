@@ -17,6 +17,7 @@ namespace Blink_API.DTOs.Product
         public string BrandName { get; set; }
         public string CategoryName { get; set; }
         public double AverageRate { get; set; }
+        public int CountOfRates { get; set; }
         public bool IsDeleted { get; set; }
         public ICollection<ReviewCommentDTO> ProductReviews { get; set; }=new List<ReviewCommentDTO>();
     }

@@ -1,7 +1,8 @@
-﻿using Blink_API.Services.Product;
+﻿using Blink_API.Models;
+using Blink_API.Services.Product;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Blink_API.Controllers
+namespace Blink_API.Controllers.Product
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -26,6 +27,9 @@ namespace Blink_API.Controllers
             var product = await productService.GetProductById(id);  
             if(product == null)
                 return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
+
             return Ok(product);
         }
         
