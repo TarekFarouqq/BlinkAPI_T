@@ -24,5 +24,11 @@ namespace Blink_API.Repositories
                 .Where(pc => !pc.IsDeleted)
                 .ToListAsync();
         }
+        public async Task<Category?> GetChildCategoryById(int id)
+        {
+            return await _db.Categories
+                .Where(pc => pc.ParentCategoryId != null && !pc.IsDeleted && pc.CategoryId == id)
+                .FirstOrDefaultAsync();
+        }
     }
 }
