@@ -27,9 +27,8 @@ namespace Blink_API.Controllers.Product
             var product = await productService.GetProductById(id);  
             if(product == null)
                 return NotFound();
-            //string baseUrl = $"{Request.Scheme}://{Request.Host}/";
-            //product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
-
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
             return Ok(product);
         }
         
