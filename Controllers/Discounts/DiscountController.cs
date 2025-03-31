@@ -20,5 +20,12 @@ namespace Blink_API.Controllers.Discounts
             if (discounts == null) return NotFound();
             return Ok(discounts);
         }
+        [HttpGet("{DiscountId}")]
+        public async Task<ActionResult> GetRunningDiscountById(int DiscountId)
+        {
+            var discount = await discountService.GetRunningDiscountById(DiscountId);
+            if (discount == null) return NotFound();
+            return Ok(discount);
+        }
     }
 }
