@@ -21,5 +21,18 @@ namespace Blink_API.Repositories.DiscountRepos
                  .OrderByDescending(d=>d.DiscountFromDate)
                  .ToListAsync();
         }
+        public async Task<Discount?> GetRunningDiscountById(int id)
+        {
+            return await db.Discounts
+                 .Include(d => d.ProductDiscounts)
+                 .Where(d => d.DiscountId == id)
+                 .Where(d => d.DiscountFromDate <= DateTime.UtcNow)
+                 .Where(d => d.DiscountEndDate >= DateTime.UtcNow)
+                 .Where(d => !d.IsDeleted)
+                 .Where(d => d.ProductDiscounts.Any(pd => !pd.IsDeleted))
+                 .OrderByDescending(d => d.DiscountFromDate)
+                 .FirstOrDefaultAsync();
+                 
+        }
     }
 }
