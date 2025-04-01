@@ -17,7 +17,7 @@ namespace Blink_API.Models
         [StringLength(200, MinimumLength = 5)]
         public string Address { get; set; }
         public DateTime CreatedIn { get; set; } = DateTime.UtcNow;
-        public bool UserGranted { get; set; }
+        public bool UserGranted { get; set; } // 
 
         public bool IsDeleted { get; set; } = false;
 
