@@ -4,6 +4,7 @@ using Blink_API.Repositories;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Services;
 using Blink_API.Services.AuthServices;
+using Blink_API.Services.CartService;
 using Blink_API.Services.DiscountServices;
 using Blink_API.Services.Product;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -33,7 +34,7 @@ namespace Blink_API
             builder.Services.AddScoped<CategoryService>();
             // Add Mapper
             builder.Services.AddAutoMapper(typeof(MapperConfig));
-
+            builder.Services.AddScoped<CartService>();
             //Add UnitOfWork
             builder.Services.AddScoped<UnitOfWork>();
             //Add ProductRepo
