@@ -21,7 +21,8 @@ namespace Blink_API.Services.AuthServices
             var authClaims = new List<Claim>()
             {
                 new Claim(ClaimTypes.GivenName,user.UserName),
-                new Claim(ClaimTypes.Email,user.Email)
+                new Claim(ClaimTypes.Email,user.Email),
+                new Claim(ClaimTypes.NameIdentifier,user.Id)
             };
 
             var userRoles = await userManager.GetRolesAsync(user);
