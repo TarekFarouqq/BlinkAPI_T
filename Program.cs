@@ -23,7 +23,9 @@ namespace Blink_API
             { s.UseSqlServer(builder.Configuration.GetConnectionString("conString")); });
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<BlinkDbContext>();
+                .AddEntityFrameworkStores<BlinkDbContext>()
+                .AddDefaultTokenProviders()
+                .AddSignInManager();
 
             // add category repo
             builder.Services.AddScoped<CategoryRepo>();
@@ -62,9 +64,11 @@ namespace Blink_API
 
                 };
             });
-                #endregion
+            #endregion
+            // for email service :
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
-                builder.Services.AddControllers();
+            builder.Services.AddControllers();
                 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
                 builder.Services.AddOpenApi();
                 builder.Services.AddCors(Options =>
