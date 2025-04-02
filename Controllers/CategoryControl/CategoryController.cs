@@ -38,6 +38,15 @@ namespace Blink_API.Controllers
             }
             return Ok(categories);
         }
+        [HttpGet("GetParentCategoryById")]
+        public async Task<ActionResult> GetParentCategoryById(int id)
+        {
+            var category = await categoryService.GetParentCategoryById(id);
+            if (category == null) return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}";
+            category.CategoryImage = baseUrl + category.CategoryImage.Replace("wwwroot", "");
+            return Ok(category);
+        }
         [HttpGet("GetChildCategoryById")]
         public async Task<ActionResult> GetChildCategoryById(int id)
         {
@@ -46,6 +55,18 @@ namespace Blink_API.Controllers
             string baseUrl = $"{Request.Scheme}://{Request.Host}";
             category.CategoryImage = baseUrl + category.CategoryImage.Replace("wwwroot", "");
             return Ok(category);
+        }
+        [HttpGet("GetChildCategoryByParentId")]
+        public async Task<ActionResult> GetChildCategoryByParentId(int id)
+        {
+            var categories = await categoryService.GetChildCategoryByParentId(id);
+            if (categories == null) return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}";
+            foreach (var category in categories)
+            {
+                category.CategoryImage = baseUrl + category.CategoryImage.Replace("wwwroot", "");
+            }
+            return Ok(categories);
         }
     }
 }
