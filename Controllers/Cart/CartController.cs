@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Text;
+using Blink_API.DTOs.CartDTOs;
 using Blink_API.Models;
 using Blink_API.Services.CartService;
 using Blink_API.Services.Product;
@@ -19,7 +20,7 @@ namespace Blink_API.Controllers.Cart
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAllProducts()
+        public async Task<ActionResult> GetAllCarts()
         {
             var carts = await cartService.GetAllCarts();
             if (carts == null)
@@ -35,7 +36,7 @@ namespace Blink_API.Controllers.Cart
             return Ok(carts);
         }
 
-        [HttpGet("GetById/{id}")]
+        [HttpGet("GetByUserId/{id}")]
         public async Task<ActionResult> GetByUserId(string id)
         {
             var cart = await cartService.GetByUserId(id);
@@ -48,5 +49,19 @@ namespace Blink_API.Controllers.Cart
             }
             return Ok(cart);
         }
+
+        [HttpPost("AddCart")]
+        public async Task<ActionResult<ReadCartDTO>> AddCart([FromQuery] string userId, [FromBody] List<AddCartDetailsDTO> cartDetails)
+        {
+            if (string.IsNullOrEmpty(userId) || cartDetails == null || !cartDetails.Any())
+            {
+                return BadRequest("Invalid cart data.");
+            }
+
+            var addedCart = await cartService.AddCart(userId, cartDetails);
+            return Ok(addedCart);
+        }
+
+
     }
 }

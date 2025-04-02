@@ -12,6 +12,7 @@ namespace Blink_API
         CategoryRepo categoryRepo;
         DiscountRepo discountRepo;
         CartRepo cartRepo;
+        CartDetailsRepo cartDetailsRepo;
         public UnitOfWork(BlinkDbContext _db)
         {
             db = _db;
@@ -59,6 +60,18 @@ namespace Blink_API
                     cartRepo = new CartRepo(db);
                 }
                 return cartRepo;
+            }
+        }
+
+        public CartDetailsRepo CartDetailsRepo
+        {
+            get
+            {
+                if (cartDetailsRepo == null)
+                {
+                    cartDetailsRepo = new CartDetailsRepo(db);
+                }
+                return cartDetailsRepo;
             }
         }
     }
