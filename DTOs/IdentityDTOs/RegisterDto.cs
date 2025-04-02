@@ -18,8 +18,7 @@ namespace Blink_API.DTOs.IdentityDTOs
             , ErrorMessage = "Password must be at least 8 characters long and include at least one uppercase letter," +" one digit, and one special character (@$!%*?&")]
         public string Password { get; set; }
         [Required]
-        [RegularExpression("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$"
-         , ErrorMessage = "Password and rePassword not match")]
+        [Compare("Password", ErrorMessage = "Password and rePassword do not match")]
         public string rePassword { get; set; }
 
         [Required]
