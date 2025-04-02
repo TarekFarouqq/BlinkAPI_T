@@ -1,8 +1,11 @@
 using Blink_API.MapperConfigs;
 using Blink_API.Models;
 using Blink_API.Repositories;
+using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Services;
 using Blink_API.Services.AuthServices;
+using Blink_API.Services.CartService;
+using Blink_API.Services.DiscountServices;
 using Blink_API.Services.Product;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -33,13 +36,17 @@ namespace Blink_API
             builder.Services.AddScoped<CategoryService>();
             // Add Mapper
             builder.Services.AddAutoMapper(typeof(MapperConfig));
-
+            builder.Services.AddScoped<CartService>();
             //Add UnitOfWork
             builder.Services.AddScoped<UnitOfWork>();
             //Add ProductRepo
             builder.Services.AddScoped<ProductRepo>();
             //Add ProductService
             builder.Services.AddScoped<ProductService>();
+            //Add DiscountRepo
+            builder.Services.AddScoped<DiscountRepo>();
+            //Add DiscountService
+            builder.Services.AddScoped<DiscountService>();
 
             #region Add AUTH SERVICES
 
@@ -86,6 +93,8 @@ namespace Blink_API
                     app.MapOpenApi();
                     app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
                 }
+
+            app.UseStaticFiles();
 
                 app.UseHttpsRedirection();
                 app.UseAuthentication();

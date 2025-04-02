@@ -1,5 +1,7 @@
 ﻿using Blink_API.Models;
 using Blink_API.Repositories;
+using Blink_API.Repositories.CartRepos;
+using Blink_API.Repositories.DiscountRepos;
 
 namespace Blink_API
 {
@@ -8,6 +10,9 @@ namespace Blink_API
         private readonly BlinkDbContext db;
         ProductRepo productRepo;
         CategoryRepo categoryRepo;
+        DiscountRepo discountRepo;
+        CartRepo cartRepo;
+        CartDetailsRepo cartDetailsRepo;
         public UnitOfWork(BlinkDbContext _db)
         {
             db = _db;
@@ -34,6 +39,40 @@ namespace Blink_API
                 return categoryRepo;
             }
         }
+        public DiscountRepo DiscountRepo
+        {
+            get
+            {
+                if (discountRepo == null)
+                {
+                    discountRepo = new DiscountRepo(db);
+                }
+                return discountRepo;
+            }
+        }
 
+        public CartRepo CartRepo
+        {
+            get
+            {
+                if (cartRepo == null)
+                {
+                    cartRepo = new CartRepo(db);
+                }
+                return cartRepo;
+            }
+        }
+
+        public CartDetailsRepo CartDetailsRepo
+        {
+            get
+            {
+                if (cartDetailsRepo == null)
+                {
+                    cartDetailsRepo = new CartDetailsRepo(db);
+                }
+                return cartDetailsRepo;
+            }
+        }
     }
 }
