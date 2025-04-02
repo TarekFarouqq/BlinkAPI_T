@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Blink_API.DTOs.CartDTOs;
 using Blink_API.DTOs.Category;
+using Blink_API.Models;
 
 namespace Blink_API.Services.CartService
 {
@@ -27,5 +28,41 @@ namespace Blink_API.Services.CartService
             var resultedMapping = mapper.Map<ReadCartDTO>(cart);
             return resultedMapping;
         }
+
+        public async Task<ReadCartDTO> AddCart(string Userid, List<AddCartDetailsDTO> cartDetails)
+        {
+            // Create or get the user's cart id by his user id 
+            var cartId = await unitOfWork.CartRepo.AddCart(Userid);
+
+
+            foreach (var cartDetail in cartDetails)
+            {
+                
+                var exsistCartDetail = await unitOfWork.CartDetailsRepo.GetById(cartId.Value, cartDetail.ProductId);
+                if (exsistCartDetail == null)
+                {
+                    CartDetail newCartDetail = new CartDetail()
+                    {
+                        CartId = cartId.Value,
+                        ProductId = cartDetail.ProductId,
+                        Quantity = cartDetail.Quantity,
+                    };
+                    unitOfWork.CartDetailsRepo.Add(newCartDetail);
+                }
+                else 
+                {
+                    // inform the front that this prodcut is in cart already
+
+                }
+            }
+
+            await unitOfWork.CartDetailsRepo.SaveChanges();
+
+            // Fetch the updated cart after adding items
+            var updatedCart = await unitOfWork.CartRepo.GetByUserId(Userid);
+            return mapper.Map<ReadCartDTO>(updatedCart);
+        }
+
+
     }
 }

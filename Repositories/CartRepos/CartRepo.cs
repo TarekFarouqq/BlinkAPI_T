@@ -27,11 +27,27 @@ namespace Blink_API.Repositories.CartRepos
         {
             return await db.Carts
                 .AsNoTracking()
-                .Include(c => c.CartDetails)
-                .ThenInclude(c => c.Product)
-                .ThenInclude(c => c.ProductImages)
+                 .Include(c => c.CartDetails)
+                         .ThenInclude(c => c.Product).ThenInclude(c => c.StockProductInventories)
+                    .Include(c => c.CartDetails)
+                         .ThenInclude(c => c.Product).ThenInclude(c => c.ProductImages)
                 .Where(p => !p.IsDeleted)
                 .FirstOrDefaultAsync(p => p.UserId == id);
+        }
+
+        public async Task<int?> AddCart(string id)
+        {
+            
+            var cart = await GetByUserId(id);
+
+            if (cart == null)
+            {
+                cart = new Cart() { UserId = id };
+                await db.Carts.AddAsync(cart);
+                await db.SaveChangesAsync();
+            }
+           
+            return cart.CartId;
         }
     }
 }

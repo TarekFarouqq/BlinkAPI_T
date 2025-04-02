@@ -21,12 +21,12 @@ namespace Blink_API.Repositories
         public virtual void Add(TEntity entity)
         {
             db.Set<TEntity>().Add(entity);
-            SaveChanges();
+
         }
         public void Update(TEntity entity)
         {
             db.Entry(entity).State = EntityState.Modified;
-            SaveChanges();
+
         }
         public virtual async void Delete(Tkey id)
         {
@@ -38,7 +38,7 @@ namespace Blink_API.Repositories
                 {
                     prop.SetValue(t, true);
                     Update(t);
-                    SaveChanges();
+
                 }
             }
         }
