@@ -14,23 +14,28 @@ namespace Blink_API.Repositories.CartRepos
         public override async Task<List<Cart>> GetAll()
         {
             return await db.Carts
-                .AsNoTracking()
-                    .Include(c=> c.CartDetails)
-                         .ThenInclude(c=> c.Product).ThenInclude(c=>c.StockProductInventories)
-                    .Include(c => c.CartDetails)
-                         .ThenInclude(c => c.Product).ThenInclude(c=>c.ProductImages)
-                
+                        .AsNoTracking()
+                .Include(c => c.CartDetails.Where(cd => !cd.IsDeleted))  
+                    .ThenInclude(c => c.Product)
+                        .ThenInclude(p => p.StockProductInventories)
+                .Include(c => c.CartDetails.Where(cd => !cd.IsDeleted))  
+                    .ThenInclude(c => c.Product)
+                        .ThenInclude(p => p.ProductImages)
+                .Where(p => !p.IsDeleted)
                 .ToListAsync();
+        
         }
 
         public async Task<Cart?> GetByUserId(string id)
         {
             return await db.Carts
-                .AsNoTracking()
-                 .Include(c => c.CartDetails)
-                         .ThenInclude(c => c.Product).ThenInclude(c => c.StockProductInventories)
-                    .Include(c => c.CartDetails)
-                         .ThenInclude(c => c.Product).ThenInclude(c => c.ProductImages)
+                 .AsNoTracking()
+                .Include(c => c.CartDetails.Where(cd => !cd.IsDeleted))
+                    .ThenInclude(c => c.Product)
+                        .ThenInclude(p => p.StockProductInventories)
+                .Include(c => c.CartDetails.Where(cd => !cd.IsDeleted))
+                    .ThenInclude(c => c.Product)
+                        .ThenInclude(p => p.ProductImages)
                 .Where(p => !p.IsDeleted)
                 .FirstOrDefaultAsync(p => p.UserId == id);
         }
@@ -49,5 +54,7 @@ namespace Blink_API.Repositories.CartRepos
            
             return cart.CartId;
         }
+
+
     }
 }
