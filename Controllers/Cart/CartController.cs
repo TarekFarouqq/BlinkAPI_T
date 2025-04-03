@@ -50,15 +50,15 @@ namespace Blink_API.Controllers.Cart
             return Ok(cart);
         }
 
-        [HttpPost("AddCart")]
-        public async Task<ActionResult<ReadCartDTO>> AddCart([FromQuery] string userId, [FromBody] List<AddCartDetailsDTO> cartDetails)
+        [HttpPost("AddCart/{userId}")]
+        public async Task<ActionResult<ReadCartDTO>> AddCart(string userId, [FromBody] AddCartDetailsDTO cartDetail)
         {
-            if (string.IsNullOrEmpty(userId) || cartDetails == null || !cartDetails.Any())
+            if (string.IsNullOrEmpty(userId) || cartDetail == null)
             {
                 return BadRequest("Invalid cart data.");
             }
 
-            var addedCart = await cartService.AddCart(userId, cartDetails);
+            var addedCart = await cartService.AddCart(userId, cartDetail);
             return Ok(addedCart);
         }
 
