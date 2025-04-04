@@ -90,26 +90,51 @@ namespace Blink_API.Controllers.Account
             if (ModelState.IsValid)
             {
                 // find user :
-                var user = await _userManager.FindByEmailAsync(model.Email);
+                //var user = await _userManager.FindByEmailAsync(model.Email);
+                //if (user == null)
+                //{
+                //    return Unauthorized(new ApiResponse(401, "Invalid email or password"));
+                //}
+
+                //var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+
+                //// check for login :
+                //if (result.Succeeded)
+                //{
+                //    // valid user , generate el token :
+                //    var token = await _authServices.CreateTokenAsync(user, _userManager);
+                //    return Ok(new { Token = token });
+                //}
+                //else
+                //{
+                //    // invalid login :
+                //    return Unauthorized(new ApiResponse(401, "Invalid login, Email or passward is not correct !"));
+                //}
+
+
+                var user = await _userManager.FindByNameAsync(model.Email);
                 if (user == null)
                 {
-                    return Unauthorized(new ApiResponse(401, "Invalid email or password"));
+                    user= await _userManager.FindByEmailAsync(model.Email);
                 }
-
-                var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
-
-                // check for login :
-                if (result.Succeeded)
+                if ( user != null)
                 {
-                    // valid user , generate el token :
-                    var token = await _authServices.CreateTokenAsync(user, _userManager);
-                    return Ok(new { Token = token });
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+                    if (result.Succeeded)
+                    {
+                        var token = await _authServices.CreateTokenAsync(user,_userManager);
+                        return Ok(new {Token=token});
+                    }
+                    else
+                    {
+                        return Unauthorized(new ApiResponse(401, "Invalid Login, Login Details was Incorrect"));
+                    }
                 }
                 else
                 {
-                    // invalid login :
-                    return Unauthorized(new ApiResponse(401, "Invalid login, Email or passward is not correct !"));
+                    return NotFound("User Not Found");
                 }
+
             }
             return BadRequest(new ApiResponse(400));
         }
