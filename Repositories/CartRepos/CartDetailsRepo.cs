@@ -14,8 +14,9 @@ namespace Blink_API.Repositories.CartRepos
         {
             return await db.CartDetails
                 .AsNoTracking()
-                .Where(p => !p.IsDeleted)
                 .FirstOrDefaultAsync(p => p.CartId == cartId && p.ProductId == productId);
         }
+
+        
     }
 }

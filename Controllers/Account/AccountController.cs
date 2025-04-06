@@ -28,19 +28,22 @@ namespace Blink_API.Controllers.Account
             _emailService = emailService;
         }
 
+        #region Register 
+
 
         [HttpPost("register")] // api/account/register
         public async Task<ActionResult<UserDto>> Register(RegisterDto model)
         {
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
             var existUserName = await _userManager.FindByNameAsync(model.UserName);
-            if (existingUser != null && existUserName !=null)
+            if (existingUser != null && existUserName != null)
             {
-                return BadRequest(new { 
-                    StatusMessage ="failed",
-                    message = "This email or userName are already exist.." 
-                
-                
+                return BadRequest(new
+                {
+                    StatusMessage = "failed",
+                    message = "This email or userName are already exist.."
+
+
                 });
             }
             var user = new ApplicationUser()
@@ -52,37 +55,42 @@ namespace Blink_API.Controllers.Account
                 PhoneNumber = model.PhoneNumber,
                 Address = model.Address,
                 UserGranted = true,
-               
-                
+
+
 
 
             };
 
- 
-    
- 
 
-            var result = await _userManager.CreateAsync(user,model.Password);
- 
+
+
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
             if (result.Succeeded is false) return BadRequest(new ApiResponse(400));
             await _userManager.UpdateAsync(user);
             return Ok(new UserDto()
- 
 
- 
-            { 
-                Message ="success",
-                FullName = user.FirstName+" "+ user.LastName,
-                UserName =user.UserName,
+
+
+            {
+                Message = "success",
+                FullName = user.FirstName + " " + user.LastName,
+                UserName = user.UserName,
                 Email = user.Email,
-                Token = await  _authServices.CreateTokenAsync(user,_userManager),
-                UserGranted = user.UserGranted ,
-            
-            
-            
- 
+                Token = await _authServices.CreateTokenAsync(user, _userManager),
+                UserGranted = user.UserGranted,
+
+
+
+
             });
         }
+
+
+
+        #endregion
+
         #region login
         [HttpPost("Login")] // api/account/Login
         public async Task<IActionResult> Login(LoginDto model)
@@ -90,29 +98,53 @@ namespace Blink_API.Controllers.Account
             if (ModelState.IsValid)
             {
                 // find user :
-                var user = await _userManager.FindByEmailAsync(model.Email);
+                //var user = await _userManager.FindByEmailAsync(model.Email);
+                //if (user == null)
+                //{
+                //    return Unauthorized(new ApiResponse(401, "Invalid email or password"));
+                //}
+
+                //var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+
+                //// check for login :
+                //if (result.Succeeded)
+                //{
+                //    // valid user , generate el token :
+                //    var token = await _authServices.CreateTokenAsync(user, _userManager);
+                //    return Ok(new { Token = token });
+                //}
+                //else
+                //{
+                //    // invalid login :
+                //    return Unauthorized(new ApiResponse(401, "Invalid login, Email or passward is not correct !"));
+                //}
+
+
+                var user = await _userManager.FindByNameAsync(model.Email);
                 if (user == null)
                 {
-                    return Unauthorized(new ApiResponse(401, "Invalid email or password"));
+                    user= await _userManager.FindByEmailAsync(model.Email);
                 }
 
-                var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
-
-                // check for login :
-                if (result.Succeeded)
-                {
-                    // valid user , generate el token :
-                    var token = await _authServices.CreateTokenAsync(user, _userManager);
-                    return Ok(new { Token = token });
+              
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+                    if (result.Succeeded)
+                    {
+                        var token = await _authServices.CreateTokenAsync(user,_userManager);
+                        return Ok(new {Token=token});
+                    }
+                    else
+                    {
+                        return Unauthorized(new ApiResponse(401, "Invalid Login, Login Details was Incorrect"));
+                    }
                 }
                 else
                 {
-                    // invalid login :
-                    return Unauthorized(new ApiResponse(401, "Invalid login, Email or passward is not correct !"));
+                    return NotFound("User Not Found");
                 }
+
             }
-            return BadRequest(new ApiResponse(400));
-        }
+        
         #endregion
 
         #region LogOut 
@@ -126,7 +158,7 @@ namespace Blink_API.Controllers.Account
         #endregion
 
         #region ForgetPassward
-        [HttpPost("Forget passward")]
+        [HttpPost("forgetPassward")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgetPassward model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -137,7 +169,7 @@ namespace Blink_API.Controllers.Account
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
             // Create the reset password link :
-            var resetLink = Url.Action("ResetPassword", "Account", new { token, email = user.Email }, Request.Scheme);
+            var resetLink = Url.Action("ResetPassword", "Account", new { email = user.Email, token }, Request.Scheme);
 
             // Send email
             await _emailService.SendEmailAsync(user.Email, "Reset Password",
@@ -147,7 +179,7 @@ namespace Blink_API.Controllers.Account
         #endregion
 
         #region Reset passward
-        [HttpPost("Reset-password")]
+        [HttpPost("Resetpassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
