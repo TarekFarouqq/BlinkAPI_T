@@ -96,7 +96,7 @@ namespace Blink_API.Controllers.Account
                     return Unauthorized(new ApiResponse(401, "Invalid email or password"));
                 }
 
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
+                var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
 
                 // check for login :
                 if (result.Succeeded)
