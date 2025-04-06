@@ -17,7 +17,11 @@ namespace Blink_API.Services.AuthServices
             var smtpClient = new SmtpClient(_configuration["EmailSettings:SmtpServer"])
             {
                 Port = int.Parse(_configuration["EmailSettings:SmtpPort"]),
-                Credentials = new NetworkCredential(_configuration["EmailSettings:SenderEmail"], _configuration["EmailSettings:SenderPassword"]),
+                UseDefaultCredentials = false,
+
+                Credentials = new NetworkCredential(
+                    _configuration["EmailSettings:SenderEmail"],
+                    _configuration["EmailSettings:SenderPassword"]),
                 EnableSsl = true,
             };
 
