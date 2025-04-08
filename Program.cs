@@ -1,9 +1,11 @@
 using Blink_API.MapperConfigs;
 using Blink_API.Models;
 using Blink_API.Repositories;
+using Blink_API.Repositories.BranchRepos;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Services;
 using Blink_API.Services.AuthServices;
+using Blink_API.Services.BranchServices;
 using Blink_API.Services.CartService;
 using Blink_API.Services.DiscountServices;
 using Blink_API.Services.Product;
@@ -47,6 +49,11 @@ namespace Blink_API
             builder.Services.AddScoped<DiscountRepo>();
             //Add DiscountService
             builder.Services.AddScoped<DiscountService>();
+            // Add Branch Services
+            builder.Services.AddScoped<BranchServices>();
+            // Add Branch REPo
+            builder.Services.AddScoped<BranchRepos>();
+
 
             #region Add AUTH SERVICES
 

@@ -17,7 +17,7 @@ namespace Blink_API.Services.CartService
 
         public async Task<List<ReadCartDTO>> GetAllCarts()
         {
-            var carts = await unitOfWork.CartRepo.GetAll(); 
+            var carts = await unitOfWork.CartRepo.GetAllAsync(); 
             var resultedMapping = mapper.Map<List<ReadCartDTO>>(carts);
             return resultedMapping;
         }
