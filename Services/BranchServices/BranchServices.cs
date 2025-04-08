@@ -3,7 +3,6 @@ using Blink_API.DTOs.BranchDto;
 using Blink_API.Errors;
 using Blink_API.Models;
 using Blink_API.Repositories.BranchRepos;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Blink_API.Services.BranchServices
 {
@@ -21,10 +20,10 @@ namespace Blink_API.Services.BranchServices
 
         public async Task<List<ReadBranchDTO>> GetAllBranches()
         {
-            var branches =await _unitOfWork.BranchRepos.GetAllAsync();
+            var branches = await _unitOfWork.BranchRepos.GetAll();
             var branchesDto = _mapper.Map<List<ReadBranchDTO>>(branches);
             return branchesDto;
-            
+
         }
 
         public async Task<ReadBranchDTO?> GetBranchById(int id)
@@ -49,18 +48,18 @@ namespace Blink_API.Services.BranchServices
                 return new ApiResponse(400, "Branch with the same name already exists.");
             }
             _unitOfWork.BranchRepos.Add(branch);
-           await _unitOfWork.BranchRepos.SaveChanges();
+            await _unitOfWork.BranchRepos.SaveChanges();
             return new ApiResponse(201, "Branch added successfully.");
 
 
         }
-        public async Task<ApiResponse> UpdateBranch(int Id,AddBranchDTO updatedBranch)
+        public async Task<ApiResponse> UpdateBranch(int Id, AddBranchDTO updatedBranch)
         {
             if (updatedBranch == null)
             {
                 return new ApiResponse(400, "Invalid branch data.");
             }
-            var branch = await _unitOfWork.BranchRepos.GetBranchByIdAsync(Id);
+            var branch = await _unitOfWork.BranchRepos.GetById(Id);
 
             if (branch == null)
             {
@@ -69,29 +68,23 @@ namespace Blink_API.Services.BranchServices
             branch.BranchName = updatedBranch.BranchName;
             branch.BranchAddress = updatedBranch.BranchAddress;
             branch.Phone = updatedBranch.Phone;
-             _unitOfWork.BranchRepos.Update(branch);
+            _unitOfWork.BranchRepos.Update(branch);
             await _unitOfWork.BranchRepos.SaveChanges();
             return new ApiResponse(200, "Branch updated successfully.");
         }
 
-        public async Task<ApiResponse> DeleteBranch(int branchId)
+        public async Task<ApiResponse> DeleteBranch(int id)
         {
-            var branch = await _unitOfWork.BranchRepos.GetById(branchId);
-            if (branch == null)
+            var branch = await _unitOfWork.BranchRepos.GetById(id);
+            if (branch == null || branch.IsDeleted)
             {
                 return new ApiResponse(404, "Branch not found.");
             }
-          
-            if (branch.IsDeleted==true)
-            {
-                return new ApiResponse(400, "Branch has already been deleted.");
-            }
-               _unitOfWork.BranchRepos.Delete(branch);
+
+            await _unitOfWork.BranchRepos.Delete(id);
             await _unitOfWork.BranchRepos.SaveChanges();
 
             return new ApiResponse(200, "Branch deleted successfully.");
-            
-
         }
 
     }

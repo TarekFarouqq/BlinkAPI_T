@@ -1,5 +1,4 @@
-﻿using Blink_API.DTOs.BranchDto;
-using Blink_API.Models;
+﻿using Blink_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BranchRepos
@@ -13,7 +12,7 @@ namespace Blink_API.Repositories.BranchRepos
             _blinkDbContext = blinkDbContext;
         }
 
-        public async override Task<List<Branch>> GetAllAsync()
+        public async override Task<List<Branch>> GetAll()
         {
             return await _blinkDbContext.Branches.Where(b => b.IsDeleted==false).Include(b => b.Inventories).ToListAsync();
         }
@@ -27,10 +26,37 @@ namespace Blink_API.Repositories.BranchRepos
         }
 
 
-        public async Task<Branch?> GetBranchByIdAsync(int branchId)
+        public async Task<bool> Update(int id, Branch updatedBranch)
         {
-            return await _blinkDbContext.Set<Branch>().FindAsync(branchId); 
+            var existingBranch = await _blinkDbContext.Branches.FindAsync(id);
+            if (existingBranch == null || existingBranch.IsDeleted)
+                return false;
+
+            existingBranch.BranchName = updatedBranch.BranchName;
+            existingBranch.BranchAddress = updatedBranch.BranchAddress;
+            existingBranch.Phone = updatedBranch.Phone;
+
+            _blinkDbContext.Branches.Update(existingBranch);
+            await _blinkDbContext.SaveChangesAsync();
+            return true;
         }
+        
+        
+        //public override async Task<bool> Delete(int id)
+        //{
+        //    var branch = await _blinkDbContext.Branches.Include(b => b.Inventories).FirstOrDefaultAsync(b => b.BranchId == id);
+
+        //    if (branch == null || branch.IsDeleted)
+        //        return false;
+
+        //    if (branch.Inventories.Any())
+        //        return false; 
+
+        //    return await base.Delete(id);
+        //}
+
+
+
 
     }
 }
