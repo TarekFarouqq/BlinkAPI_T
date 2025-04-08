@@ -15,7 +15,7 @@ namespace Blink_API.Services.Product
         }
         public async Task<ICollection<ProductDetailsDTO>> GetAllProducts()
         {
-            var products = await unitOfWork.ProductRepo.GetAll();
+            var products = await unitOfWork.ProductRepo.GetAllAsync();
             var result = mapper.Map<ICollection<ProductDetailsDTO>>(products);
             return result;
         }

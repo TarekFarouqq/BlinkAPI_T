@@ -1,5 +1,6 @@
 ﻿using Blink_API.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Blink_API.Repositories
 {
@@ -10,7 +11,7 @@ namespace Blink_API.Repositories
         { 
             db = _db;
         }
-        public virtual async Task<List<TEntity>> GetAll()
+        public virtual async Task<List<TEntity>> GetAllAsync()
         {
             return await db.Set<TEntity>().ToListAsync();
         }
@@ -18,29 +19,22 @@ namespace Blink_API.Repositories
         {
             return await db.Set<TEntity>().FindAsync(id);
         }
+        public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await db.Set<TEntity>().FirstOrDefaultAsync(predicate);
+        }
         public virtual void Add(TEntity entity)
         {
             db.Set<TEntity>().Add(entity);
 
         }
-        public void Update(TEntity entity)
+        public virtual void Update(TEntity entity)
         {
-            db.Entry(entity).State = EntityState.Modified;
-
+             db.Update(entity);
         }
-        public virtual async void Delete(Tkey id)
+        public virtual void Delete(TEntity entity)
         {
-            TEntity? t = await GetById(id);
-            if (t != null)
-            {
-                var prop = t.GetType().GetProperty("IsDeleted");
-                if (prop != null)
-                {
-                    prop.SetValue(t, true);
-                    Update(t);
-
-                }
-            }
+            db.Remove(entity);
         }
         public async Task SaveChanges()
         {

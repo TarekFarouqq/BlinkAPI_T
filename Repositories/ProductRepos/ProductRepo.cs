@@ -10,7 +10,7 @@ namespace Blink_API.Repositories
         {
             db = _db;
         }
-        public override async Task<List<Product>> GetAll()
+        public override async Task<List<Product>> GetAllAsync()
         {
             return await db.Products
                 .AsNoTracking()
