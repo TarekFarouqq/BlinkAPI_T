@@ -35,7 +35,6 @@ namespace Blink_API.Controllers.BranchController
                 return NotFound(new ApiResponse(404,"Branch is Not Found"));
             return Ok(branch);
         }
-
         // POST: api/Branch/add
         [HttpPost("add")]
         public async Task<ActionResult> Add(AddBranchDTO branchdto)
@@ -43,7 +42,6 @@ namespace Blink_API.Controllers.BranchController
             var result = await _branchService.AddBranch(branchdto);
             return Ok(result);
         }
-
         // PUT: api/Branch/update/5
         [HttpPut("update/{id}")]
         public async Task<ActionResult> Update(int id, AddBranchDTO branchdto)
@@ -56,9 +54,13 @@ namespace Blink_API.Controllers.BranchController
         [HttpDelete("delete/{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var result = await _branchService.DeleteBranch(id); 
-         
-            return Ok(result);
+            var response = await _branchService.DeleteBranch(id);
+            if (response.StatusCode == 404)
+            {
+                return NotFound(new ApiResponse(404,"Branch Not Found"));
+            }
+            return Ok(response);
         }
+
     }
 }

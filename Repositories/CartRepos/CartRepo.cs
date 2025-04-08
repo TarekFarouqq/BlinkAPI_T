@@ -11,7 +11,7 @@ namespace Blink_API.Repositories.CartRepos
             db = _db;
         }
 
-        public override async Task<List<Cart>> GetAllAsync()
+        public override async Task<List<Cart>> GetAll()
         {
             return await db.Carts
                         .AsNoTracking()

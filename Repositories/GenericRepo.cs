@@ -11,7 +11,7 @@ namespace Blink_API.Repositories
         { 
             db = _db;
         }
-        public virtual async Task<List<TEntity>> GetAllAsync()
+        public virtual async Task<List<TEntity>> GetAll()
         {
             return await db.Set<TEntity>().ToListAsync();
         }
@@ -19,22 +19,33 @@ namespace Blink_API.Repositories
         {
             return await db.Set<TEntity>().FindAsync(id);
         }
-        public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
-        {
-            return await db.Set<TEntity>().FirstOrDefaultAsync(predicate);
-        }
         public virtual void Add(TEntity entity)
         {
             db.Set<TEntity>().Add(entity);
 
         }
-        public virtual void Update(TEntity entity)
+        public void Update(TEntity entity)
         {
-             db.Update(entity);
+            db.Entry(entity).State = EntityState.Modified;
+
         }
-        public virtual void Delete(TEntity entity)
+        public virtual async Task Delete(Tkey id)
         {
-            db.Remove(entity);
+            TEntity? t = await GetById(id);
+            if (t != null)
+            {
+                var prop = t.GetType().GetProperty("IsDeleted");
+                if (prop != null)
+                {
+                    prop.SetValue(t, true);
+                    Update(t);
+                }
+            }
+        }
+
+        public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await db.Set<TEntity>().FirstOrDefaultAsync(predicate);
         }
         public async Task SaveChanges()
         {
