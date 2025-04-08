@@ -48,6 +48,16 @@ namespace Blink_API
             //Add DiscountService
             builder.Services.AddScoped<DiscountService>();
 
+            // to store verify code :
+            builder.Services.AddMemoryCache();
+
+            builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
+
+
             #region Add AUTH SERVICES
 
             builder.Services.AddScoped(typeof(IAuthServices), typeof(AuthServices));
