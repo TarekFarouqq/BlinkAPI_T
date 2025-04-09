@@ -17,6 +17,10 @@ namespace Blink_API.Models
         [Required]
         [Phone]
         public string Phone { get; set; }
+
+        public decimal Lat { get; set; }
+        public decimal Long { get; set; }
+
         [Required]
 
         public int BranchId { get; set; }
