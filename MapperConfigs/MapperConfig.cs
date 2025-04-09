@@ -6,7 +6,12 @@ using Blink_API.Models;
 using Blink_API.DTOs.DiscountDTO;
 using Blink_API.DTOs.ProductDTOs;
 using Blink_API.DTOs.CartDTOs;
+ 
 using Blink_API.DTOs.BrandDtos;
+ 
+using Blink_API.DTOs.BranchDto;
+using Blink_API.DTOs.InventoryDTOS;
+ 
 
 namespace Blink_API.MapperConfigs
 {
@@ -87,13 +92,19 @@ namespace Blink_API.MapperConfigs
                 .FirstOrDefault())).ReverseMap();
 
 
+ 
             // brand map :
             CreateMap<Brand, BrandDTO>()
        .ReverseMap();
 
             CreateMap<insertBrandDTO,Brand >()
        .ReverseMap();
+ 
 
+            CreateMap<Branch, ReadBranchDTO>();
+            CreateMap<AddBranchDTO, Branch>();
+            CreateMap<Inventory, InventoryDto>();
+ 
 
         }
     }
