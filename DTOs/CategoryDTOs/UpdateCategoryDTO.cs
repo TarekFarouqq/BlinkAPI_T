@@ -1,12 +1,10 @@
-﻿namespace Blink_API.DTOs.Category
+﻿namespace Blink_API.DTOs.CategoryDTOs
 {
-
-
-    public class ChildCategoryDTO
+    public class UpdateCategoryDTO
     {
-        public int CategoryId { get; set; }
         public string CategoryName { get; set; }
         public string CategoryDescription { get; set; }
         public string CategoryImage { get; set; }
+        public int? ParentCategoryId { get; set; }
     }
 }

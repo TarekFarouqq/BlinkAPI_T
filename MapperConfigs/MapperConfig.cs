@@ -4,6 +4,7 @@ using Blink_API.DTOs.Product;
 using Blink_API.DTOs.Category;
 using Blink_API.Models;
 using Blink_API.DTOs.DiscountDTO;
+using Blink_API.DTOs.CategoryDTOs;
 
 namespace Blink_API.MapperConfigs
 {
@@ -40,6 +41,9 @@ namespace Blink_API.MapperConfigs
                 })))
                 .ReverseMap();
             CreateMap<ProductDiscount, DiscountProductDetailsDTO>().ReverseMap();
+
+            CreateMap<CreateCategoryDTO, Category>();
+
         }
     }
 }
