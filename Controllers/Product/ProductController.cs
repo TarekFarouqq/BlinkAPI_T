@@ -14,9 +14,9 @@ namespace Blink_API.Controllers.Product
             productService = _productService;
         }
         [HttpGet]
-        public async Task<ActionResult> GetAllProducts()
+        public async Task<ActionResult> GetAll()
         {
-            var products = await productService.GetAllProducts();
+            var products = await productService.GetAll();
             if (products == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
@@ -26,21 +26,21 @@ namespace Blink_API.Controllers.Product
             }
             return Ok(products);
         }
-        [HttpGet("GetById/{id}")]
-        public async Task<ActionResult> GetProductById(int id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetById(int id)
         {
-            var product = await productService.GetProductById(id);  
+            var product = await productService.GetById(id);  
             if(product == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
             product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
             return Ok(product);
         }
-        [HttpGet("GetProductsWithDiscounts")]
-        public async Task<ActionResult> GetProductsWithRunningDiscounts()
+        [HttpGet("GetByChildCategory/{id}")]
+        public async Task<ActionResult> GetByChildCategory(int id)
         {
-            var products = await productService.GetProductsWithRunningDiscounts();
-            if(products == null)
+            var products = await productService.GetByChildCategoryId(id);
+            if (products == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var product in products)
@@ -49,21 +49,11 @@ namespace Blink_API.Controllers.Product
             }
             return Ok(products);
         }
-        [HttpGet("GetProductsWithDiscounts/{id}")]
-        public async Task<ActionResult> GetProductsWithRunningDiscounts(int id)
+        [HttpGet("GetByParentCategory/{id}")]
+        public async Task<ActionResult> GetByParentCategory(int id)
         {
-            var product = await productService.GetProductWithRunningDiscountByProductId(id);
-            if (product == null)
-                return NotFound();
-            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
-            product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
-            return Ok(product);
-        }
-        [HttpGet("GetProductsWithCategoryId/{CategoryId}")]
-        public async Task<ActionResult> GetProductsWithCategoryId(int CategoryId)
-        {
-            var products = await productService.GetProductsWithCategoryId(CategoryId);
-            if(products == null)
+            var products = await productService.GetByParentCategoryId(id);
+            if (products == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var product in products)
@@ -71,7 +61,6 @@ namespace Blink_API.Controllers.Product
                 product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
             }
             return Ok(products);
-
         }
     }
 }

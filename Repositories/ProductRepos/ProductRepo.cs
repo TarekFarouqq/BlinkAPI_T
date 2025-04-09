@@ -15,67 +15,55 @@ namespace Blink_API.Repositories
         {
             return await db.Products
                 .AsNoTracking()
-                .Include(u=>u.User)
-                .Include(b=>b.Brand)
-                .Include(c=>c.Category)
-                .Include(i=>i.ProductImages)
-                .Include(r=>r.Reviews)
-                .ThenInclude(rc=>rc.ReviewComments)
+                .Where(p => !p.IsDeleted)
+                .Include(u => u.User)
+                .Include(b => b.Brand)
+                .Include(c => c.Category)
+                .Include(i => i.ProductImages)
+                .Include(r => r.Reviews)
+                .ThenInclude(rc => rc.ReviewComments)
                 .Include(sip => sip.StockProductInventories)
-                .Where(p=>!p.IsDeleted)
-                .ToListAsync(); 
+                .Include(pd => pd.ProductDiscounts)
+                .ThenInclude(d => d.Discount)
+                .ToListAsync();
         }
         public override async Task<Product?> GetById(int id)
         {
             return await db.Products
                 .AsNoTracking()
-                .Include(u => u.User)
+               .Include(u => u.User)
                 .Include(b => b.Brand)
                 .Include(c => c.Category)
                 .Include(i => i.ProductImages)
                 .Include(r => r.Reviews)
                 .ThenInclude(rc => rc.ReviewComments)
                 .Include(sip => sip.StockProductInventories)
+                .Include(pd => pd.ProductDiscounts)
+                .ThenInclude(d => d.Discount)
                 .Where(p => !p.IsDeleted)
                 .FirstOrDefaultAsync(p => p.ProductId == id);
         }
-        public async Task<ICollection<Product>> GetProductsWithRunningDiscounts()
-        {
-            return await db.Products
-                .AsNoTracking()
-                .Where(p => !p.IsDeleted)
-                .Include(u => u.User)
-                .Include(b => b.Brand)
-                .Include(c => c.Category)
-                .Include(i => i.ProductImages)
-                .Include(r => r.Reviews)
-                .ThenInclude(rc => rc.ReviewComments)
-                .Include(sip => sip.StockProductInventories)
-                .Include(pd=>pd.ProductDiscounts)
-                .ThenInclude(d=>d.Discount)
-                .ToListAsync();
-        }   
-        public async Task<Product?> GetProductWithRunningDiscountByProductId(int id)
-        {
-            return await db.Products
-               .AsNoTracking()
-               .Where(p => !p.IsDeleted)
-               .Include(u => u.User)
-               .Include(b => b.Brand)
-               .Include(c => c.Category)
-               .Include(i => i.ProductImages)
-               .Include(r => r.Reviews)
-               .ThenInclude(rc => rc.ReviewComments)
-               .Include(sip => sip.StockProductInventories)
-               .Include(pd => pd.ProductDiscounts)
-               .ThenInclude(d => d.Discount)
-               .FirstOrDefaultAsync(p => p.ProductId == id);
-        }
-        public async Task<ICollection<Product>> GetProductsWithCategoryId(int categoryId)
+        public async Task<ICollection<Product>> GetByChildCategoryId(int categoryId)
         {
             return await db.Products
               .AsNoTracking()
-              .Where(p => !p.IsDeleted && p.CategoryId == categoryId)
+              .Where(p => !p.IsDeleted && p.CategoryId == categoryId && p.Category.ParentCategoryId != null)
+              .Include(u => u.User)
+              .Include(b => b.Brand)
+              .Include(c => c.Category)
+              .Include(i => i.ProductImages)
+              .Include(r => r.Reviews)
+              .ThenInclude(rc => rc.ReviewComments)
+              .Include(sip => sip.StockProductInventories)
+              .Include(pd => pd.ProductDiscounts)
+              .ThenInclude(d => d.Discount)
+              .ToListAsync();
+        }
+        public async Task<ICollection<Product>> GetByParentCategoryId(int categoryId)
+        {
+            return await db.Products
+              .AsNoTracking()
+              .Where(p => !p.IsDeleted && p.Category.ParentCategoryId == categoryId)
               .Include(u => u.User)
               .Include(b => b.Brand)
               .Include(c => c.Category)
