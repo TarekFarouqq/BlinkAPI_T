@@ -1,4 +1,5 @@
-﻿using Blink_API.Models;
+﻿using System.Runtime.CompilerServices;
+using Blink_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories

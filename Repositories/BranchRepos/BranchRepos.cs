@@ -1,4 +1,5 @@
-﻿using Blink_API.Models;
+﻿using System.Linq.Expressions;
+using Blink_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BranchRepos
@@ -40,8 +41,13 @@ namespace Blink_API.Repositories.BranchRepos
             await _blinkDbContext.SaveChangesAsync();
             return true;
         }
-        
-        
+
+        public async Task<Branch?> GetFirstOrDefaultAsync(Expression<Func<Branch, bool>> predicate)
+        {
+            return await _blinkDbContext.Set<Branch>().FirstOrDefaultAsync(predicate);
+        }
+
+
         //public override async Task<bool> Delete(int id)
         //{
         //    var branch = await _blinkDbContext.Branches.Include(b => b.Inventories).FirstOrDefaultAsync(b => b.BranchId == id);

@@ -42,11 +42,6 @@ namespace Blink_API.Repositories
                 }
             }
         }
-
-        public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
-        {
-            return await db.Set<TEntity>().FirstOrDefaultAsync(predicate);
-        }
         public async Task SaveChanges()
         {
            await db.SaveChangesAsync();
