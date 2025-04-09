@@ -24,12 +24,19 @@ namespace Blink_API.Repositories
                 .Where(pc => !pc.IsDeleted)
                 .ToListAsync();
         }
+        public async Task<Category?> GetParentCategoryById(int id)
+        {
+            return await _db.Categories
+                .Where(pc => pc.ParentCategoryId == null && !pc.IsDeleted && pc.CategoryId == id)
+                .FirstOrDefaultAsync();
+        }
         public async Task<Category?> GetChildCategoryById(int id)
         {
             return await _db.Categories
                 .Where(pc => pc.ParentCategoryId != null && !pc.IsDeleted && pc.CategoryId == id)
                 .FirstOrDefaultAsync();
         }
+
 
 
         public override void Add(Category entity)
@@ -75,6 +82,14 @@ namespace Blink_API.Repositories
         }
 
 
+
+
+        public async Task<ICollection<Category>> GetChildCategoryByParentId(int id)
+        {
+            return await _db.Categories
+                .Where(pc => pc.ParentCategoryId != null && !pc.IsDeleted && pc.ParentCategoryId == id)
+                .ToListAsync();
+        }
 
     }
 }

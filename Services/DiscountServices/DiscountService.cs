@@ -18,5 +18,11 @@ namespace Blink_API.Services.DiscountServices
             var mappedDiscount = mapper.Map<ICollection<DiscountDetailsDTO>>(discounts);
             return mappedDiscount;
         }
+        public async Task<DiscountDetailsDTO> GetRunningDiscountById(int id)
+        {
+            var discount = await unitOfWork.DiscountRepo.GetRunningDiscountById(id);
+            var mappedDiscount = mapper.Map<DiscountDetailsDTO>(discount);
+            return mappedDiscount;
+        }
     }
 }

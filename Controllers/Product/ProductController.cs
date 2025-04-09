@@ -36,6 +36,42 @@ namespace Blink_API.Controllers.Product
             product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
             return Ok(product);
         }
-        
+        [HttpGet("GetProductsWithDiscounts")]
+        public async Task<ActionResult> GetProductsWithRunningDiscounts()
+        {
+            var products = await productService.GetProductsWithRunningDiscounts();
+            if(products == null)
+                return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var product in products)
+            {
+                product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
+            }
+            return Ok(products);
+        }
+        [HttpGet("GetProductsWithDiscounts/{id}")]
+        public async Task<ActionResult> GetProductsWithRunningDiscounts(int id)
+        {
+            var product = await productService.GetProductWithRunningDiscountByProductId(id);
+            if (product == null)
+                return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
+            return Ok(product);
+        }
+        [HttpGet("GetProductsWithCategoryId/{CategoryId}")]
+        public async Task<ActionResult> GetProductsWithCategoryId(int CategoryId)
+        {
+            var products = await productService.GetProductsWithCategoryId(CategoryId);
+            if(products == null)
+                return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var product in products)
+            {
+                product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
+            }
+            return Ok(products);
+
+        }
     }
 }

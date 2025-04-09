@@ -16,6 +16,7 @@
 
             return statusCode switch
             {
+
                 400 => "A Bad Request, You Have Made",
                 401 => "Authorized, You Are Not",
                 404 => "Resource Was Not Found",

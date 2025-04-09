@@ -1,9 +1,16 @@
 using Blink_API.MapperConfigs;
 using Blink_API.Models;
 using Blink_API.Repositories;
+using Blink_API.Repositories.BranchRepos;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Services;
 using Blink_API.Services.AuthServices;
+
+using Blink_API.Services.BrandServices;
+
+using Blink_API.Services.BranchServices;
+
+using Blink_API.Services.CartService;
 using Blink_API.Services.DiscountServices;
 using Blink_API.Services.Product;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -25,7 +32,9 @@ namespace Blink_API
             { s.UseSqlServer(builder.Configuration.GetConnectionString("conString")); });
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<BlinkDbContext>();
+                .AddEntityFrameworkStores<BlinkDbContext>()
+                .AddDefaultTokenProviders()
+                .AddSignInManager();
 
             // add category repo
             builder.Services.AddScoped<CategoryRepo>();
@@ -33,7 +42,7 @@ namespace Blink_API
             builder.Services.AddScoped<CategoryService>();
             // Add Mapper
             builder.Services.AddAutoMapper(typeof(MapperConfig));
-
+            builder.Services.AddScoped<CartService>();
             //Add UnitOfWork
             builder.Services.AddScoped<UnitOfWork>();
             //Add ProductRepo
@@ -44,6 +53,25 @@ namespace Blink_API
             builder.Services.AddScoped<DiscountRepo>();
             //Add DiscountService
             builder.Services.AddScoped<DiscountService>();
+            // Add Branch Services
+            builder.Services.AddScoped<BranchServices>();
+            // Add Branch REPo
+            builder.Services.AddScoped<BranchRepos>();
+
+
+            //Add Brand :
+            builder.Services.AddScoped<BrandService>();
+
+
+            // to store verify code :
+            builder.Services.AddMemoryCache();
+
+    //        builder.Services.AddControllers()
+    //.AddJsonOptions(options =>
+    //{
+    //    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    //});
+
 
             #region Add AUTH SERVICES
 
@@ -68,9 +96,11 @@ namespace Blink_API
 
                 };
             });
-                #endregion
+            #endregion
+            // for email service :
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
-                builder.Services.AddControllers();
+            builder.Services.AddControllers();
                 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
                 builder.Services.AddOpenApi();
                 builder.Services.AddCors(Options =>

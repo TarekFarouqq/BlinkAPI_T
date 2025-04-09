@@ -28,12 +28,19 @@ namespace Blink_API.Services
             var resultMapping = mapper.Map<List<ChildCategoryDTO>>(categories); 
             return resultMapping;
         }
+        public async Task<ChildCategoryDTO> GetParentCategoryById(int id)
+        {
+            var category = await unitOfWork.CategoryRepo.GetParentCategoryById(id);
+            var resultMapping = mapper.Map<ChildCategoryDTO>(category);
+            return resultMapping;
+        }
         public async Task<ChildCategoryDTO> GetChildCategoryById(int id)
         {
             var category = await unitOfWork.CategoryRepo.GetChildCategoryById(id);
             var resultMapping= mapper.Map<ChildCategoryDTO>(category);
             return resultMapping;
         }
+
 
 
         //adding category
@@ -99,6 +106,14 @@ namespace Blink_API.Services
             return "Category updated successfully.";
         }
 
+
+
+        public async Task<ICollection<ChildCategoryDTO>> GetChildCategoryByParentId(int id)
+        {
+            var category = await unitOfWork.CategoryRepo.GetChildCategoryByParentId(id);
+            var resultMapping = mapper.Map<ICollection<ChildCategoryDTO>>(category);
+            return resultMapping;
+        }
 
     }
 }
