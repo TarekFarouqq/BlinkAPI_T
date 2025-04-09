@@ -4,6 +4,9 @@ using Blink_API.DTOs.Product;
 using Blink_API.DTOs.Category;
 using Blink_API.Models;
 using Blink_API.DTOs.DiscountDTO;
+
+using Blink_API.DTOs.CategoryDTOs;
+
 using Blink_API.DTOs.ProductDTOs;
 using Blink_API.DTOs.CartDTOs;
  
@@ -12,6 +15,7 @@ using Blink_API.DTOs.BrandDtos;
 using Blink_API.DTOs.BranchDto;
 using Blink_API.DTOs.InventoryDTOS;
  
+
 
 namespace Blink_API.MapperConfigs
 {
@@ -64,7 +68,10 @@ namespace Blink_API.MapperConfigs
                 }
             ))).ReverseMap();
             ///////
-            CreateMap<ProductDiscount, DiscountProductDetailsDTO>().ReverseMap();
+
+
+            CreateMap<CreateCategoryDTO, Category>();
+
             ///////
             CreateMap<Product, ProductDiscountsDTO>()
                 .ForMember(dest => dest.SupplierName, option => option.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
@@ -105,6 +112,7 @@ namespace Blink_API.MapperConfigs
             CreateMap<AddBranchDTO, Branch>();
             CreateMap<Inventory, InventoryDto>();
  
+
 
         }
     }

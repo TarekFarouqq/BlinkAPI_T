@@ -1,4 +1,7 @@
-﻿namespace Blink_API.Notes
+﻿using Blink_API.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace Blink_API.Notes
 {
     public class Andrew_sNotes
     {
@@ -11,6 +14,19 @@
         //funcations Names :
         //GetCategoriesWithFirstLevelSubcategoriesAsync => 
         //GetTopLevelCategoriesWithSubcategoriesAsync   => 
-        
+
+
+        /*
+         
+         - ADDING CRUD OPERATION TO CATEORY 
+            - CREATE CATEGORY BE :- 
+               * Create CreateCategoryDTO
+               * Add fun in CategoryService
+               * Add Mapping in MappingProfile.cs
+               * Add Endpoint in CategoryController
+         
+         */
+
+
     }
 }

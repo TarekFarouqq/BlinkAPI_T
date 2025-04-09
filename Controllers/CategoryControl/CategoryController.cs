@@ -1,4 +1,5 @@
 ﻿using Blink_API.DTOs.Category;
+using Blink_API.DTOs.CategoryDTOs;
 using Blink_API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -56,6 +57,57 @@ namespace Blink_API.Controllers
             category.CategoryImage = baseUrl + category.CategoryImage.Replace("wwwroot", "");
             return Ok(category);
         }
+
+
+
+        [HttpPost("AddCategory")]
+
+        public async Task<ActionResult> AddCategory(CreateCategoryDTO dto)
+        {
+            if (!ModelState.IsValid)
+            
+                return BadRequest();
+            
+
+            var result = await categoryService.AddedCategory(dto);
+
+            if (result.Contains("not exist")) return NotFound(result);
+            return Ok(result);
+            
+
+            
+        }
+
+        [HttpDelete("SoftDeleteCategory/{id}")]
+        public async Task<ActionResult> SoftDeleteCategory(int id)
+        {
+            var result = await categoryService.SoftDeleteCategory(id);
+            if (result.Contains("not found")) return NotFound(result);
+            return Ok(result);
+        }
+
+
+
+
+        [HttpPut("UpdateCategory/{id}")]
+        public async Task<ActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await categoryService.UpdateCategory(id, dto);
+            if (result.Contains("not found") || result.Contains("is deleted"))
+            {
+                return NotFound(result);
+            }
+
+            return Ok(result);
+        }
+
+
+
         [HttpGet("GetChildCategoryByParentId")]
         public async Task<ActionResult> GetChildCategoryByParentId(int id)
         {
@@ -68,5 +120,6 @@ namespace Blink_API.Controllers
             }
             return Ok(categories);
         }
+
     }
 }

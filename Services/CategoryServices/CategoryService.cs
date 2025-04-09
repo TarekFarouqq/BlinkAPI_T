@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using Blink_API.DTOs.Category;
+using Blink_API.DTOs.CategoryDTOs;
+using Blink_API.Models;
 using Blink_API.Repositories;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace Blink_API.Services
 {
@@ -37,11 +40,80 @@ namespace Blink_API.Services
             var resultMapping= mapper.Map<ChildCategoryDTO>(category);
             return resultMapping;
         }
+
+
+
+        //adding category
+         public async Task<string> AddedCategory(CreateCategoryDTO dTO)
+        {
+            if(dTO.ParentCategoryId.HasValue && dTO.ParentCategoryId.Value > 0)
+            {
+                var parent = await unitOfWork.CategoryRepo.GetById(dTO.ParentCategoryId.Value);
+
+                if (parent == null || parent.IsDeleted)
+                {
+                    return "ParentCategory not exist or is removed.";
+                }
+
+            }
+
+            var categ = mapper.Map<Category>(dTO);
+            unitOfWork.CategoryRepo.Add(categ);
+            
+            return "category is added";
+        }
+
+
+        public async Task<string> SoftDeleteCategory(int id)
+        {
+            var category = await unitOfWork.CategoryRepo.GetById(id);
+            if (category == null || category.IsDeleted)
+                return "Category not found or already deleted.";
+
+            await unitOfWork.CategoryRepo.Delete(id);
+            return "Category soft deleted successfully.";
+        }
+
+
+
+        public async Task<string> UpdateCategory(int id, UpdateCategoryDTO dto)
+        {
+            // Fetch the existing category
+            var category = await unitOfWork.CategoryRepo.GetById(id);
+            if (category == null || category.IsDeleted)
+            {
+                return "Category not found or is deleted.";
+            }
+
+            // Validate the parent category
+            if (dto.ParentCategoryId.HasValue)
+            {
+                var parentCategory = await unitOfWork.CategoryRepo.GetById(dto.ParentCategoryId.Value);
+                if (parentCategory == null || parentCategory.IsDeleted)
+                {
+                    return "Parent category does not exist or is deleted.";
+                }
+            }
+
+            // Map DTO to entity and update
+            category.CategoryName = dto.CategoryName;
+            category.CategoryDescription = dto.CategoryDescription;
+            category.CategoryImage = dto.CategoryImage;
+            category.ParentCategoryId = dto.ParentCategoryId;
+
+            await unitOfWork.CategoryRepo.UpdateCategoryAsync(category);
+
+            return "Category updated successfully.";
+        }
+
+
+
         public async Task<ICollection<ChildCategoryDTO>> GetChildCategoryByParentId(int id)
         {
             var category = await unitOfWork.CategoryRepo.GetChildCategoryByParentId(id);
             var resultMapping = mapper.Map<ICollection<ChildCategoryDTO>>(category);
             return resultMapping;
         }
+
     }
 }
