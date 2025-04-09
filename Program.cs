@@ -4,6 +4,7 @@ using Blink_API.Repositories;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Services;
 using Blink_API.Services.AuthServices;
+using Blink_API.Services.BrandServices;
 using Blink_API.Services.CartService;
 using Blink_API.Services.DiscountServices;
 using Blink_API.Services.Product;
@@ -48,14 +49,18 @@ namespace Blink_API
             //Add DiscountService
             builder.Services.AddScoped<DiscountService>();
 
+            //Add Brand :
+            builder.Services.AddScoped<BrandService>();
+
+
             // to store verify code :
             builder.Services.AddMemoryCache();
 
-            builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-    });
+    //        builder.Services.AddControllers()
+    //.AddJsonOptions(options =>
+    //{
+    //    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    //});
 
 
             #region Add AUTH SERVICES

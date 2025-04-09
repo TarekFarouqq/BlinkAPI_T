@@ -1,5 +1,6 @@
 ﻿using Blink_API.Models;
 using Blink_API.Repositories;
+using Blink_API.Repositories.BrandRepository;
 using Blink_API.Repositories.CartRepos;
 using Blink_API.Repositories.DiscountRepos;
 
@@ -8,37 +9,42 @@ namespace Blink_API
     public class UnitOfWork
     {
         private readonly BlinkDbContext db;
-        ProductRepo productRepo;
-        CategoryRepo categoryRepo;
-        DiscountRepo discountRepo;
-        CartRepo cartRepo;
-        CartDetailsRepo cartDetailsRepo;
+        private ProductRepo productRepo;
+        private CategoryRepo categoryRepo;
+        private DiscountRepo discountRepo;
+        private CartRepo cartRepo;
+        private CartDetailsRepo cartDetailsRepo;
+        private BrandRepos brandRepo;
+
         public UnitOfWork(BlinkDbContext _db)
         {
             db = _db;
         }
-        public ProductRepo ProductRepo 
+
+        public ProductRepo ProductRepo
         {
-            get 
+            get
             {
-                if (productRepo == null) 
+                if (productRepo == null)
                 {
-                    productRepo = new ProductRepo (db);
+                    productRepo = new ProductRepo(db);
                 }
                 return productRepo;
-             }
+            }
         }
+
         public CategoryRepo CategoryRepo
         {
-           get
+            get
             {
-               if(categoryRepo == null)
+                if (categoryRepo == null)
                 {
-                    categoryRepo = new CategoryRepo (db);
+                    categoryRepo = new CategoryRepo(db);
                 }
                 return categoryRepo;
             }
         }
+
         public DiscountRepo DiscountRepo
         {
             get
@@ -74,5 +80,19 @@ namespace Blink_API
                 return cartDetailsRepo;
             }
         }
+
+        public BrandRepos BrandRepos
+        {
+            get
+            {
+                if (brandRepo == null)
+                {
+                    brandRepo = new BrandRepos(db);
+                }
+                return brandRepo;
+            }
+        }
+
+        
     }
 }

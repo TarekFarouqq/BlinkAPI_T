@@ -6,6 +6,7 @@ using Blink_API.Models;
 using Blink_API.DTOs.DiscountDTO;
 using Blink_API.DTOs.ProductDTOs;
 using Blink_API.DTOs.CartDTOs;
+using Blink_API.DTOs.BrandDtos;
 
 namespace Blink_API.MapperConfigs
 {
@@ -84,6 +85,14 @@ namespace Blink_API.MapperConfigs
                 .Where(pd => !pd.IsDeleted && pd.Discount.DiscountFromDate <= DateTime.UtcNow && pd.Discount.DiscountEndDate >= DateTime.UtcNow)
                 .Select(pd => pd.DiscountAmount)
                 .FirstOrDefault())).ReverseMap();
+
+
+            // brand map :
+            CreateMap<Brand, BrandDTO>()
+       .ReverseMap();
+
+            CreateMap<insertBrandDTO,Brand >()
+       .ReverseMap();
 
 
         }
