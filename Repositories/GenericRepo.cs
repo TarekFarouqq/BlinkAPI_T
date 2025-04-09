@@ -8,7 +8,7 @@ namespace Blink_API.Repositories
     {
         private readonly BlinkDbContext db;
         public GenericRepo(BlinkDbContext _db)
-        { 
+        {
             db = _db;
         }
         public virtual async Task<List<TEntity>> GetAll()
@@ -44,7 +44,7 @@ namespace Blink_API.Repositories
         }
         public async Task SaveChanges()
         {
-           await db.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
     }
 }
