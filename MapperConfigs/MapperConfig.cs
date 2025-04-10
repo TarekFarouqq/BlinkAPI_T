@@ -98,8 +98,13 @@ namespace Blink_API.MapperConfigs
                 .Select(pd => pd.DiscountAmount)
                 .FirstOrDefault())).ReverseMap();
 
+            CreateMap<Product, InsertProductDTO>().ReverseMap();
 
- 
+            CreateMap<ProductImage, InsertProductImagesDTO>()
+                .ForMember(dest=>dest.ProductId,option=>option.MapFrom(src => src.Product.ProductId))
+                //.ForMember(dest=>dest.ImagePath,option=>option.MapFrom(src=>src.ProductImagePath))
+                .ReverseMap();
+
             // brand map :
             CreateMap<Brand, BrandDTO>()
        .ReverseMap();
