@@ -63,7 +63,8 @@ namespace Blink_API
             builder.Services.AddScoped<InventoryRepo>();
             //Add Inventory Service
             builder.Services.AddScoped<InventoryService>();
-
+            //Add New AuthService
+            builder.Services.AddScoped<AuthServiceUpdated>();
 
             //Add Brand :
             builder.Services.AddScoped<BrandService>();

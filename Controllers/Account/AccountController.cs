@@ -21,14 +21,15 @@ namespace Blink_API.Controllers.Account
         // add signIn manager for login : 
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailService _emailService;
-
-        public AccountController(UserManager<ApplicationUser> userManager, IAuthServices authServices, SignInManager<ApplicationUser> signInManager, IEmailService emailService, IMemoryCache cache)
+        private AuthServiceUpdated authServiceUpdated;
+        public AccountController(AuthServiceUpdated _authServiceUpdated,UserManager<ApplicationUser> userManager, IAuthServices authServices, SignInManager<ApplicationUser> signInManager, IEmailService emailService, IMemoryCache cache)
         {
             _userManager = userManager;
             _authServices = authServices;
             _signInManager = signInManager;
             _emailService = emailService;
             _cache = cache;
+            authServiceUpdated = _authServiceUpdated;
         }
 
         #region Register 
@@ -253,6 +254,60 @@ namespace Blink_API.Controllers.Account
             {
                 return BadRequest(new { message = "Unable to remove old password" });
             }
+        }
+        #endregion
+
+
+        #region Admin Process
+        [HttpPost("RegisterAdmin")]
+        public async Task<ActionResult> RegisterAdmin(RegisterDto registerDTO)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            if (registerDTO == null)
+                return BadRequest();
+            var result = await authServiceUpdated.RegisterAdmin(registerDTO);
+            if (result == null || result == "")
+                return BadRequest();
+            if (result == "Username Is Registered Before")
+                return BadRequest(result);
+            if (result == "EmailAddress Is Registered Before")
+                return BadRequest(result);
+            return Ok(result);
+        }
+        #endregion
+        #region Supplier Process
+        [HttpPost("RegisterSupplier")]
+        public async Task<ActionResult> RegisterSupplier(RegisterDto registerDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            if (registerDto == null)
+                return BadRequest();
+            var result = await authServiceUpdated.RegisterSupplier(registerDto);
+            if (result == null || result == "")
+                return BadRequest();
+            if (result == "Username Is Registered Before")
+                return BadRequest(result);
+            if (result == "EmailAddress Is Registered Before")
+                return BadRequest(result);
+            return Ok(result);
+        }
+        #endregion
+        #region LoginProcess
+        [HttpPost("LoginAccount")]
+        public async Task<ActionResult> LoginAccount(LoginDto loginDTO)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            if (loginDTO == null)
+                return BadRequest();
+            var result = await authServiceUpdated.LoginAccount(loginDTO);
+            if (result == null || result == "")
+                return BadRequest();
+            if (result == "Login details are incorrect")
+                return BadRequest(result);
+            return Ok(result);
         }
         #endregion
     }
