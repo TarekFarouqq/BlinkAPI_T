@@ -167,7 +167,6 @@ namespace Blink_API.Repositories
                 await db.SaveChangesAsync();
             }
         }
-
         public async Task AddProductImage(List<ProductImage> prdImages)
         {
             var product = await GetById(prdImages[0].ProductId);

@@ -14,7 +14,8 @@ using Blink_API.DTOs.BrandDtos;
  
 using Blink_API.DTOs.BranchDto;
 using Blink_API.DTOs.InventoryDTOS;
- 
+using Blink_API.DTOs.IdentityDTOs;
+
 
 
 namespace Blink_API.MapperConfigs
@@ -126,6 +127,18 @@ namespace Blink_API.MapperConfigs
             /////////////
             CreateMap<Inventory, ReadInventoryDTO>().ForMember(dest => dest.BranchName, option => option.MapFrom(src => src.Branch.BranchName));
             CreateMap<AddInventoryDTO, Inventory>();
+            /////////////
+            CreateMap<RegisterDto, ApplicationUser>()
+                .ForMember(dest=>dest.FirstName,option=>option.MapFrom(src=>src.FName))
+                .ForMember(dest=>dest.LastName,option=>option.MapFrom(src=>src.LName))
+                .ForMember(dest=>dest.Email,option=>option.MapFrom(src=>src.Email))
+                .ForMember(dest=>dest.PhoneNumber,option=>option.MapFrom(src=>src.PhoneNumber))
+                .ForMember(dest=>dest.Address,option=>option.MapFrom(src=>src.Address))
+                .ForMember(dest=>dest.UserName,option=>option.MapFrom(src=>src.UserName))
+                .ForMember(dest=>dest.LastModification,option=>option.MapFrom(src=> DateTime.Now))
+                .ReverseMap();
+
+
 
 
 
