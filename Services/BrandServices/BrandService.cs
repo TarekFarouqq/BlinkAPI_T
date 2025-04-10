@@ -26,7 +26,7 @@ namespace Blink_API.Services.BrandServices
         }
 
         //// insert || add brand 
-        public async Task<BrandDTO> InsertBrand(insertBrandDTO insertedBrand)
+        public async Task<ApiResponse> InsertBrand(insertBrandDTO insertedBrand)
         {
             if (insertedBrand == null)
             {
@@ -35,7 +35,8 @@ namespace Blink_API.Services.BrandServices
             var brand = mapper.Map<Brand>(insertedBrand);
             unitOfWork.BrandRepos.Add(brand);
             await unitOfWork.BrandRepos.SaveChanges();
-            return mapper.Map<BrandDTO>(brand);
+            //return mapper.Map<BrandDTO>(brand);
+            return new ApiResponse(201, "Brand added successfully.");
         }
 
         //// update brand :
