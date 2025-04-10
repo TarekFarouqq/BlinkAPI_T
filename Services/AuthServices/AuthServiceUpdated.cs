@@ -70,7 +70,7 @@ namespace Blink_API.Services.AuthServices
             }
             return true;
         }
-        public async Task<string> RegisterAdmin(RegisterDto registerAdmin)
+        public async Task<object> RegisterAdmin(RegisterDto registerAdmin)
         {
             var existingUsername = await userManager.FindByNameAsync(registerAdmin.UserName);
             if (existingUsername != null)
@@ -86,12 +86,17 @@ namespace Blink_API.Services.AuthServices
                 {
                     await userManager.AddToRoleAsync(mappedAdmin, "Admin");
                     var token = await CreateTokenAsync(mappedAdmin);
-                    return token;
+                    return new
+                    {
+                        token = token,
+                        username=mappedAdmin.UserName,
+                        email=mappedAdmin.Email
+                    };
                 }
             }
             return "";
         }
-        public async Task<string> RegisterSupplier(RegisterDto registerSupplier)
+        public async Task<object> RegisterSupplier(RegisterDto registerSupplier)
         {
             var existingUsername = await userManager.FindByNameAsync(registerSupplier.UserName);
             if (existingUsername != null)
@@ -109,12 +114,17 @@ namespace Blink_API.Services.AuthServices
                 {
                     await userManager.AddToRoleAsync(mappedSupplier, "Supplier");
                     var token = await CreateTokenAsync(mappedSupplier);
-                    return token;
+                    return new
+                    {
+                        token = token,
+                        username=mappedSupplier.UserName,
+                        email=mappedSupplier.Email
+                    };
                 }
             }
             return "";
         }
-        public async Task<string> LoginAccount(LoginDto loginAccount)
+        public async Task<object> LoginAccount(LoginDto loginAccount)
         {
             var user = await userManager.FindByEmailAsync(loginAccount.Email)
                        ?? await userManager.FindByNameAsync(loginAccount.Email);
@@ -124,7 +134,12 @@ namespace Blink_API.Services.AuthServices
             if (!signInResult.Succeeded)
                 return "Login details are incorrect";
             var token = await CreateTokenAsync(user);
-            return token;
+            return new
+            {
+                token = token,
+                username=user.UserName,
+                email=user.Email
+            };
         }
     }
 }
