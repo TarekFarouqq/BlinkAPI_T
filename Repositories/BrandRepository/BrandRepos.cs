@@ -22,6 +22,24 @@ namespace Blink_API.Repositories.BrandRepository
                 .Where(b => b.IsDeleted==false)
                 .ToListAsync();
         }
+
+        // get by id :
+        public async override Task<Brand?> GetById(int id)
+        {
+            return await db.Brands
+                .Where(b => b.BrandId == id && b.IsDeleted == false)
+                 
+                .FirstOrDefaultAsync();
+        }
+
+        // get by name :
+        public async Task<List<Brand>> GetByName(string name)
+        {
+            return await db.Brands
+                .Where(b => b.BrandName.Contains(name) && b.IsDeleted == false)
+                .ToListAsync();
+        }
+
         // insert brand
         public async Task<Brand> InsertBrand(Brand brand)
         {
