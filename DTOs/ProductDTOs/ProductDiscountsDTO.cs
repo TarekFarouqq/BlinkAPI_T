@@ -11,8 +11,11 @@ namespace Blink_API.DTOs.ProductDTOs
         public DateTime ProductModificationDate { get; set; }
         public DateTime ProductSupplyDate { get; set; }
         public List<string> ProductImages { get; set; }
+        public string SupplierId  { get; set; }
         public string SupplierName { get; set; }
+        public int BrandId { get; set; }
         public string BrandName { get; set; }
+        public int CategoryId { get; set; }
         public string CategoryName { get; set; }
         public double AverageRate { get; set; }
         public int CountOfRates { get; set; }

@@ -18,7 +18,7 @@ namespace Blink_API.Repositories
                 .Include(u => u.User)
                 .Include(b => b.Brand)
                 .Include(c => c.Category)
-                .Include(i => i.ProductImages)
+                .Include(i => i.ProductImages.Where(pi=>!pi.IsDeleted))
                 .Include(r => r.Reviews)
                 .ThenInclude(rc => rc.ReviewComments)
                 .Include(sip => sip.StockProductInventories)
@@ -42,7 +42,7 @@ namespace Blink_API.Repositories
                 .Include(u => u.User)
                 .Include(b => b.Brand)
                 .Include(c => c.Category)
-                .Include(i => i.ProductImages)
+                .Include(i => i.ProductImages.Where(pi=>!pi.IsDeleted))
                 .Include(r => r.Reviews)
                 .ThenInclude(rc => rc.ReviewComments)
                 .Include(sip => sip.StockProductInventories)
@@ -61,7 +61,7 @@ namespace Blink_API.Repositories
                 .Include(u => u.User)
                 .Include(b => b.Brand)
                 .Include(c => c.Category)
-                .Include(i => i.ProductImages)
+                .Include(i => i.ProductImages.Where(pi=>!pi.IsDeleted))
                 .Include(r => r.Reviews)
                 .ThenInclude(rc => rc.ReviewComments)
                 .Include(sip => sip.StockProductInventories)
@@ -77,7 +77,7 @@ namespace Blink_API.Repositories
                .Include(u => u.User)
                 .Include(b => b.Brand)
                 .Include(c => c.Category)
-                .Include(i => i.ProductImages)
+                .Include(i => i.ProductImages.Where(pi=>!pi.IsDeleted))
                 .Include(r => r.Reviews)
                 .ThenInclude(rc => rc.ReviewComments)
                 .Include(sip => sip.StockProductInventories)
@@ -94,7 +94,7 @@ namespace Blink_API.Repositories
               .Include(u => u.User)
               .Include(b => b.Brand)
               .Include(c => c.Category)
-              .Include(i => i.ProductImages)
+              .Include(i => i.ProductImages.Where(pi=>!pi.IsDeleted))
               .Include(r => r.Reviews)
               .ThenInclude(rc => rc.ReviewComments)
               .Include(sip => sip.StockProductInventories)
@@ -110,7 +110,7 @@ namespace Blink_API.Repositories
               .Include(u => u.User)
               .Include(b => b.Brand)
               .Include(c => c.Category)
-              .Include(i => i.ProductImages)
+              .Include(i => i.ProductImages.Where(pi=>!pi.IsDeleted))
               .Include(r => r.Reviews)
               .ThenInclude(rc => rc.ReviewComments)
               .Include(sip => sip.StockProductInventories)
@@ -135,7 +135,6 @@ namespace Blink_API.Repositories
             {
                 product.ProductName = entity.ProductName;
                 product.ProductDescription = entity.ProductDescription;
-                product.ProductCreationDate = entity.ProductCreationDate;
                 product.ProductModificationDate = DateTime.Now;
                 product.SupplierId = entity.SupplierId;
                 product.BrandId = entity.BrandId;
@@ -153,14 +152,36 @@ namespace Blink_API.Repositories
                 await UpdateProduct(id,product);
             }
         }
-        public async Task AddProductImage(int prdId,ProductImage prdImage)
+        private async Task RemoveOldImages(int prdId)
         {
             var product = await GetById(prdId);
             if (product != null)
             {
-                prdImage.ProductImageId = db.ProductImages.Any() ? db.ProductImages.Max(pi => pi.ProductImageId) + 1 : 1;
-                db.ProductImages.Add(prdImage);
-                //await SaveChanges();
+                var oldImages = db.ProductImages
+                    .Where(pi => pi.ProductId == prdId)
+                    .ToList();
+                foreach (ProductImage img in oldImages)
+                {
+                    img.IsDeleted = true;
+                }
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task AddProductImage(List<ProductImage> prdImages)
+        {
+            var product = await GetById(prdImages[0].ProductId);
+            if (product != null)
+            {
+                await RemoveOldImages(product.ProductId);
+
+                foreach (ProductImage image in prdImages)
+                {
+                    image.ProductImageId = db.ProductImages.Any() ? db.ProductImages.Max(pi => pi.ProductImageId) + 1 : 1;
+                    db.ProductImages.Add(image);
+                    await SaveChanges();
+                }
+
             }
         }
     }

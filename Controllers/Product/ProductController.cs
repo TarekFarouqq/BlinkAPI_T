@@ -111,24 +111,30 @@ namespace Blink_API.Controllers.Product
         //    return Ok(result);
         //}
         [HttpPost]
-        public async Task<ActionResult> Add(InsertProductDTO productDTO)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> Add([FromForm] InsertProductDTO productDTO)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(errors);
+            }
             if (productDTO == null)
                 return BadRequest();
             var result = await productService.Add(productDTO);
             if (result == 0)
                 return BadRequest();
-            int prdId = result;
-            await productService.AddProductImage(prdId, productDTO.ProductImages);
             return Ok(result);
         }
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, InsertProductDTO productDTO)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> Update(int id, [FromForm] UpdateProductDTO productDTO)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(errors);
+            }
             if (productDTO == null)
                 return BadRequest();
             await productService.Update(id, productDTO);
