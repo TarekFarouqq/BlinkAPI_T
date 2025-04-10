@@ -14,9 +14,9 @@ namespace Blink_API.Models
         [StringLength(500)]
         public string ProductDescription { get; set; }
         [Required]
-        public DateTime ProductCreationDate { get; set; }
-        public DateTime ProductModificationDate { get; set; }
-        public DateTime ProductSupplyDate { get; set; }
+        public DateTime ProductCreationDate { get; set; } = DateTime.UtcNow;
+        public DateTime ProductModificationDate { get; set; } = DateTime.UtcNow;
+        public DateTime ProductSupplyDate { get; set; } = DateTime.UtcNow;
         [Required]
         public string SupplierId { get; set; }
         [Required]
