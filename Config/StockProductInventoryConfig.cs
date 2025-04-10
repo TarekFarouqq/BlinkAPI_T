@@ -12,13 +12,4 @@ namespace Blink_API.Config
             builder.Property(pd => pd.StockUnitPrice).HasPrecision(18, 4);
         }
     }
-
-    public class InventoryConfig : IEntityTypeConfiguration<Inventory>
-    {
-        public void Configure(EntityTypeBuilder<Inventory> builder)
-        {
-            builder.Property(pd => pd.Lat).HasPrecision(18, 10);
-            builder.Property(pd => pd.Long).HasPrecision(18, 10);
-        }
-    }
 }
