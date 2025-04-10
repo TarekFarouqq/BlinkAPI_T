@@ -1,4 +1,5 @@
 ﻿using Blink_API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.InventoryRepos
 {
@@ -10,6 +11,17 @@ namespace Blink_API.Repositories.InventoryRepos
             db = _db;
         }
 
+        public async override Task<List<Inventory>> GetAll()
+        {
+            return await db.Inventories.Where(b => b.IsDeleted == false).Include(b => b.Branch).ToListAsync();
+        }
 
+        public async override Task<Inventory?> GetById(int id)
+        {
+            return await db.Inventories
+                .Where(b => b.InventoryId == id && b.IsDeleted == false)
+                .Include(b => b.Branch)
+                .FirstOrDefaultAsync();
+        }
     }
 }

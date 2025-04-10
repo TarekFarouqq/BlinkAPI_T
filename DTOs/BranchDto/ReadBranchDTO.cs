@@ -8,6 +8,6 @@ namespace Blink_API.DTOs.BranchDto
         public string BranchName { get; set; }
         public string BranchAddress { get; set; }
         public string Phone { get; set; }
-        public List<InventoryDto> Inventories { get; set; }
+        public List<ReadInventoryDTO> Inventories { get; set; }
     }
 }

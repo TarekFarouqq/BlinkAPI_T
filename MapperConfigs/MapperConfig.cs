@@ -100,18 +100,21 @@ namespace Blink_API.MapperConfigs
 
 
  
-            // brand map :
+            /////////
             CreateMap<Brand, BrandDTO>()
-       .ReverseMap();
+                .ReverseMap();
 
             CreateMap<insertBrandDTO,Brand >()
-       .ReverseMap();
+                .ReverseMap();
  
-
+            ////////////
             CreateMap<Branch, ReadBranchDTO>();
             CreateMap<AddBranchDTO, Branch>();
-            CreateMap<Inventory, InventoryDto>();
- 
+
+            /////////////
+            CreateMap<Inventory, ReadInventoryDTO>().ForMember(dest => dest.BranchName, option => option.MapFrom(src => src.Branch.BranchName));
+            CreateMap<AddInventoryDTO, Inventory>();
+
 
 
         }

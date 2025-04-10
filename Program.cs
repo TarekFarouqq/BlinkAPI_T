@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Blink_API.Services.InventoryService;
+using Blink_API.Repositories.InventoryRepos;
 
 namespace Blink_API
 {
@@ -57,6 +59,10 @@ namespace Blink_API
             builder.Services.AddScoped<BranchServices>();
             // Add Branch REPo
             builder.Services.AddScoped<BranchRepos>();
+            //add Inventory Repo
+            builder.Services.AddScoped<InventoryRepo>();
+            //Add Inventory Service
+            builder.Services.AddScoped<InventoryService>();
 
 
             //Add Brand :
