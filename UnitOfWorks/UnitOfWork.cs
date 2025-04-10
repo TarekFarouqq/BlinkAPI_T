@@ -7,6 +7,7 @@ using Blink_API.Repositories.BranchRepos;
  
 using Blink_API.Repositories.CartRepos;
 using Blink_API.Repositories.DiscountRepos;
+using Blink_API.Repositories.InventoryRepos;
 
 namespace Blink_API
 {
@@ -14,21 +15,15 @@ namespace Blink_API
     {
         private readonly BlinkDbContext db;
  
-       
-      
-        
- 
-       
-         BrandRepos brandRepo;
-
- 
+        BrandRepos brandRepo;
         ProductRepo productRepo;
         CategoryRepo categoryRepo;
         DiscountRepo discountRepo;
         CartRepo cartRepo;
         CartDetailsRepo cartDetailsRepo;
         BranchRepos branchRepos;
- 
+        InventoryRepo inventoryRepo;
+
         public UnitOfWork(BlinkDbContext _db)
         {
             db = _db;
@@ -43,6 +38,18 @@ namespace Blink_API
                     productRepo = new ProductRepo(db);
                 }
                 return productRepo;
+            }
+        }
+
+        public InventoryRepo InventoryRepo
+        {
+            get
+            {
+                if (inventoryRepo == null)
+                {
+                    inventoryRepo = new InventoryRepo(db);
+                }
+                return inventoryRepo;
             }
         }
 
