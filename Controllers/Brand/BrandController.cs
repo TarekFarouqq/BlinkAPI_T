@@ -1,4 +1,6 @@
-﻿using Blink_API.DTOs.BrandDtos;
+﻿using Azure;
+using Blink_API.DTOs.BrandDtos;
+using Blink_API.Errors;
 using Blink_API.Models;
 using Blink_API.Services.BranchServices;
 using Blink_API.Services.BrandServices;
@@ -28,6 +30,26 @@ namespace Blink_API.Controllers.Brand
             var brands = await brandService.GetAllBrands();
             if (brands == null)
                 return NotFound();
+            return Ok(brands);
+        }
+
+        // get brand by id :
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetById(int id)
+        {
+            var branch = await brandService.GetBrandbyId(id);
+            if (branch == null)
+                return NotFound(new ApiResponse(404, "Brand is Not Found"));
+            return Ok(branch);
+        }
+
+        // get brand by name :
+        [HttpGet("GetBrandByName/{name}")]
+        public async Task<ActionResult> GetByName(string name)
+        {
+            var brands = await brandService.GetBrandByName(name);
+            if (brands == null || !brands.Any()) 
+                return NotFound(new ApiResponse(404, "No brands found"));
             return Ok(brands);
         }
 
@@ -70,9 +92,11 @@ namespace Blink_API.Controllers.Brand
         public async Task<ActionResult> SoftDeleteBrand(int id)
         {
             var result = await brandService.SoftDeleteBrand(id);
-            if (result == false)
-                return NotFound();
-            return Ok("Brand deleted successfully.");
+            if (result.StatusCode == 404)
+            {
+                return NotFound(new ApiResponse(404, "Branch Not Found"));
+            }
+            return Ok(result);
         }
 
     }

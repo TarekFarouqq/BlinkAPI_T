@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Blink_API.DTOs.BranchDto;
 using Blink_API.DTOs.BrandDtos;
 using Blink_API.Errors;
 using Blink_API.Models;
@@ -24,6 +25,23 @@ namespace Blink_API.Services.BrandServices
             var result = mapper.Map<ICollection<BrandDTO>>(brands);
             return result;
         }
+        // get by id :
+        public async Task<BrandDTO?> GetBrandbyId(int id)
+        {
+            var brand = await unitOfWork.BrandRepos.GetById(id);
+            if (brand == null) return null;
+            var brandDto = mapper.Map<BrandDTO>(brand);  
+            return brandDto;
+        }
+        // get by name :
+        public async Task<ICollection<BrandDTO>> GetBrandByName(string name)
+        {
+            var brands = await unitOfWork.BrandRepos.GetByName(name);
+            if (brands == null || !brands.Any()) return new List<BrandDTO>();  
+            var brandsDto = mapper.Map<ICollection<BrandDTO>>(brands);
+            return brandsDto;
+        }
+
 
         //// insert || add brand 
         public async Task<ApiResponse> InsertBrand(insertBrandDTO insertedBrand)
@@ -62,7 +80,7 @@ namespace Blink_API.Services.BrandServices
         }
 
         //// soft delete brand :
-        public async Task<bool> SoftDeleteBrand(int id)
+        public async Task<ApiResponse> SoftDeleteBrand(int id)
         {
             var brand = await unitOfWork.BrandRepos.GetById(id);
             if (brand == null || brand.IsDeleted)
@@ -71,7 +89,7 @@ namespace Blink_API.Services.BrandServices
             }
             await unitOfWork.BrandRepos.Delete(id);
             await unitOfWork.BrandRepos.SaveChanges();
-            return true;
+            return new ApiResponse(200, "Brand deleted successfully.");
         }
     }
 }
