@@ -124,6 +124,34 @@ namespace Blink_API.Services.AuthServices
             }
             return "";
         }
+        public async Task<object> RegisterClient(RegisterDto registerClient)
+        {
+            var existingUsername = await userManager.FindByNameAsync(registerClient.UserName);
+            if (existingUsername != null)
+                return "Username Is Registered Before";
+            var existingEmail = await userManager.FindByEmailAsync(registerClient.Email);
+            if (existingEmail != null)
+                return "EmailAddress Is Registered Before";
+            if (existingUsername != null && existingEmail != null)
+                return "";
+            if (await CheckRule("Client"))
+            {
+                var mappedSupplier = mapper.Map<ApplicationUser>(registerClient);
+                var supplier = await userManager.CreateAsync(mappedSupplier, registerClient.Password);
+                if (supplier.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(mappedSupplier, "Client");
+                    var token = await CreateTokenAsync(mappedSupplier);
+                    return new
+                    {
+                        token = token,
+                        username = mappedSupplier.UserName,
+                        email = mappedSupplier.Email
+                    };
+                }
+            }
+            return "";
+        }
         public async Task<object> LoginAccount(LoginDto loginAccount)
         {
             var user = await userManager.FindByEmailAsync(loginAccount.Email)

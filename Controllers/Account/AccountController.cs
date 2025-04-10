@@ -294,6 +294,24 @@ namespace Blink_API.Controllers.Account
             return Ok(result);
         }
         #endregion
+        #region Client Process
+        [HttpPost("RegisterClient")]
+        public async Task<ActionResult> RegisterClient(RegisterDto registerDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            if (registerDto == null)
+                return BadRequest();
+            var result = await authServiceUpdated.RegisterClient(registerDto);
+            if (result == null || result == "")
+                return BadRequest();
+            if (result == "Username Is Registered Before")
+                return BadRequest(result);
+            if (result == "EmailAddress Is Registered Before")
+                return BadRequest(result);
+            return Ok(result);
+        }
+        #endregion
         #region LoginProcess
         [HttpPost("LoginAccount")]
         public async Task<ActionResult> LoginAccount(LoginDto loginDTO)
