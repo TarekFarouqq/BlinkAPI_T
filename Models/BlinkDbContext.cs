@@ -26,6 +26,9 @@ namespace Blink_API.Models
         public DbSet<TransactionDetail> TransactionDetails { get; set; }
         public DbSet<TransactionProduct> TransactionProducts { get; set; }
         public DbSet<WishList> WishLists { get; set; }
+        public DbSet<FilterAttributes> FilterAttributes { get; set; }
+        public DbSet<DefaultAttributes> DefaultAttributes { get; set; }
+        public DbSet<ProductAttributes> ProductAttributes { get; set; }
         public BlinkDbContext() : base() 
         {
 
