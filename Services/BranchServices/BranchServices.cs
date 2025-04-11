@@ -80,7 +80,12 @@ namespace Blink_API.Services.BranchServices
             {
                 return new ApiResponse(404, "Branch not found.");
             }
+            var inventoriesCount = await _unitOfWork.InventoryRepo.CountInventoriesForBranch(id);
 
+            if (inventoriesCount > 0)
+            {
+                return new ApiResponse(400, "Cannot delete branch with existing inventories,please delete the inventories first !");
+            }
             await _unitOfWork.BranchRepos.Delete(id);
             await _unitOfWork.BranchRepos.SaveChanges();
 
