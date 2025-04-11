@@ -20,6 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Blink_API.Services.InventoryService;
 using Blink_API.Repositories.InventoryRepos;
+using Blink_API.Services.BiDataService;
 
 namespace Blink_API
 {
@@ -63,8 +64,13 @@ namespace Blink_API
             builder.Services.AddScoped<InventoryRepo>();
             //Add Inventory Service
             builder.Services.AddScoped<InventoryService>();
+
+            // for biii
+            builder.Services.AddScoped<BiStockService>();
+
             //Add New AuthService
             builder.Services.AddScoped<AuthServiceUpdated>();
+ 
 
             //Add Brand :
             builder.Services.AddScoped<BrandService>();

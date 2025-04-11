@@ -38,8 +38,10 @@ namespace Blink_API.Controllers.Brand
             var brand = await brandService.GetBrandbyId(id);
             if (brand == null)
                 return NotFound(new ApiResponse(404, "Brand is Not Found"));
+ 
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
             brand.BrandImage = $"{baseUrl}{brand.BrandImage}";
+ 
             return Ok(brand);
         }
         [HttpGet("GetBrandByName/{name}")]
