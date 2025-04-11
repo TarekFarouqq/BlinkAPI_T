@@ -8,6 +8,8 @@ using Blink_API.Errors;
 using Blink_API.Services.AuthServices;
 using static System.Net.WebRequestMethods;
 using Microsoft.Extensions.Caching.Memory;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Blink_API.Controllers.Account
 {
@@ -196,22 +198,27 @@ namespace Blink_API.Controllers.Account
 
         // after forget pass and enter el email , verify with code sent : 
         #region verify code
+        [Authorize]
         [HttpPost("verifyCode")]
         public async Task<IActionResult> VerifyCode([FromBody] VerifyCodeDto model)
         {
-            if (!_cache.TryGetValue(model.Email, out string savedCode))
-            {
-                return BadRequest(new { message = "Code expired or not found", isValid = false });
-            }
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
-            if (model.code == savedCode)
-            {
-                return Ok(new { message = "Valid code", isValid = true });
-            }
-            else
-            {
-                return BadRequest(new { message = "Invalid code", isValid = false });
-            }
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized(new { message = "Email not found in token" });
+            var cachedCode = _cache.Get<string>(email);
+
+            if (cachedCode == null)
+                return BadRequest(new { message = "Code expired or not found" });
+
+            if (cachedCode != model.code)
+                return BadRequest(new { message = "Invalid code" });
+
+             
+            _cache.Set(email + "_verified", true, TimeSpan.FromMinutes(10));
+
+            return Ok(new { message = "Code verified successfully", isValid = true });
+
         }
         #endregion
 
