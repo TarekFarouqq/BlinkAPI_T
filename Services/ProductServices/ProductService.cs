@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using AutoMapper;
 using Blink_API.DTOs.ProductDTOs;
+using Blink_API.Errors;
 using Blink_API.Models;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.OpenApi.Any;
@@ -137,6 +138,36 @@ namespace Blink_API.Services.Product
                 }
             }
             return result;
+        }
+        public async Task<ICollection<ReadFilterAttributesDTO>> GetFilterAttributesAsync()
+        {
+            var result = await unitOfWork.ProductRepo.GetFilterAttributeAsync();
+            var mapped = mapper.Map<ICollection<ReadFilterAttributesDTO>>(result);
+            return mapped;
+        }
+        public async Task<FilterAttributes?> GetFilterAttributeById(int id)
+        {
+            var result = await unitOfWork.ProductRepo.GetFilterAttributeById(id);
+            return result;
+        }
+        public async Task<ApiResponse> AddFilterAttribute(InsertFilterAttribute filterAttribute)
+        {
+            var mappedAttribute=mapper.Map<FilterAttributes>(filterAttribute);  
+            int AttributeId = await unitOfWork.ProductRepo.AddFilterAttribute(mappedAttribute);
+            if (AttributeId == 0)
+                throw new Exception("There is an error occured");
+            return new ApiResponse(200, "FilterAttribute Saved Success");
+        }
+        public async Task<ICollection<DefaultAttributes>> GetDefaultAttributesByAttributeId(int id)
+        {
+            var result = await unitOfWork.ProductRepo.GetDefaultAttributesByAttributeId(id);
+            return result;
+        }
+        public async Task AddDefaultAttribute(InsertDefaultAttributes defaultAttributes)
+        {
+            var mappedDefaultAttributes=mapper.Map<DefaultAttributes>(defaultAttributes);
+            await unitOfWork.ProductRepo.AddDefaultAttribute(mappedDefaultAttributes);
+
         }
     }
 }

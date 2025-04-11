@@ -1,4 +1,5 @@
-﻿using System.Reflection.Metadata.Ecma335;
+﻿using System.IO;
+using System.Reflection.Metadata.Ecma335;
 using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Models;
 using Blink_API.Services.Product;
@@ -136,5 +137,47 @@ namespace Blink_API.Controllers.Product
             await productService.Delete(id);
             return Ok();
         }
+        #region FilterAttributes
+        [HttpGet("GetFilterAttributes")]
+        public async Task<ActionResult> GetFilterAttributes()
+        {
+            var Attributes = await productService.GetFilterAttributesAsync();
+            return Ok(Attributes);
+        }
+        [HttpGet("GetFilterAttributeById/{id}")]
+        public async Task<ActionResult> GetFilterAttributeById(int id)
+        {
+            var Attribute = await productService.GetFilterAttributeById(id);
+            return Ok(Attribute);
+        }
+        [HttpPost("AddFilterAttribute")]
+        public async Task<ActionResult> AddFilterAttribute(InsertFilterAttribute filterAttributes)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (filterAttributes == null)
+                return BadRequest();
+            var result = await productService.AddFilterAttribute(filterAttributes);
+            if(result.StatusCode != 200)
+                return BadRequest("There is an error happened");
+            return Ok("Attribute Saved Success");
+        }
+        [HttpGet("GetDefaulAttributesByAttributeId/{id}")]
+        public async Task<ActionResult> GetDefaulAttributesByAttributeId(int id)
+        {
+            var attributes = await productService.GetDefaultAttributesByAttributeId(id);
+            return Ok(attributes);
+        }
+        [HttpPost("AddDefaultAttributes")]
+        public async Task<ActionResult> AddDefaultAttributes(InsertDefaultAttributes attributes)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (attributes == null)
+                return BadRequest();
+            await productService.AddDefaultAttribute(attributes);
+            return Ok("Default Attributes Inserted Success");
+        }
+        #endregion
     }
 }

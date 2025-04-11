@@ -183,5 +183,34 @@ namespace Blink_API.Repositories
 
             }
         }
+        public async Task<ICollection<FilterAttributes>> GetFilterAttributeAsync()
+        {
+            return await db.FilterAttributes
+                .AsNoTracking()
+                .Include(fa => fa.DefaultAttributes)
+                .ToListAsync();
+        }
+        public async Task<FilterAttributes?> GetFilterAttributeById(int id)
+        {
+            return await db.FilterAttributes.FirstOrDefaultAsync(fa => fa.AttributeId == id);
+        }
+        public async Task<int> AddFilterAttribute(FilterAttributes filterAttribute)
+        {
+            await db.FilterAttributes.AddAsync(filterAttribute);
+            await SaveChanges();
+            return filterAttribute.AttributeId;
+        }
+        public async Task<ICollection<DefaultAttributes>> GetDefaultAttributesByAttributeId(int id)
+        {
+            return await db.DefaultAttributes
+                .AsNoTracking()
+                .Where(da=>da.AttributeId==id)
+                .ToListAsync();
+        }
+        public async Task AddDefaultAttribute(DefaultAttributes defaultAttributes)
+        {
+            await db.DefaultAttributes.AddAsync(defaultAttributes);
+            await SaveChanges();
+        }
     }
 }

@@ -15,6 +15,7 @@ namespace Blink_API.Models
         public string AttributeType { get; set; }
         [Required]
         public bool HasDefaultAttributes { get; set; } = false;
+        public virtual ICollection<DefaultAttributes> DefaultAttributes { get; set; }
     }
     
 }
