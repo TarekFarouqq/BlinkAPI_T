@@ -98,18 +98,6 @@ namespace Blink_API.Controllers.Product
             }
             return Ok(products);
         }
-        //[HttpPost]
-        //public async Task<ActionResult> Add(InsertProductDTO productDTO)
-        //{
-        //    if(!ModelState.IsValid)
-        //        return BadRequest(ModelState);
-        //    if (productDTO == null)
-        //        return BadRequest();
-        //    var result = await productService.Add(productDTO);
-        //    if (result == 0)
-        //        return BadRequest();
-        //    return Ok(result);
-        //}
         [HttpPost]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult> Add([FromForm] InsertProductDTO productDTO)

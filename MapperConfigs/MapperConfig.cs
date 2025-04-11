@@ -118,6 +118,7 @@ namespace Blink_API.MapperConfigs
                 .ReverseMap();
 
             CreateMap<insertBrandDTO,Brand >()
+                .ForMember(dest=>dest.BrandImage,option=>option.Ignore())
                 .ReverseMap();
  
             ////////////
