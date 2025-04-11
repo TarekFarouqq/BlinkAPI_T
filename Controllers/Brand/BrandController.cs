@@ -37,10 +37,10 @@ namespace Blink_API.Controllers.Brand
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(int id)
         {
-            var branch = await brandService.GetBrandbyId(id);
-            if (branch == null)
+            var brand = await brandService.GetBrandbyId(id);
+            if (brand == null)
                 return NotFound(new ApiResponse(404, "Brand is Not Found"));
-            return Ok(branch);
+            return Ok(brand);
         }
 
         // get brand by name :
