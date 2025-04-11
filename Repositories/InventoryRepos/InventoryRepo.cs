@@ -11,6 +11,12 @@ namespace Blink_API.Repositories.InventoryRepos
             db = _db;
         }
 
+        public async Task<int> CountInventoriesForBranch(int branchId)
+        {
+            return await db.Inventories
+                .Where(i => i.BranchId == branchId && !i.IsDeleted)
+                .CountAsync();
+        }
         public async override Task<List<Inventory>> GetAll()
         {
             return await db.Inventories.Where(b => b.IsDeleted == false).Include(b => b.Branch).ToListAsync();

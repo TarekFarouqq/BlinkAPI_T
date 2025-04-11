@@ -44,7 +44,7 @@ namespace Blink_API.Models
         public virtual ICollection<WishListDetail> WishListDetails { get; set; } = new HashSet<WishListDetail>();
         public virtual ICollection<ProductDiscount> ProductDiscounts { get; set; } = new HashSet<ProductDiscount>();
         public virtual ICollection<StockProductInventory> StockProductInventories { get; set; } = new HashSet<StockProductInventory>();
-
+        public virtual ICollection<ProductAttributes> ProductAttributes { get; set; }= new HashSet<ProductAttributes>();
 
         public bool IsDeleted { get; set; } = false;
 

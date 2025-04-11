@@ -13,16 +13,13 @@ namespace Blink_API.Config
             builder.HasOne(cd => cd.Product)
                 .WithMany(p => p.CartDetails)
                 .HasForeignKey(cd => cd.ProductId)
-                .OnDelete(DeleteBehavior.NoAction); // Changed to NoAction
+                .OnDelete(DeleteBehavior.NoAction);
 
-            // Relationship with Cart
             builder.HasOne(cd => cd.Cart)
                 .WithMany(c => c.CartDetails)
                 .HasForeignKey(cd => cd.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
-
-
-
     }
+
 }

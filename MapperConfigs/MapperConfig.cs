@@ -14,8 +14,12 @@ using Blink_API.DTOs.BrandDtos;
  
 using Blink_API.DTOs.BranchDto;
 using Blink_API.DTOs.InventoryDTOS;
+ 
 using Blink_API.DTOs.BiDataDtos;
 using Microsoft.AspNetCore.Identity;
+ 
+using Blink_API.DTOs.IdentityDTOs;
+ 
 
 
 
@@ -100,18 +104,30 @@ namespace Blink_API.MapperConfigs
                 .Select(pd => pd.DiscountAmount)
                 .FirstOrDefault())).ReverseMap();
 
-            CreateMap<Product, InsertProductDTO>().ReverseMap();
+            CreateMap<Product, InsertProductDTO>()
+                .ForMember(dest => dest.ProductImages, opt => opt.Ignore());
 
-            CreateMap<ProductImage, InsertProductImagesDTO>()
-                .ForMember(dest=>dest.ProductId,option=>option.MapFrom(src => src.Product.ProductId))
-                //.ForMember(dest=>dest.ImagePath,option=>option.MapFrom(src=>src.ProductImagePath))
-                .ReverseMap();
+            CreateMap<InsertProductDTO, Product>()
+                .ForMember(dest => dest.ProductImages, opt => opt.Ignore());
+
+            CreateMap<UpdateProductDTO, Product>().ReverseMap();
+
+            CreateMap<InsertProductImagesDTO, ProductImage>().ReverseMap();
+
+            CreateMap<InsertFilterAttribute, FilterAttributes>().ReverseMap();
+            CreateMap<InsertDefaultAttributes, DefaultAttributes>().ReverseMap();
+            CreateMap<ReadFilterAttributesDTO, FilterAttributes>().ReverseMap();
+            CreateMap<ReadDefaultAttributesDTO, DefaultAttributes>().ReverseMap();
+            //CreateMap<ProductImage, InsertProductImagesDTO>()
+            //    .ForMember(dest=>dest.ProductId,option=>option.MapFrom(src => src.Product.ProductId))
+            //    .ReverseMap();
 
             ////////////  
             CreateMap<Brand, BrandDTO>()
                 .ReverseMap();
 
             CreateMap<insertBrandDTO,Brand >()
+                .ForMember(dest=>dest.BrandImage,option=>option.Ignore())
                 .ReverseMap();
  
             ////////////
@@ -121,6 +137,18 @@ namespace Blink_API.MapperConfigs
             /////////////
             CreateMap<Inventory, ReadInventoryDTO>().ForMember(dest => dest.BranchName, option => option.MapFrom(src => src.Branch.BranchName));
             CreateMap<AddInventoryDTO, Inventory>();
+            /////////////
+            CreateMap<RegisterDto, ApplicationUser>()
+                .ForMember(dest=>dest.FirstName,option=>option.MapFrom(src=>src.FName))
+                .ForMember(dest=>dest.LastName,option=>option.MapFrom(src=>src.LName))
+                .ForMember(dest=>dest.Email,option=>option.MapFrom(src=>src.Email))
+                .ForMember(dest=>dest.PhoneNumber,option=>option.MapFrom(src=>src.PhoneNumber))
+                .ForMember(dest=>dest.Address,option=>option.MapFrom(src=>src.Address))
+                .ForMember(dest=>dest.UserName,option=>option.MapFrom(src=>src.UserName))
+                .ForMember(dest=>dest.LastModification,option=>option.MapFrom(src=> DateTime.Now))
+                .ReverseMap();
+
+
 
             ////// ************* BIII ******************
             // 1- stock_fact :
