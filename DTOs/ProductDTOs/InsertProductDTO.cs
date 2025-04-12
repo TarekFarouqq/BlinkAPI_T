@@ -26,6 +26,6 @@ namespace Blink_API.DTOs.ProductDTOs
     public class InsertProductImagesDTO
     {
         public int ProductId { get; set; } 
-        public string ProductImagePath { get; set; }
+        public string? ProductImagePath { get; set; }
     }
 }

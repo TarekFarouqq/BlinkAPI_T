@@ -3,6 +3,7 @@ using AutoMapper;
 using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Errors;
 using Blink_API.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.OpenApi.Any;
 using static System.Net.Mime.MediaTypeNames;
@@ -13,10 +14,12 @@ namespace Blink_API.Services.Product
     {
         private readonly UnitOfWork unitOfWork;
         private readonly IMapper mapper;
-        public ProductService(UnitOfWork _unitOfWork,IMapper _mapper)
+        private readonly IWebHostEnvironment _IWebHostEnvironment;
+        public ProductService(UnitOfWork _unitOfWork,IMapper _mapper, IWebHostEnvironment iWebHostEnvironment)
         {
             unitOfWork = _unitOfWork;
             mapper = _mapper;
+            _IWebHostEnvironment = iWebHostEnvironment;
         }
         public async Task<ICollection<ProductDiscountsDTO>> GetAll()
         {
@@ -125,8 +128,27 @@ namespace Blink_API.Services.Product
                 {
                     string fullPath = img;
                     int startIndex = fullPath.IndexOf("/images/");
-                    string path = fullPath.Substring(startIndex + 1);
-                    result.Add(new InsertProductImagesDTO { ProductId = id, ProductImagePath = path });
+                    string relativePath = fullPath.Substring(startIndex + 1);
+                    string physicalPath = Path.Combine(_IWebHostEnvironment.WebRootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+                    if (File.Exists(physicalPath))
+                    {
+                        var fromFile = GetFormFileFromDisk(physicalPath);
+                        newImages.Add(fromFile);
+                    }
+                }
+            }
+            var oldProductImages = await unitOfWork.ProductRepo.GetProductImages(id);
+            foreach (ProductImage productImage in oldProductImages)
+            {
+                string oldFullPath = productImage.ProductImagePath;
+                int startIndex = oldFullPath.IndexOf("/images/");
+                string relativePath = oldFullPath.Substring(startIndex + 1);
+                string physicalPath = Path.Combine(_IWebHostEnvironment.WebRootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+                if (File.Exists(physicalPath))
+                {
+                    var fromFile = GetFormFileFromDisk(physicalPath);
+                    File.Delete(physicalPath);
                 }
             }
             foreach (var img in newImages)
@@ -138,6 +160,29 @@ namespace Blink_API.Services.Product
                 }
             }
             return result;
+        }
+        public IFormFile GetFormFileFromDisk(string path)
+        {
+            var fileName = Path.GetFileName(path);
+            var extension = Path.GetExtension(path).ToLower();
+            string contentType = extension switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                ".webp" => "image/webp",
+                _ => "application/octet-stream"
+            };
+            byte[] fileBytes = File.ReadAllBytes(path);
+            var stream = new MemoryStream(fileBytes); 
+
+            return new FormFile(stream, 0, fileBytes.Length, "file", fileName)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = contentType
+            };
+
         }
         public async Task<ICollection<ReadFilterAttributesDTO>> GetFilterAttributesAsync()
         {

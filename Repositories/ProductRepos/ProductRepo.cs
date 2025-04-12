@@ -235,5 +235,12 @@ namespace Blink_API.Repositories
                 .Where(pa => pa.ProductId == productId)
                 .ToListAsync();
         }
+        public async Task<ICollection<ProductImage>> GetProductImages(int ProductId)
+        {
+            return await db.ProductImages
+                .AsNoTracking()
+                .Where(p => p.ProductId == ProductId && !p.IsDeleted)
+                .ToListAsync();
+        }
     }
 }
