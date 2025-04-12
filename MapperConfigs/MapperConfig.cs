@@ -162,10 +162,7 @@ namespace Blink_API.MapperConfigs
             
             // review diminsiion :
             CreateMap<Review, Review_DimensionDto>()
-                .ForMember(dest => dest.ReviewId, option => option.MapFrom(src => src.ReviewId))
-                .ForMember(dest => dest.Rate, option => option.MapFrom(src => src.Rate))
-                .ForMember(dest => dest.CreationDate, option => option.MapFrom(src => src.CreationDate))
-                .ForMember(dest => dest.UserId, option => option.MapFrom(src => src.UserId))
+                
                 .ForMember(dest => dest.ProductId, option => option.MapFrom(src => src.ProductId))
                  .ForMember(dest => dest.ReviewComments, opt => opt.MapFrom(src => src.ReviewComments.Select(c => c.Content).ToList()))
     
@@ -221,10 +218,7 @@ namespace Blink_API.MapperConfigs
 
             // cart diminsion :
             CreateMap<Cart, cart_DiminsionDto>()
-                .ForMember(dest => dest.CartId, option => option.MapFrom(src => src.CartId))
-                .ForMember(dest => dest.UserId, option => option.MapFrom(src => src.UserId))
                 .ForMember(dest => dest.CreationDate, option => option.MapFrom(src => src.CartDetails.FirstOrDefault().CreationDate))
-                .ForMember(dest => dest.IsDeleted, option => option.MapFrom(src => src.IsDeleted))
                 .ForMember(dest => dest.ProductId, option => option.MapFrom(src => src.CartDetails.FirstOrDefault().ProductId))
                 .ForMember(dest => dest.Quantity, option => option.MapFrom(src => src.CartDetails.FirstOrDefault().Quantity))
                 .ReverseMap();
@@ -284,7 +278,7 @@ namespace Blink_API.MapperConfigs
 
             // product diminsion :
             CreateMap<Product,Product_DiminsionDto>()
-                .ForMember(dest => dest.SupplierId, option => option.MapFrom(src => src.SupplierId))
+               
                 .ForMember(dest => dest.ParentCategoryId, option => option.MapFrom(src => src.Category.ParentCategoryId))
                 .ForMember(dest => dest.CategoryName, option => option.MapFrom(src => src.Category.CategoryName))
                 .ForMember(dest => dest.CategoryDescription, option => option.MapFrom(src => src.Category.CategoryDescription))
