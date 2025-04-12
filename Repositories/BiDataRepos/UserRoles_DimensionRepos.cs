@@ -12,10 +12,19 @@ namespace Blink_API.Repositories.BiDataRepos
         {
             _blinkDbContext = blinkDbContext;
         }
-
-        public async override Task<List<IdentityUserRole<string>>> GetAll()
+        public async IAsyncEnumerable<IdentityUserRole<string>> GetAllAsStream()
         {
-            return await _blinkDbContext.UserRoles.ToListAsync();
+            await foreach (var userRole in _blinkDbContext.UserRoles.AsAsyncEnumerable())
+            {
+                yield return userRole;
+            }
         }
+
+        #region old 
+        //public async override Task<List<IdentityUserRole<string>>> GetAll()
+        //{
+        //    return await _blinkDbContext.UserRoles.ToListAsync();
+        //}
+        #endregion
     }
 }

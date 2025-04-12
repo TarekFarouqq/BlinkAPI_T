@@ -31,21 +31,23 @@ namespace Blink_API.Repositories.BrandRepository
                 .Where(b => b.BrandName.Contains(name) && b.IsDeleted == false)
                 .ToListAsync();
         }
+ 
 
         // insert brand
 
+ 
         public async Task<Brand> InsertBrand(Brand brand)
         {
             db.Brands.Add(brand);
             await SaveChanges();
             return brand;
         }
-        public async Task<Brand> UpdateBrand(int id,Brand brand)
+        public async Task<Brand> UpdateBrand(int id, Brand brand)
         {
             var oldBrand = await GetById(id);
-            if(oldBrand != null)
+            if (oldBrand != null)
             {
-                oldBrand.BrandName=brand.BrandName;
+                oldBrand.BrandName = brand.BrandName;
                 oldBrand.BrandImage = brand.BrandImage;
                 oldBrand.BrandDescription = brand.BrandDescription;
                 oldBrand.BrandWebSiteURL = brand.BrandWebSiteURL;

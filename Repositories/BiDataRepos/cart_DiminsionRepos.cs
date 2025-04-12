@@ -11,13 +11,27 @@ namespace Blink_API.Repositories.BiDataRepos
         {
             _blinkDbContext = blinkDbContext;
         }
-        public async override Task<List<Cart>> GetAll()
+        public async IAsyncEnumerable<Cart> GetAllAsStream()
         {
-            return await _blinkDbContext.Carts
+            await foreach (var item in _blinkDbContext.Carts
                 .Include(b => b.CartDetails)
                 .ThenInclude(b => b.Product)
                 .Where(b => b.IsDeleted == false)
-                .ToListAsync();
+                .AsAsyncEnumerable())
+            {
+                yield return item;
+            }
         }
+
+        #region old
+        //public async override Task<List<Cart>> GetAll()
+        //{
+        //    return await _blinkDbContext.Carts
+        //        .Include(b => b.CartDetails)
+        //        .ThenInclude(b => b.Product)
+        //        .Where(b => b.IsDeleted == false)
+        //        .ToListAsync();
+        //}
+        #endregion
     }
 }

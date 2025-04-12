@@ -11,9 +11,19 @@ namespace Blink_API.Repositories.BiDataRepos
         {
             _blinkDbContext = blinkDbContext;
         }
-        public async override Task<List<ApplicationUser>> GetAll()
+        //public async override Task<List<ApplicationUser>> GetAll()
+        //{
+        //    return await _blinkDbContext.Users.ToListAsync();
+        //}
+
+        // for solve loading server for bi :
+        public async IAsyncEnumerable<ApplicationUser> GetAllAsStream()
         {
-            return await _blinkDbContext.Users.ToListAsync();
+            await foreach (var user in _blinkDbContext.Users.AsAsyncEnumerable())
+            {
+                yield return user;
+            }
         }
+
     }
 }
