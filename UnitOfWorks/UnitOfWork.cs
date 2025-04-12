@@ -8,14 +8,26 @@ using Blink_API.Repositories.BranchRepos;
 using Blink_API.Repositories.CartRepos;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Repositories.InventoryRepos;
+
+using StackExchange.Redis;
+using Microsoft.EntityFrameworkCore;
+using Blink_API.Repositories.Order;
+using AutoMapper;
+
 using Blink_API.Repositories.BiDataRepos;
+
 
 namespace Blink_API
 {
     public class UnitOfWork
     {
         private readonly BlinkDbContext db;
+
+
+        public DbContext Context => db;
+
         internal object cart_DiminsionRepos;
+
         BrandRepos brandRepo;
         ProductRepo productRepo;
         CategoryRepo categoryRepo;
@@ -24,6 +36,7 @@ namespace Blink_API
         CartDetailsRepo cartDetailsRepo;
         BranchRepos branchRepos;
         InventoryRepo inventoryRepo;
+        orderRepo orderRepo;
 
         // **** for bi ***
         BiDataRepos biDataRepos;
@@ -43,6 +56,20 @@ namespace Blink_API
         public UnitOfWork(BlinkDbContext _db)
         {
             db = _db;
+        }
+
+       
+
+        public orderRepo OrderRepo
+        {
+            get
+            {
+                if (orderRepo == null)
+                {
+                    orderRepo = new orderRepo(db);
+                }
+                return orderRepo;
+            }
         }
 
         public ProductRepo ProductRepo
@@ -144,6 +171,11 @@ namespace Blink_API
                 return branchRepos;
             }
         }
+
+
+        public async Task<int> CompleteAsync()
+         => await db.SaveChangesAsync();
+
         // *************************************  for bidatarepos ************************************:
         public BiDataRepos BiDataRepos
         {
@@ -333,6 +365,7 @@ namespace Blink_API
                 return _productDiminsionRepos;
             }
         }
+
 
     }
     
