@@ -1,5 +1,7 @@
 ﻿using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories
@@ -243,22 +245,38 @@ namespace Blink_API.Repositories
                 .Where(p => p.ProductId == ProductId && !p.IsDeleted)
                 .ToListAsync();
         }
-        public async Task<ICollection<Product>> GetFillteredProducts(ICollection<FilterProductDTO> filterProductsDTO)
+        public async Task<ICollection<Product>> GetFillteredProducts([FromQuery] Dictionary<int, List<string>> filtersProduct)
         {
             var resultProduct = db.Products
                 .AsNoTracking()
                 .Include(p => p.ProductAttributes)
                 .ThenInclude(fa => fa.FilterAttribute)
+                .Where(p => !p.IsDeleted)
                 .AsQueryable();
+            //foreach (var filter in filtersProduct)
+            //{
+            //    int attributeId = filter.Key;
+            //    List<string> values = filter.Value;
 
-            foreach (FilterProductDTO filter in filterProductsDTO)
+            //    resultProduct = resultProduct.Where(p =>
+            //        p.ProductAttributes.Any(pa =>
+            //            pa.FilterAttribute.AttributeId == attributeId &&
+            //            values.Contains(pa.AttributeValue)
+            //        ));
+            //}
+
+            foreach(var filter in filtersProduct)
             {
-                resultProduct = resultProduct
-                    .Where(p => p.ProductAttributes.Any(pa =>
-                    pa.FilterAttribute.AttributeName == filter.AttributeName &&
-                    pa.AttributeValue == filter.AttributeValue
-                    ));
+                int AttributeId = filter.Key;
+                List<string> attributesValue = filter.Value;
+                foreach(var attribute in attributesValue)
+                {
+                    resultProduct = resultProduct.Where(p => p.ProductAttributes.Any(
+                            pa=>pa.AttributeId==AttributeId && pa.AttributeValue==attribute
+                        ));
+                }
             }
+
             var result = await resultProduct
                 .Where(p => !p.IsDeleted)
                 .Include(u => u.User)
