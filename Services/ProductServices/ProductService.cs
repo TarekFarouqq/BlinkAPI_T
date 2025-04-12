@@ -4,6 +4,7 @@ using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Errors;
 using Blink_API.Models;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.OpenApi.Any;
 using static System.Net.Mime.MediaTypeNames;
@@ -228,10 +229,22 @@ namespace Blink_API.Services.Product
         {
             await unitOfWork.ProductRepo.DeleteOldProductAttributes(productId);
         }
-        public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(ICollection<FilterProductDTO> filterProductsDTO)
+        public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct,int pgNumber, decimal fromPrice, decimal toPrice, int rating)
         {
-            var products = await unitOfWork.ProductRepo.GetFillteredProducts(filterProductsDTO);
+            var products = await unitOfWork.ProductRepo.GetFillteredProducts(filtersProduct,pgNumber);
             var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
+            if(fromPrice != -1 && fromPrice > 0)
+            {
+                mappedProducts = mappedProducts.Where(fp => fp.ProductPrice >= fromPrice).ToList();
+            }
+            if(toPrice != -1 && toPrice > 0)
+            {
+                mappedProducts=mappedProducts.Where(fp=>fp.ProductPrice <= toPrice).ToList();   
+            }
+            if(rating != -1)
+            {
+                mappedProducts = mappedProducts.Where(fp => fp.AverageRate == int.Parse(rating.ToString())).ToList();
+            }
             return mappedProducts;
         }
     }

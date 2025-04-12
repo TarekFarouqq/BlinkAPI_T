@@ -1,5 +1,7 @@
 ﻿using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories
@@ -243,21 +245,24 @@ namespace Blink_API.Repositories
                 .Where(p => p.ProductId == ProductId && !p.IsDeleted)
                 .ToListAsync();
         }
-        public async Task<ICollection<Product>> GetFillteredProducts(ICollection<FilterProductDTO> filterProductsDTO)
+        public async Task<ICollection<Product>> GetFillteredProducts([FromQuery] Dictionary<int, List<string>> filtersProduct,int pgNumber)
         {
             var resultProduct = db.Products
                 .AsNoTracking()
                 .Include(p => p.ProductAttributes)
                 .ThenInclude(fa => fa.FilterAttribute)
+                .Where(p => !p.IsDeleted)
                 .AsQueryable();
-
-            foreach (FilterProductDTO filter in filterProductsDTO)
+            foreach(var filter in filtersProduct)
             {
-                resultProduct = resultProduct
-                    .Where(p => p.ProductAttributes.Any(pa =>
-                    pa.FilterAttribute.AttributeName == filter.AttributeName &&
-                    pa.AttributeValue == filter.AttributeValue
-                    ));
+                int AttributeId = filter.Key;
+                List<string> attributesValue = filter.Value;
+                foreach(var attribute in attributesValue)
+                {
+                    resultProduct = resultProduct.Where(p => p.ProductAttributes.Any(
+                            pa=>pa.AttributeId==AttributeId && pa.AttributeValue==attribute
+                        ));
+                }
             }
             var result = await resultProduct
                 .Where(p => !p.IsDeleted)
@@ -270,6 +275,7 @@ namespace Blink_API.Repositories
                 .Include(sip => sip.StockProductInventories)
                 .Include(pd => pd.ProductDiscounts)
                 .ThenInclude(d => d.Discount)
+                .Skip((pgNumber - 1) * 16)
                 .ToListAsync();
             return result;
         }

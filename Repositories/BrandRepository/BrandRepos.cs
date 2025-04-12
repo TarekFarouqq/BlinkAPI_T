@@ -31,6 +31,11 @@ namespace Blink_API.Repositories.BrandRepository
                 .Where(b => b.BrandName.Contains(name) && b.IsDeleted == false)
                 .ToListAsync();
         }
+ 
+
+        // insert brand
+
+ 
         public async Task<Brand> InsertBrand(Brand brand)
         {
             db.Brands.Add(brand);

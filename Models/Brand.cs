@@ -11,16 +11,14 @@ namespace Blink_API.Models
         [Required]
         [StringLength(50)]
         public string BrandName { get; set; }
-
         public string BrandImage { get; set; }
         [StringLength(500)]
         public string BrandDescription { get; set; }
         [Url]
         public string BrandWebSiteURL { get; set; }
         public bool IsDeleted { get; set; } = false;
-
         public virtual ICollection<Product> Products { get; set; } = new HashSet<Product>();
-
+        public virtual ICollection<ReviewSuppliedProduct> ReviewsSuppliedProducts { get; set; }
     }
 }
 
