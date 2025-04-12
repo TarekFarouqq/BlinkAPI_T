@@ -14,9 +14,9 @@ namespace Blink_API.Models
         [StringLength(500)]
         public string ProductDescription { get; set; }
         [Required]
-        public DateTime ProductCreationDate { get; set; }
-        public DateTime ProductModificationDate { get; set; }
-        public DateTime ProductSupplyDate { get; set; }
+        public DateTime ProductCreationDate { get; set; } = DateTime.UtcNow;
+        public DateTime ProductModificationDate { get; set; } = DateTime.UtcNow;
+        public DateTime ProductSupplyDate { get; set; } = DateTime.UtcNow;
         [Required]
         public string SupplierId { get; set; }
         [Required]
@@ -44,7 +44,7 @@ namespace Blink_API.Models
         public virtual ICollection<WishListDetail> WishListDetails { get; set; } = new HashSet<WishListDetail>();
         public virtual ICollection<ProductDiscount> ProductDiscounts { get; set; } = new HashSet<ProductDiscount>();
         public virtual ICollection<StockProductInventory> StockProductInventories { get; set; } = new HashSet<StockProductInventory>();
-
+        public virtual ICollection<ProductAttributes> ProductAttributes { get; set; }= new HashSet<ProductAttributes>();
 
         public bool IsDeleted { get; set; } = false;
 

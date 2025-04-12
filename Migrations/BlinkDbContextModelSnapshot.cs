@@ -262,6 +262,28 @@ namespace Blink_API.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Blink_API.Models.DefaultAttributes", b =>
+                {
+                    b.Property<int>("DefaultAttributeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DefaultAttributeId"));
+
+                    b.Property<int>("AttributeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AttributeValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("DefaultAttributeId");
+
+                    b.HasIndex("AttributeId");
+
+                    b.ToTable("DefaultAttributes");
+                });
+
             modelBuilder.Entity("Blink_API.Models.Discount", b =>
                 {
                     b.Property<int>("DiscountId")
@@ -287,6 +309,30 @@ namespace Blink_API.Migrations
                     b.ToTable("Discounts");
                 });
 
+            modelBuilder.Entity("Blink_API.Models.FilterAttributes", b =>
+                {
+                    b.Property<int>("AttributeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AttributeId"));
+
+                    b.Property<string>("AttributeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AttributeType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("HasDefaultAttributes")
+                        .HasColumnType("bit");
+
+                    b.HasKey("AttributeId");
+
+                    b.ToTable("FilterAttributes");
+                });
+
             modelBuilder.Entity("Blink_API.Models.Inventory", b =>
                 {
                     b.Property<int>("InventoryId")
@@ -310,6 +356,14 @@ namespace Blink_API.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<decimal>("Lat")
+                        .HasPrecision(18, 10)
+                        .HasColumnType("decimal(18,10)");
+
+                    b.Property<decimal>("Long")
+                        .HasPrecision(18, 10)
+                        .HasColumnType("decimal(18,10)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -507,6 +561,24 @@ namespace Blink_API.Migrations
                     b.HasIndex("SupplierId");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Blink_API.Models.ProductAttributes", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AttributeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AttributeValue")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ProductId", "AttributeId", "AttributeValue");
+
+                    b.HasIndex("AttributeId");
+
+                    b.ToTable("ProductAttributes");
                 });
 
             modelBuilder.Entity("Blink_API.Models.ProductDiscount", b =>
@@ -916,6 +988,17 @@ namespace Blink_API.Migrations
                     b.Navigation("ParentCategory");
                 });
 
+            modelBuilder.Entity("Blink_API.Models.DefaultAttributes", b =>
+                {
+                    b.HasOne("Blink_API.Models.FilterAttributes", "FilterAttribute")
+                        .WithMany()
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FilterAttribute");
+                });
+
             modelBuilder.Entity("Blink_API.Models.Inventory", b =>
                 {
                     b.HasOne("Blink_API.Models.Branch", "Branch")
@@ -990,6 +1073,25 @@ namespace Blink_API.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Blink_API.Models.ProductAttributes", b =>
+                {
+                    b.HasOne("Blink_API.Models.FilterAttributes", "FilterAttribute")
+                        .WithMany()
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Blink_API.Models.Product", "Product")
+                        .WithMany("ProductAttributes")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FilterAttribute");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Blink_API.Models.ProductDiscount", b =>
@@ -1299,6 +1401,8 @@ namespace Blink_API.Migrations
                     b.Navigation("CartDetails");
 
                     b.Navigation("OrderDetails");
+
+                    b.Navigation("ProductAttributes");
 
                     b.Navigation("ProductDiscounts");
 

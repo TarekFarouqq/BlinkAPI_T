@@ -1,5 +1,7 @@
 ﻿namespace Blink_API.DTOs.Category
 {
+
+
     public class ChildCategoryDTO
     {
         public int CategoryId { get; set; }

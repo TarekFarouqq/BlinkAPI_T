@@ -1,9 +1,15 @@
 using Blink_API.MapperConfigs;
 using Blink_API.Models;
 using Blink_API.Repositories;
+using Blink_API.Repositories.BranchRepos;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Services;
 using Blink_API.Services.AuthServices;
+
+using Blink_API.Services.BrandServices;
+
+using Blink_API.Services.BranchServices;
+
 using Blink_API.Services.CartService;
 using Blink_API.Services.DiscountServices;
 using Blink_API.Services.Product;
@@ -12,6 +18,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Blink_API.Services.InventoryService;
+using Blink_API.Repositories.InventoryRepos;
+using Blink_API.Services.BiDataService;
 
 namespace Blink_API
 {
@@ -47,6 +56,35 @@ namespace Blink_API
             builder.Services.AddScoped<DiscountRepo>();
             //Add DiscountService
             builder.Services.AddScoped<DiscountService>();
+            // Add Branch Services
+            builder.Services.AddScoped<BranchServices>();
+            // Add Branch REPo
+            builder.Services.AddScoped<BranchRepos>();
+            //add Inventory Repo
+            builder.Services.AddScoped<InventoryRepo>();
+            //Add Inventory Service
+            builder.Services.AddScoped<InventoryService>();
+
+            // for biii
+            builder.Services.AddScoped<BiStockService>();
+
+            //Add New AuthService
+            builder.Services.AddScoped<AuthServiceUpdated>();
+ 
+
+            //Add Brand :
+            builder.Services.AddScoped<BrandService>();
+
+
+            // to store verify code :
+            builder.Services.AddMemoryCache();
+
+    //        builder.Services.AddControllers()
+    //.AddJsonOptions(options =>
+    //{
+    //    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    //});
+
 
             #region Add AUTH SERVICES
 

@@ -1,13 +1,12 @@
 ﻿using Blink_API.Models;
 using Microsoft.EntityFrameworkCore;
-
 namespace Blink_API.Repositories
 {
     public class GenericRepo<TEntity, Tkey> where TEntity : class
     {
         private readonly BlinkDbContext db;
         public GenericRepo(BlinkDbContext _db)
-        { 
+        {
             db = _db;
         }
         public virtual async Task<List<TEntity>> GetAll()
@@ -28,7 +27,7 @@ namespace Blink_API.Repositories
             db.Entry(entity).State = EntityState.Modified;
 
         }
-        public virtual async void Delete(Tkey id)
+        public virtual async Task Delete(Tkey id)
         {
             TEntity? t = await GetById(id);
             if (t != null)
@@ -38,13 +37,12 @@ namespace Blink_API.Repositories
                 {
                     prop.SetValue(t, true);
                     Update(t);
-
                 }
             }
         }
         public async Task SaveChanges()
         {
-           await db.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
     }
 }
