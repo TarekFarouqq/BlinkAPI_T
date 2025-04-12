@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Blink_API.DTOs.BrandDtos;
 using Blink_API.Errors;
 using Blink_API.Models;
