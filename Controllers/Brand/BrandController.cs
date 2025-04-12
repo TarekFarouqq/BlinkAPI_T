@@ -1,13 +1,8 @@
-﻿using Azure;
-using Blink_API.DTOs.BrandDtos;
+﻿using Blink_API.DTOs.BrandDtos;
 using Blink_API.Errors;
 using Blink_API.Models;
-using Blink_API.Services.BranchServices;
 using Blink_API.Services.BrandServices;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-
 namespace Blink_API.Controllers.Brand
 {
     [Route("api/[controller]")]

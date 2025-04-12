@@ -151,7 +151,7 @@ namespace Blink_API.Controllers.Product
             return Ok(Attribute);
         }
         [HttpPost("AddFilterAttribute")]
-        public async Task<ActionResult> AddFilterAttribute(InsertFilterAttribute filterAttributes)
+        public async Task<ActionResult> AddFilterAttribute(InsertFilterAttributeDTO filterAttributes)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -169,7 +169,7 @@ namespace Blink_API.Controllers.Product
             return Ok(attributes);
         }
         [HttpPost("AddDefaultAttributes")]
-        public async Task<ActionResult> AddDefaultAttributes(InsertDefaultAttributes attributes)
+        public async Task<ActionResult> AddDefaultAttributes(InsertDefaultAttributesDTO attributes)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -177,6 +177,24 @@ namespace Blink_API.Controllers.Product
                 return BadRequest();
             await productService.AddDefaultAttribute(attributes);
             return Ok("Default Attributes Inserted Success");
+        }
+        [HttpPost("AddProductAttribute/{productId}")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> AddProductAttribute(int productId, [FromForm] ICollection<InsertProductAttributeDTO> attributes)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (attributes.Count == 0)
+                await productService.DeleteProductAttributes(productId);
+                //return BadRequest("List Was Empty");
+            await productService.AddProductAttribute(attributes);
+            return Ok(new { success = "ProductAttributes Inserted Success" });
+        }
+        [HttpGet("GetProductAttributes/{id}")]
+        public async Task<ActionResult> GetProductAttributes(int id)
+        {
+            var productAttributes = await productService.GetProductAttributes(id);
+            return Ok(productAttributes);
         }
         #endregion
     }

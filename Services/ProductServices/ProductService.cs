@@ -150,7 +150,7 @@ namespace Blink_API.Services.Product
             var result = await unitOfWork.ProductRepo.GetFilterAttributeById(id);
             return result;
         }
-        public async Task<ApiResponse> AddFilterAttribute(InsertFilterAttribute filterAttribute)
+        public async Task<ApiResponse> AddFilterAttribute(InsertFilterAttributeDTO filterAttribute)
         {
             var mappedAttribute=mapper.Map<FilterAttributes>(filterAttribute);  
             int AttributeId = await unitOfWork.ProductRepo.AddFilterAttribute(mappedAttribute);
@@ -163,11 +163,25 @@ namespace Blink_API.Services.Product
             var result = await unitOfWork.ProductRepo.GetDefaultAttributesByAttributeId(id);
             return result;
         }
-        public async Task AddDefaultAttribute(InsertDefaultAttributes defaultAttributes)
+        public async Task AddDefaultAttribute(InsertDefaultAttributesDTO defaultAttributes)
         {
             var mappedDefaultAttributes=mapper.Map<DefaultAttributes>(defaultAttributes);
             await unitOfWork.ProductRepo.AddDefaultAttribute(mappedDefaultAttributes);
-
+        }
+        public async Task AddProductAttribute(ICollection<InsertProductAttributeDTO> insertProductAttributeDTO)
+        {
+            var mappedProductAttribute = mapper.Map<ICollection<ProductAttributes>>(insertProductAttributeDTO);
+            await unitOfWork.ProductRepo.AddProductAttribute(mappedProductAttribute);
+        }
+        public async Task<ICollection<InsertProductAttributeDTO>> GetProductAttributes(int productId)
+        {
+            var productAttributes = await unitOfWork.ProductRepo.GetProductAttributes(productId);
+            var mappedProductAttributes = mapper.Map<ICollection<InsertProductAttributeDTO>>(productAttributes);
+            return mappedProductAttributes;
+        }
+        public async Task DeleteProductAttributes(int productId)
+        {
+            await unitOfWork.ProductRepo.DeleteOldProductAttributes(productId);
         }
     }
 }
