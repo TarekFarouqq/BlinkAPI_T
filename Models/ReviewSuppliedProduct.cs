@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Blink_API.Models
 {
     public class ReviewSuppliedProduct
     {
+        [Key]
         public int RequestId { get; set; }
         public DateTime RequestData { get; set; } = DateTime.UtcNow;
         public bool? RequestStatus { get; set; }
