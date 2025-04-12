@@ -400,7 +400,10 @@ namespace Blink_API
             }
         }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 11de893 (complete bi)
     }
     
 =======
