@@ -1,17 +1,11 @@
 ﻿using AutoMapper;
-using Azure.Core;
-using Blink_API.DTOs.BranchDto;
 using Blink_API.DTOs.BrandDtos;
-using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Errors;
 using Blink_API.Models;
-using Blink_API.Repositories;
-
 namespace Blink_API.Services.BrandServices
 {
     public class BrandService
     {
-        
         private readonly UnitOfWork unitOfWork;
         private readonly IMapper mapper;
         public BrandService(UnitOfWork _unitOfWork, IMapper _mapper)

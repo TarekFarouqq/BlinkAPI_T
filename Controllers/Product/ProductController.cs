@@ -196,6 +196,12 @@ namespace Blink_API.Controllers.Product
             var productAttributes = await productService.GetProductAttributes(id);
             return Ok(productAttributes);
         }
+        [HttpGet("GetFillteredProducts")]
+        public async Task<ActionResult> GetFillteredProducts(ICollection<FilterProductDTO> filtersProduct)
+        {
+            var products = await productService.GetFillteredProducts(filtersProduct);
+            return Ok(products);
+        }
         #endregion
     }
 }

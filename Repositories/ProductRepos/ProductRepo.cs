@@ -1,4 +1,5 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.DTOs.ProductDTOs;
+using Blink_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories
@@ -241,6 +242,36 @@ namespace Blink_API.Repositories
                 .AsNoTracking()
                 .Where(p => p.ProductId == ProductId && !p.IsDeleted)
                 .ToListAsync();
+        }
+        public async Task<ICollection<Product>> GetFillteredProducts(ICollection<FilterProductDTO> filterProductsDTO)
+        {
+            var resultProduct = db.Products
+                .AsNoTracking()
+                .Include(p => p.ProductAttributes)
+                .ThenInclude(fa => fa.FilterAttribute)
+                .AsQueryable();
+
+            foreach (FilterProductDTO filter in filterProductsDTO)
+            {
+                resultProduct = resultProduct
+                    .Where(p => p.ProductAttributes.Any(pa =>
+                    pa.FilterAttribute.AttributeName == filter.AttributeName &&
+                    pa.AttributeValue == filter.AttributeValue
+                    ));
+            }
+            var result = await resultProduct
+                .Where(p => !p.IsDeleted)
+                .Include(u => u.User)
+                .Include(b => b.Brand)
+                .Include(c => c.Category)
+                .Include(i => i.ProductImages.Where(pi => !pi.IsDeleted))
+                .Include(r => r.Reviews)
+                .ThenInclude(rc => rc.ReviewComments)
+                .Include(sip => sip.StockProductInventories)
+                .Include(pd => pd.ProductDiscounts)
+                .ThenInclude(d => d.Discount)
+                .ToListAsync();
+            return result;
         }
     }
 }

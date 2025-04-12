@@ -228,5 +228,11 @@ namespace Blink_API.Services.Product
         {
             await unitOfWork.ProductRepo.DeleteOldProductAttributes(productId);
         }
+        public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(ICollection<FilterProductDTO> filterProductsDTO)
+        {
+            var products = await unitOfWork.ProductRepo.GetFillteredProducts(filterProductsDTO);
+            var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
+            return mappedProducts;
+        }
     }
 }
