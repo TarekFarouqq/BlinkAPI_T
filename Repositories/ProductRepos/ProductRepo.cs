@@ -245,7 +245,7 @@ namespace Blink_API.Repositories
                 .Where(p => p.ProductId == ProductId && !p.IsDeleted)
                 .ToListAsync();
         }
-        public async Task<ICollection<Product>> GetFillteredProducts([FromQuery] Dictionary<int, List<string>> filtersProduct)
+        public async Task<ICollection<Product>> GetFillteredProducts([FromQuery] Dictionary<int, List<string>> filtersProduct,int pgNumber)
         {
             var resultProduct = db.Products
                 .AsNoTracking()
@@ -253,18 +253,6 @@ namespace Blink_API.Repositories
                 .ThenInclude(fa => fa.FilterAttribute)
                 .Where(p => !p.IsDeleted)
                 .AsQueryable();
-            //foreach (var filter in filtersProduct)
-            //{
-            //    int attributeId = filter.Key;
-            //    List<string> values = filter.Value;
-
-            //    resultProduct = resultProduct.Where(p =>
-            //        p.ProductAttributes.Any(pa =>
-            //            pa.FilterAttribute.AttributeId == attributeId &&
-            //            values.Contains(pa.AttributeValue)
-            //        ));
-            //}
-
             foreach(var filter in filtersProduct)
             {
                 int AttributeId = filter.Key;
@@ -276,7 +264,6 @@ namespace Blink_API.Repositories
                         ));
                 }
             }
-
             var result = await resultProduct
                 .Where(p => !p.IsDeleted)
                 .Include(u => u.User)
@@ -288,6 +275,7 @@ namespace Blink_API.Repositories
                 .Include(sip => sip.StockProductInventories)
                 .Include(pd => pd.ProductDiscounts)
                 .ThenInclude(d => d.Discount)
+                .Skip((pgNumber - 1) * 16)
                 .ToListAsync();
             return result;
         }
