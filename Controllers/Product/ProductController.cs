@@ -196,8 +196,8 @@ namespace Blink_API.Controllers.Product
             var productAttributes = await productService.GetProductAttributes(id);
             return Ok(productAttributes);
         }
-        [HttpGet("GetFillteredProducts/{pgNumber}")]
-        public async Task<ActionResult> GetFillteredProducts(int pgNumber)
+        [HttpGet("GetFillteredProducts/{pgNumber}/{fromPrice}/{toPrice}/{rating}")]
+        public async Task<ActionResult> GetFillteredProducts(int pgNumber,decimal fromPrice,decimal toPrice,int rating)
         {
             var filters = HttpContext.Request.Query;
             var filtersProduct = new Dictionary<int, List<string>>();
@@ -213,7 +213,7 @@ namespace Blink_API.Controllers.Product
                     filtersProduct[attributeId].AddRange(filters[key]);
                 }
             }
-            var products = await productService.GetFillteredProducts(filtersProduct, pgNumber);
+            var products = await productService.GetFillteredProducts(filtersProduct, pgNumber,fromPrice,toPrice,rating);
             return Ok(products);
         }
         #endregion
