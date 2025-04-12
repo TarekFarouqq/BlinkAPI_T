@@ -197,8 +197,27 @@ namespace Blink_API.Controllers.Product
             return Ok(productAttributes);
         }
         [HttpGet("GetFillteredProducts")]
-        public async Task<ActionResult> GetFillteredProducts(ICollection<FilterProductDTO> filtersProduct)
+        //public async Task<ActionResult> GetFillteredProducts(ICollection<FilterProductDTO> filtersProduct)
+        //{
+        //    var products = await productService.GetFillteredProducts(filtersProduct);
+        //    return Ok(products);
+        //}
+        public async Task<ActionResult> GetFillteredProducts()
         {
+            var filters = HttpContext.Request.Query;
+            var filtersProduct = new Dictionary<int, List<string>>();
+            foreach (var key in filters.Keys)
+            {
+                if (int.TryParse(key, out int attributeId))
+                {
+                    if (!filtersProduct.ContainsKey(attributeId))
+                    {
+                        filtersProduct[attributeId] = new List<string>();
+                    }
+
+                    filtersProduct[attributeId].AddRange(filters[key]);
+                }
+            }
             var products = await productService.GetFillteredProducts(filtersProduct);
             return Ok(products);
         }
