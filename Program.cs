@@ -20,6 +20,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Blink_API.Services.InventoryService;
 using Blink_API.Repositories.InventoryRepos;
+using Microsoft.AspNetCore.Builder;
+using StackExchange.Redis;
+using Blink_API.Services.OrderServicees;
+using Blink_API.Repositories.Order;
+using Blink_API.Services.PaymentServices;
+using Microsoft.Extensions.Options;
 
 namespace Blink_API
 {
@@ -31,7 +37,10 @@ namespace Blink_API
 
             // Add services to the container.
             builder.Services.AddDbContext<BlinkDbContext>(s =>
-            { s.UseSqlServer(builder.Configuration.GetConnectionString("conString")); });
+            { s.UseSqlServer(builder.Configuration.GetConnectionString("conString"));
+                s.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
+            });
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<BlinkDbContext>()
@@ -69,6 +78,21 @@ namespace Blink_API
             //Add Brand :
             builder.Services.AddScoped<BrandService>();
 
+            // Add Order
+            builder.Services.AddScoped<orderServices>();
+            builder.Services.AddScoped<orderRepo>();
+            // Add Payment
+            builder.Services.AddScoped<PaymentServices>();
+
+
+            #region Redis services
+
+            //builder.Services.AddSingleton<IConnectionMultiplexer>((serviceProvider) =>
+            //{
+            //    var connection = builder.Configuration.GetConnectionString("Redis");
+            //    return ConnectionMultiplexer.Connect(connection);
+            //});
+            #endregion
 
             // to store verify code :
             builder.Services.AddMemoryCache();
