@@ -39,6 +39,7 @@ namespace Blink_API
         Discount_DiminsionRepo DiminsionRepo;
         Branch_InventoryRepos branchInventoryRepos;
         InventoryTransaction_factRepos inventoryTransactionfactRepo;
+        Product_DiminsionRepos _productDiminsionRepos;
         public UnitOfWork(BlinkDbContext _db)
         {
             db = _db;
@@ -304,20 +305,35 @@ namespace Blink_API
             }
         }
 
-         
-private InventoryTransaction_factRepos _inventoryTransactionfactRepo;  
-
-        public InventoryTransaction_factRepos InventoryTransactionfactRepo
+        // inventory transaction fact :
+        public InventoryTransaction_factRepos InventoryTransactionFactRepos
         {
             get
             {
-                if (_inventoryTransactionfactRepo == null)
+                if (inventoryTransactionfactRepo == null)
                 {
-                    _inventoryTransactionfactRepo = new InventoryTransaction_factRepos(db);
+                    inventoryTransactionfactRepo = new InventoryTransaction_factRepos(db);
                 }
-                return _inventoryTransactionfactRepo;
+                return inventoryTransactionfactRepo;
             }
         }
+
+
+        // product dimintion :
+
+
+        public Product_DiminsionRepos ProductDiminsionRepos
+        {
+            get
+            {
+                if (_productDiminsionRepos == null)
+                {
+                    _productDiminsionRepos = new Product_DiminsionRepos(db);
+                }
+                return _productDiminsionRepos;
+            }
         }
+
+    }
     
 }

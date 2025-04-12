@@ -128,5 +128,14 @@ namespace Blink_API.Controllers.BiDataController
             var inventoryTransactionFact = await _biStockService.GetAllInventoryTransactionFacts();
             return Ok(inventoryTransactionFact);
         }
+
+        // get all product diminsion :
+        [HttpGet]
+        [Route("GetAllProducts")]
+        public async Task<ActionResult> GetAllProducts()
+        {
+            var productDiminsion = await _biStockService.GetAllProductDimensions();
+            return Ok(productDiminsion);
+        }
     }
 }
