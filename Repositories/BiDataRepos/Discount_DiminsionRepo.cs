@@ -10,11 +10,25 @@ namespace Blink_API.Repositories.BiDataRepos
         {
             _blinkDbContext = blinkDbContext;
         }
-        public async override Task<List<Discount>> GetAll()
+
+        public async IAsyncEnumerable<Discount> GetAllAsStream()
         {
-            return await _blinkDbContext.Discounts
+            await foreach (var item in _blinkDbContext.Discounts
                 .Where(b => b.IsDeleted == false)
-                .ToListAsync();
+                .AsAsyncEnumerable())
+            {
+                yield return item;
+            }
         }
+
+
+        #region old
+        //public async override Task<List<Discount>> GetAll()
+        //{
+        //    return await _blinkDbContext.Discounts
+        //        .Where(b => b.IsDeleted == false)
+        //        .ToListAsync();
+        //}
+        #endregion
     }
 }
