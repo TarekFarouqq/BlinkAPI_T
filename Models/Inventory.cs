@@ -17,27 +17,20 @@ namespace Blink_API.Models
         [Required]
         [Phone]
         public string Phone { get; set; }
-
         public decimal Lat { get; set; }
         public decimal Long { get; set; }
-
         [Required]
-
         public int BranchId { get; set; }
-
         [ForeignKey("BranchId")]
         public virtual Branch Branch { get; set; }
         public bool IsDeleted { get; set; } = false;
-
-
         [InverseProperty("SrcInventory")]
         public virtual ICollection<TransactionDetail> SentTransactions { get; set; } = new HashSet<TransactionDetail>();
-
         [InverseProperty("DistInventory")]
         public virtual ICollection<TransactionDetail> ReceivedTransactions { get; set; } = new HashSet<TransactionDetail>();
         public virtual ICollection<InventoryTransactionHeader> InventoryTransactionHeaders { get; set; } = new HashSet<InventoryTransactionHeader>();
         public virtual ICollection<StockProductInventory> StockProductInventories { get; set; } = new HashSet<StockProductInventory>();
-
+        public virtual ICollection<ReviewSuppliedProduct> ReviewsSuppliedProducts { get; set; }
     }
 }
 
