@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using AutoMapper;
 using Blink_API.DTOs.ProductDTOs;
+using Blink_API.Errors;
 using Blink_API.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.OpenApi.Any;
 using static System.Net.Mime.MediaTypeNames;
@@ -12,10 +14,12 @@ namespace Blink_API.Services.Product
     {
         private readonly UnitOfWork unitOfWork;
         private readonly IMapper mapper;
-        public ProductService(UnitOfWork _unitOfWork,IMapper _mapper)
+        private readonly IWebHostEnvironment _IWebHostEnvironment;
+        public ProductService(UnitOfWork _unitOfWork,IMapper _mapper, IWebHostEnvironment iWebHostEnvironment)
         {
             unitOfWork = _unitOfWork;
             mapper = _mapper;
+            _IWebHostEnvironment = iWebHostEnvironment;
         }
         public async Task<ICollection<ProductDiscountsDTO>> GetAll()
         {
@@ -124,8 +128,27 @@ namespace Blink_API.Services.Product
                 {
                     string fullPath = img;
                     int startIndex = fullPath.IndexOf("/images/");
-                    string path = fullPath.Substring(startIndex + 1);
-                    result.Add(new InsertProductImagesDTO { ProductId = id, ProductImagePath = path });
+                    string relativePath = fullPath.Substring(startIndex + 1);
+                    string physicalPath = Path.Combine(_IWebHostEnvironment.WebRootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+                    if (File.Exists(physicalPath))
+                    {
+                        var fromFile = GetFormFileFromDisk(physicalPath);
+                        newImages.Add(fromFile);
+                    }
+                }
+            }
+            var oldProductImages = await unitOfWork.ProductRepo.GetProductImages(id);
+            foreach (ProductImage productImage in oldProductImages)
+            {
+                string oldFullPath = productImage.ProductImagePath;
+                int startIndex = oldFullPath.IndexOf("/images/");
+                string relativePath = oldFullPath.Substring(startIndex + 1);
+                string physicalPath = Path.Combine(_IWebHostEnvironment.WebRootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+                if (File.Exists(physicalPath))
+                {
+                    var fromFile = GetFormFileFromDisk(physicalPath);
+                    File.Delete(physicalPath);
                 }
             }
             foreach (var img in newImages)
@@ -137,6 +160,73 @@ namespace Blink_API.Services.Product
                 }
             }
             return result;
+        }
+        public IFormFile GetFormFileFromDisk(string path)
+        {
+            var fileName = Path.GetFileName(path);
+            var extension = Path.GetExtension(path).ToLower();
+            string contentType = extension switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                ".webp" => "image/webp",
+                _ => "application/octet-stream"
+            };
+            byte[] fileBytes = File.ReadAllBytes(path);
+            var stream = new MemoryStream(fileBytes); 
+
+            return new FormFile(stream, 0, fileBytes.Length, "file", fileName)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = contentType
+            };
+
+        }
+        public async Task<ICollection<ReadFilterAttributesDTO>> GetFilterAttributesAsync()
+        {
+            var result = await unitOfWork.ProductRepo.GetFilterAttributeAsync();
+            var mapped = mapper.Map<ICollection<ReadFilterAttributesDTO>>(result);
+            return mapped;
+        }
+        public async Task<FilterAttributes?> GetFilterAttributeById(int id)
+        {
+            var result = await unitOfWork.ProductRepo.GetFilterAttributeById(id);
+            return result;
+        }
+        public async Task<ApiResponse> AddFilterAttribute(InsertFilterAttributeDTO filterAttribute)
+        {
+            var mappedAttribute=mapper.Map<FilterAttributes>(filterAttribute);  
+            int AttributeId = await unitOfWork.ProductRepo.AddFilterAttribute(mappedAttribute);
+            if (AttributeId == 0)
+                throw new Exception("There is an error occured");
+            return new ApiResponse(200, "FilterAttribute Saved Success");
+        }
+        public async Task<ICollection<DefaultAttributes>> GetDefaultAttributesByAttributeId(int id)
+        {
+            var result = await unitOfWork.ProductRepo.GetDefaultAttributesByAttributeId(id);
+            return result;
+        }
+        public async Task AddDefaultAttribute(InsertDefaultAttributesDTO defaultAttributes)
+        {
+            var mappedDefaultAttributes=mapper.Map<DefaultAttributes>(defaultAttributes);
+            await unitOfWork.ProductRepo.AddDefaultAttribute(mappedDefaultAttributes);
+        }
+        public async Task AddProductAttribute(ICollection<InsertProductAttributeDTO> insertProductAttributeDTO)
+        {
+            var mappedProductAttribute = mapper.Map<ICollection<ProductAttributes>>(insertProductAttributeDTO);
+            await unitOfWork.ProductRepo.AddProductAttribute(mappedProductAttribute);
+        }
+        public async Task<ICollection<InsertProductAttributeDTO>> GetProductAttributes(int productId)
+        {
+            var productAttributes = await unitOfWork.ProductRepo.GetProductAttributes(productId);
+            var mappedProductAttributes = mapper.Map<ICollection<InsertProductAttributeDTO>>(productAttributes);
+            return mappedProductAttributes;
+        }
+        public async Task DeleteProductAttributes(int productId)
+        {
+            await unitOfWork.ProductRepo.DeleteOldProductAttributes(productId);
         }
     }
 }

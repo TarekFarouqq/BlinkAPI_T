@@ -20,12 +20,16 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Blink_API.Services.InventoryService;
 using Blink_API.Repositories.InventoryRepos;
+
 using Microsoft.AspNetCore.Builder;
 using StackExchange.Redis;
 using Blink_API.Services.OrderServicees;
 using Blink_API.Repositories.Order;
 using Blink_API.Services.PaymentServices;
 using Microsoft.Extensions.Options;
+
+using Blink_API.Services.BiDataService;
+
 
 namespace Blink_API
 {
@@ -72,8 +76,13 @@ namespace Blink_API
             builder.Services.AddScoped<InventoryRepo>();
             //Add Inventory Service
             builder.Services.AddScoped<InventoryService>();
+
+            // for biii
+            builder.Services.AddScoped<BiStockService>();
+
             //Add New AuthService
             builder.Services.AddScoped<AuthServiceUpdated>();
+ 
 
             //Add Brand :
             builder.Services.AddScoped<BrandService>();
