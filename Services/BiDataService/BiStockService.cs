@@ -112,9 +112,17 @@ namespace Blink_API.Services.BiDataService
         // get all inventory transaction fact :
         public async Task<List<InventoryTransaction_FactDto>> GetAllInventoryTransactionFacts()
         {
-            var inventoryTransactionFacts = await _unitOfWork.InventoryTransactionfactRepo.GetAll();
+            var inventoryTransactionFacts = await _unitOfWork.InventoryTransactionFactRepos.GetAll();
             var inventoryTransactionFactsDto = _mapper.Map<List<InventoryTransaction_FactDto>>(inventoryTransactionFacts);
             return inventoryTransactionFactsDto;
+        }
+
+        //get all product diminsion :
+        public async Task<List<Product_DiminsionDto>> GetAllProductDimensions()
+        {
+            var productDimensions = await _unitOfWork.ProductDiminsionRepos.GetAll();
+            var productDimensionsDto = _mapper.Map<List<Product_DiminsionDto>>(productDimensions);
+            return productDimensionsDto;
         }
 
     }
