@@ -304,12 +304,23 @@ namespace Blink_API.MapperConfigs
                 .ForMember(dest => dest.BrandDescription, option => option.MapFrom(src => src.Brand.BrandDescription))
                 .ForMember(dest => dest.ProductImagePath, option => option.MapFrom(src => src.ProductImages.FirstOrDefault().ProductImagePath))
                // .ForMember(dest => dest.BrandWebSiteURL, option => option.MapFrom(src => src.Brand.WebSiteURL))
-
-
-
-
-
                 .ReverseMap();
+
+
+
+
+
+            #region ReviewSuppliedProduct
+            CreateMap<InsertReviewSuppliedProductDTO, ReviewSuppliedProduct>();
+            CreateMap<ReviewSuppliedProduct, ReadReviewSuppliedProductDTO>()
+                .ForMember(dest=>dest.BrandName,option=>option.MapFrom(src=>src.Brand.BrandName))
+                .ForMember(dest=>dest.InventoryName,option=>option.MapFrom(src=>src.Inventory.InventoryName))
+                .ForMember(dest=>dest.CategoryName,option=>option.MapFrom(src=>src.Category.CategoryName))
+                .ForMember(dest=>dest.SupplierName,option=>option.MapFrom(src=>src.Supplier.Id))
+                .ReverseMap();
+            #endregion
+
+
 
         }
     }

@@ -30,6 +30,7 @@ namespace Blink_API.Models
         public DbSet<DefaultAttributes> DefaultAttributes { get; set; }
         public DbSet<ProductAttributes> ProductAttributes { get; set; }
         public DbSet<ReviewSuppliedProduct> ReviewSuppliedProducts { get; set; }
+        public DbSet<ReviewSuppliedProductImages> ReviewSuppliedProductImages { get; set; }
         public BlinkDbContext() : base() 
         {
 

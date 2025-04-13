@@ -29,6 +29,7 @@ using Blink_API.Services.PaymentServices;
 using Microsoft.Extensions.Options;
 
 using Blink_API.Services.BiDataService;
+using Blink_API.Services.ProductServices;
 
 
 namespace Blink_API
@@ -62,6 +63,8 @@ namespace Blink_API
             builder.Services.AddScoped<UnitOfWork>();
             //Add ProductRepo
             builder.Services.AddScoped<ProductRepo>();
+            //Add ReviewSuppliedProducts
+            builder.Services.AddScoped<ReviewSuppliedProductService>();
             //Add ProductService
             builder.Services.AddScoped<ProductService>();
             //Add DiscountRepo

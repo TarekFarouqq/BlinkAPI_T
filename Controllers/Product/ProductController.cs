@@ -3,6 +3,7 @@ using System.Reflection.Metadata.Ecma335;
 using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Models;
 using Blink_API.Services.Product;
+using Blink_API.Services.ProductServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blink_API.Controllers.Product
@@ -12,9 +13,11 @@ namespace Blink_API.Controllers.Product
     public class ProductController : ControllerBase
     {
         private readonly ProductService productService;
-        public ProductController(ProductService _productService  )
+        private readonly ReviewSuppliedProductService reviewSuppliedProductsService;
+        public ProductController(ProductService _productService , ReviewSuppliedProductService _reviewSuppliedProductsService)
         {
             productService = _productService;
+            reviewSuppliedProductsService = _reviewSuppliedProductsService;
         }
         [HttpGet]
         public async Task<ActionResult> GetAll()
@@ -226,6 +229,46 @@ namespace Blink_API.Controllers.Product
                 return NotFound();
             return Ok(productStock);
         }
+        #endregion
+        #region ReviewSuppliedProduct
+        [HttpGet("GetSuppliedProducts")]
+        public async Task<ActionResult> GetSuppliedProducts()
+        {
+            var reviewSuppliedProducts = await reviewSuppliedProductsService.GetSuppliedProducts();
+            if (reviewSuppliedProducts == null)
+                return NotFound();
+            return Ok(reviewSuppliedProducts);
+        }
+        [HttpGet("GetSuppliedProductByRequestId/{requestId}")]
+        public async Task<ActionResult> GetSuppliedProductByRequestId(int requestId)
+        {
+            var reviewSuppliedProduct = await reviewSuppliedProductsService.GetSuppliedProductByRequestId(requestId);
+            if (reviewSuppliedProduct == null)
+                return NotFound();
+            return Ok(reviewSuppliedProduct);
+        }
+        [HttpPost("AddRequestSuppliedProduct")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> AddRequestProduct([FromForm]InsertReviewSuppliedProductDTO insertReviewSuppliedProductDTO)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (insertReviewSuppliedProductDTO == null)
+                return BadRequest();
+            await reviewSuppliedProductsService.AddRequestProduct(insertReviewSuppliedProductDTO);
+            return Ok();
+        }
+        [HttpPut("UpdateRequestSuppliedProduct/{requestId}")]
+        public async Task<ActionResult> UpdateRequestSupplierProduct(int requestId,bool status)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (requestId <= 0)
+                return BadRequest();
+             await reviewSuppliedProductsService.UpdateRequestProduct(requestId, status);
+            return Ok(status);
+        }
+
         #endregion
     }
 }
