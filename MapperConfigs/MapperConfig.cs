@@ -111,6 +111,12 @@ namespace Blink_API.MapperConfigs
             CreateMap<InsertProductDTO, Product>()
                 .ForMember(dest => dest.ProductImages, opt => opt.Ignore());
 
+
+            CreateMap<Product, InsertProductDTO>()
+                .ForMember(dest => dest.ProductStocks, opt => opt.Ignore());
+
+
+
             CreateMap<UpdateProductDTO, Product>().ReverseMap();
 
             CreateMap<InsertProductImagesDTO, ProductImage>().ReverseMap();
@@ -120,7 +126,7 @@ namespace Blink_API.MapperConfigs
             CreateMap<ReadFilterAttributesDTO, FilterAttributes>().ReverseMap();
             CreateMap<ReadDefaultAttributesDTO, DefaultAttributes>().ReverseMap();
             CreateMap<InsertProductAttributeDTO, ProductAttributes>().ReverseMap();
-            
+            CreateMap<InsertProductStockDTO, StockProductInventory>().ReverseMap();
             //CreateMap<ProductImage, InsertProductImagesDTO>()
             //    .ForMember(dest=>dest.ProductId,option=>option.MapFrom(src => src.Product.ProductId))
             //    .ReverseMap();

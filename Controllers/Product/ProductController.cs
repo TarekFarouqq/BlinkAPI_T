@@ -217,5 +217,15 @@ namespace Blink_API.Controllers.Product
             return Ok(products);
         }
         #endregion
+        #region Product Stock
+        [HttpGet("GetProductStock/{id}")]
+        public async Task<ActionResult> GetProductStock(int id)
+        {
+            var productStock = await productService.GetProductStock(id);
+            if (productStock == null)
+                return NotFound();
+            return Ok(productStock);
+        }
+        #endregion
     }
 }

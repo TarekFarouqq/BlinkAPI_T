@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Blink_API.Models;
 
 namespace Blink_API.DTOs.ProductDTOs
 {
@@ -11,6 +12,14 @@ namespace Blink_API.DTOs.ProductDTOs
         public int BrandId { get; set; }
         public int CategoryId { get; set; }
         public List<IFormFile> ProductImages { get; set; }
+        public List<InsertProductStockDTO> ProductStocks { get; set; }
+    }
+    public class InsertProductStockDTO
+    {
+        public int InventoryId { get; set; }
+        public int ProductId { get; set; }
+        public decimal StockUnitPrice { get; set; }
+        public int StockQuantity { get; set; }
     }
     public class UpdateProductDTO
     {
@@ -22,6 +31,7 @@ namespace Blink_API.DTOs.ProductDTOs
         public int CategoryId { get; set; }
         public List<IFormFile> NewProductImages { get; set; }
         public List<string> OldProductImages { get; set; }
+        public List<InsertProductStockDTO> ProductStocks { get; set; }
     }
     public class InsertProductImagesDTO
     {

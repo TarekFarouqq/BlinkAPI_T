@@ -15,6 +15,7 @@ using Blink_API.Repositories.Order;
 using AutoMapper;
 
 using Blink_API.Repositories.BiDataRepos;
+using Blink_API.Repositories.ProductRepos;
 
 
 namespace Blink_API
@@ -30,6 +31,7 @@ namespace Blink_API
 
         BrandRepos brandRepo;
         ProductRepo productRepo;
+        ProductSupplierRepo productSupplierRepo;
         CategoryRepo categoryRepo;
         DiscountRepo discountRepo;
         CartRepo cartRepo;
@@ -81,6 +83,18 @@ namespace Blink_API
                     productRepo = new ProductRepo(db);
                 }
                 return productRepo;
+            }
+        }
+
+        public ProductSupplierRepo ProductSupplierRepo
+        {
+            get
+            {
+                if (productSupplierRepo == null)
+                {
+                    productSupplierRepo = new ProductSupplierRepo(db);
+                }
+                return productSupplierRepo;
             }
         }
 

@@ -5,7 +5,7 @@ namespace Blink_API.Models
 {
     public class ReviewSuppliedProduct
     {
-        [Key]
+        [Key,DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int RequestId { get; set; }
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
         public bool? RequestStatus { get; set; }
@@ -23,7 +23,7 @@ namespace Blink_API.Models
         public Category Category { get; set; }
         [ForeignKey("SupplierId")]
         public ApplicationUser Supplier { get; set; }
-        [ForeignKey("SuppliedInventory")]
+        [ForeignKey("InventoryId")]
         public Inventory Inventory { get; set; }
     }
 }
