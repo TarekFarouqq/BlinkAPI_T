@@ -238,12 +238,20 @@ namespace Blink_API.Repositories
                 .Where(pa => pa.ProductId == productId)
                 .ToListAsync();
         }
-        public async Task<ICollection<ProductImage>> GetProductImages(int ProductId)
+        public async Task<List<ProductImage>> GetProductImages(int ProductId)
         {
             return await db.ProductImages
                 .AsNoTracking()
                 .Where(p => p.ProductId == ProductId && !p.IsDeleted)
                 .ToListAsync();
+        }
+        public async Task DeleteOldProductImages(int productId)
+        {
+            var oldImages = await db.ProductImages
+                .Where(pi => pi.ProductId == productId)
+                .ToListAsync();
+            db.ProductImages.RemoveRange(oldImages);
+            await SaveChanges();
         }
         public async Task<ICollection<Product>> GetFillteredProducts([FromQuery] Dictionary<int, List<string>> filtersProduct,int pgNumber)
         {
@@ -278,6 +286,26 @@ namespace Blink_API.Repositories
                 .Skip((pgNumber - 1) * 16)
                 .ToListAsync();
             return result;
+        }
+        public async Task<ICollection<StockProductInventory>> GetProductStock(int productId)
+        {
+            return await db.StockProductInventories
+                .AsNoTracking()
+                .Where(sp => sp.ProductId == productId && !sp.IsDeleted)
+                .ToListAsync();
+        }
+        public async Task AddStockProducts(ICollection<StockProductInventory> stockProductInventories)
+        {
+            if (stockProductInventories == null || stockProductInventories.Count == 0)
+                return;
+            await db.StockProductInventories.AddRangeAsync(stockProductInventories);
+            await SaveChanges();
+        }
+        public async Task UpdateStockProducts(ICollection<StockProductInventory> stockProductInventories)
+        {
+            db.StockProductInventories.RemoveRange(stockProductInventories);
+            await SaveChanges();
+            await AddStockProducts(stockProductInventories);
         }
     }
 }

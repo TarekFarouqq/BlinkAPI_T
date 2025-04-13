@@ -1,4 +1,5 @@
 ﻿using Blink_API.DTOs.Product;
+using Blink_API.Models;
 
 namespace Blink_API.DTOs.ProductDTOs
 {
