@@ -8,7 +8,7 @@ namespace Blink_API.Models
         [Key,DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int RequestId { get; set; }
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
-        public bool? RequestStatus { get; set; }
+        public bool? RequestStatus { get; set; } = null;
         public string ProductName { get; set; }
         public string ProductDescription { get; set; }
         public int BrandId { get; set; }
@@ -25,5 +25,6 @@ namespace Blink_API.Models
         public ApplicationUser Supplier { get; set; }
         [ForeignKey("InventoryId")]
         public Inventory Inventory { get; set; }
+        public virtual ICollection<ReviewSuppliedProductImages> ReviewSuppliedProductImages { get; set; } = new HashSet<ReviewSuppliedProductImages>();
     }
 }
