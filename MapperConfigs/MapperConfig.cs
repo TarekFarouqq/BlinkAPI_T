@@ -20,6 +20,9 @@ using Blink_API.DTOs.IdentityDTOs;
 using Blink_API.DTOs.CartDTOs;
 using Blink_API.Services.PaymentServices;
 using Blink_API.DTOs.PaymentCart;
+using Blink_API.DTOs.IdentityDTOs.UserDTOs;
+using Blink_API.DTOs.UsersDtos;
+using UserDto = Blink_API.DTOs.UsersDtos.UserDto;
 
 
 
@@ -164,6 +167,19 @@ namespace Blink_API.MapperConfigs
             CreateMap<CartPaymentDTO, Cart>().ReverseMap();
             CreateMap<CartPaymentDTO,ReadCartDTO>().ReverseMap();
             //CreateMap<BasketItemDto, BasketItem>();
+
+            // user :
+            CreateMap<ApplicationUser, UserDto>()
+                  .ForMember(dest => dest.Role, opt => opt.Ignore())   
+                 
+
+                .ReverseMap();
+
+            CreateMap<ApplicationUser, AddUserDto>()
+                   .ForMember(dest => dest.Role, opt => opt.Ignore())   
+                 
+
+                .ReverseMap();
 
             ////// ************* BIII ******************
             // 1- stock_fact :

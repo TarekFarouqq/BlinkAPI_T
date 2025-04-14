@@ -30,6 +30,7 @@ using Microsoft.Extensions.Options;
 
 using Blink_API.Services.BiDataService;
 using Blink_API.Services.ProductServices;
+using Blink_API.Services.UserService;
 
 
 namespace Blink_API
@@ -96,7 +97,8 @@ namespace Blink_API
             // Add Payment
             builder.Services.AddScoped<PaymentServices>();
 
-
+            // Add users :
+            builder.Services.AddScoped<UserService>();
             #region Redis services
 
             //builder.Services.AddSingleton<IConnectionMultiplexer>((serviceProvider) =>
