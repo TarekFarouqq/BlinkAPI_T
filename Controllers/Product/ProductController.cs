@@ -3,6 +3,7 @@ using System.Reflection.Metadata.Ecma335;
 using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Models;
 using Blink_API.Services.Product;
+using Blink_API.Services.ProductServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blink_API.Controllers.Product
@@ -12,9 +13,11 @@ namespace Blink_API.Controllers.Product
     public class ProductController : ControllerBase
     {
         private readonly ProductService productService;
-        public ProductController(ProductService _productService  )
+        private readonly ReviewSuppliedProductService reviewSuppliedProductsService;
+        public ProductController(ProductService _productService , ReviewSuppliedProductService _reviewSuppliedProductsService)
         {
             productService = _productService;
+            reviewSuppliedProductsService = _reviewSuppliedProductsService;
         }
         [HttpGet]
         public async Task<ActionResult> GetAll()
@@ -195,6 +198,84 @@ namespace Blink_API.Controllers.Product
         {
             var productAttributes = await productService.GetProductAttributes(id);
             return Ok(productAttributes);
+        }
+        [HttpGet("GetFillteredProducts/{pgNumber}/{fromPrice}/{toPrice}/{rating}")]
+        public async Task<ActionResult> GetFillteredProducts(int pgNumber,decimal fromPrice,decimal toPrice,int rating)
+        {
+            var filters = HttpContext.Request.Query;
+            var filtersProduct = new Dictionary<int, List<string>>();
+            foreach (var key in filters.Keys)
+            {
+                if (int.TryParse(key, out int attributeId))
+                {
+                    if (!filtersProduct.ContainsKey(attributeId))
+                    {
+                        filtersProduct[attributeId] = new List<string>();
+                    }
+
+                    filtersProduct[attributeId].AddRange(filters[key]);
+                }
+            }
+            var products = await productService.GetFillteredProducts(filtersProduct, pgNumber,fromPrice,toPrice,rating);
+            return Ok(products);
+        }
+        #endregion
+        #region Product Stock
+        [HttpGet("GetProductStock/{id}")]
+        public async Task<ActionResult> GetProductStock(int id)
+        {
+            var productStock = await productService.GetProductStock(id);
+            if (productStock == null)
+                return NotFound();
+            return Ok(productStock);
+        }
+        #endregion
+        #region ReviewSuppliedProduct
+        [HttpGet("GetSuppliedProducts")]
+        public async Task<ActionResult> GetSuppliedProducts()
+        {
+            var reviewSuppliedProducts = await reviewSuppliedProductsService.GetSuppliedProducts();
+            if (reviewSuppliedProducts == null)
+                return NotFound();
+            return Ok(reviewSuppliedProducts);
+        }
+        [HttpGet("GetSuppliedProductByRequestId/{requestId}")]
+        public async Task<ActionResult> GetSuppliedProductByRequestId(int requestId)
+        {
+            var reviewSuppliedProduct = await reviewSuppliedProductsService.GetSuppliedProductByRequestId(requestId);
+            if (reviewSuppliedProduct == null)
+                return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            if(reviewSuppliedProduct.ProductImages.Count > 0)
+            {
+                foreach (var ProductImage in reviewSuppliedProduct.ProductImages)
+                {
+                    if (ProductImage != null)
+                    {
+                        ProductImage.ImageUrl = $"{baseUrl}{ProductImage.ImageUrl.Replace("wwwroot/", "").TrimStart('/')}";
+                    }
+                }
+            }
+            return Ok(reviewSuppliedProduct);
+        }
+        [HttpPost("AddRequestSuppliedProduct")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> AddRequestProduct([FromForm]InsertReviewSuppliedProductDTO insertReviewSuppliedProductDTO)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (insertReviewSuppliedProductDTO == null)
+                return BadRequest();
+            await reviewSuppliedProductsService.AddRequestProduct(insertReviewSuppliedProductDTO);
+            return Ok();
+        }
+        [HttpPut("UpdateRequestSuppliedProduct/{requestId}")]
+        public async Task<ActionResult> UpdateRequestSupplierProduct( int requestId, [FromBody]ReadReviewSuppliedProductDTO model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { error = "Model State is Invalid" });
+            await reviewSuppliedProductsService.UpdateRequestProduct(requestId,model);
+            return Ok(new { success = "Product Reviewed Success" });
         }
         #endregion
     }

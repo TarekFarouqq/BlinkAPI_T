@@ -31,6 +31,12 @@ using Blink_API.Services.PaymentServices;
 using Microsoft.Extensions.Options;
 
 
+using Blink_API.Services.BiDataService;
+using Blink_API.Services.ProductServices;
+using Blink_API.Services.UserService;
+
+
+
 namespace Blink_API
 {
     public class Program
@@ -62,6 +68,8 @@ namespace Blink_API
             builder.Services.AddScoped<UnitOfWork>();
             //Add ProductRepo
             builder.Services.AddScoped<ProductRepo>();
+            //Add ReviewSuppliedProducts
+            builder.Services.AddScoped<ReviewSuppliedProductService>();
             //Add ProductService
             builder.Services.AddScoped<ProductService>();
             //Add DiscountRepo
@@ -95,7 +103,8 @@ namespace Blink_API
             // Add Payment
             builder.Services.AddScoped<PaymentServices>();
 
-
+            // Add users :
+            builder.Services.AddScoped<UserService>();
             #region Redis services
 
             //builder.Services.AddSingleton<IConnectionMultiplexer>((serviceProvider) =>

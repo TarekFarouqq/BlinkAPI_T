@@ -4,6 +4,7 @@ using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Errors;
 using Blink_API.Models;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.OpenApi.Any;
 using static System.Net.Mime.MediaTypeNames;
@@ -70,6 +71,12 @@ namespace Blink_API.Services.Product
             int ProductId = await unitOfWork.ProductRepo.AddProduct(product);
             List<InsertProductImagesDTO> ProductImageList = await CheckImagesToSaveInInsert(ProductId, productDTO.ProductImages);
             await AddProductImage(ProductImageList);
+            var mappedStockProducts = mapper.Map<ICollection<StockProductInventory>>(productDTO.ProductStocks);
+            foreach (var stockProduct in mappedStockProducts)
+            {
+                stockProduct.ProductId = ProductId;
+            }
+            await unitOfWork.ProductRepo.AddStockProducts(mappedStockProducts);
             return ProductId;
         }
         public async Task Update(int id, UpdateProductDTO productDTO)
@@ -80,6 +87,12 @@ namespace Blink_API.Services.Product
             int ProductId = id;
             List<InsertProductImagesDTO> ProductImageList = await CheckImagesToSaveInUpdate(id,productDTO.NewProductImages,productDTO.OldProductImages);
             await unitOfWork.ProductRepo.UpdateProduct(id, product);
+            var mappedStockProducts = mapper.Map<ICollection<StockProductInventory>>(productDTO.ProductStocks);
+            foreach (var stockProduct in mappedStockProducts)
+            {
+                stockProduct.ProductId = ProductId;
+            }
+            await unitOfWork.ProductRepo.UpdateStockProducts(mappedStockProducts);
             await AddProductImage(ProductImageList);
         }
         public async Task Delete(int id)
@@ -96,7 +109,7 @@ namespace Blink_API.Services.Product
         private async Task<string> SaveFileAsync(IFormFile file)
         {
             var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
-            if(!File.Exists(uploadFolder))
+            if(!Directory.Exists(uploadFolder))
                 Directory.CreateDirectory(uploadFolder);
             var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
             var filePath = Path.Combine(uploadFolder, uniqueFileName);  
@@ -104,7 +117,7 @@ namespace Blink_API.Services.Product
             {
                 await file.CopyToAsync(fileStream);
             }
-            return $"wwwroot/images/products/{uniqueFileName}";
+            return $"/images/products/{uniqueFileName}";
         }
         private async Task<List<InsertProductImagesDTO>> CheckImagesToSaveInInsert(int id, List<IFormFile> images)
         {
@@ -119,47 +132,60 @@ namespace Blink_API.Services.Product
             }
             return result;
         }
-        private async Task<List<InsertProductImagesDTO>> CheckImagesToSaveInUpdate(int id,List<IFormFile> newImages,List<string> oldImages)
+        private async Task<List<InsertProductImagesDTO>> CheckImagesToSaveInUpdate(int id, List<IFormFile> newImages, List<string> oldImages)
         {
+            var allImages = new List<IFormFile>();
+            var deleteImagePaths = new List<string>();
             var result = new List<InsertProductImagesDTO>();
-            foreach (var img in oldImages)
+            foreach (var imgUrl in oldImages)
             {
-                if (img is string file)
+                var physicalPath = GetPhysicalPathFromUrl(imgUrl);
+                if (!string.IsNullOrEmpty(physicalPath) && File.Exists(physicalPath))
                 {
-                    string fullPath = img;
-                    int startIndex = fullPath.IndexOf("/images/");
-                    string relativePath = fullPath.Substring(startIndex + 1);
-                    string physicalPath = Path.Combine(_IWebHostEnvironment.WebRootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-
-                    if (File.Exists(physicalPath))
-                    {
-                        var fromFile = GetFormFileFromDisk(physicalPath);
-                        newImages.Add(fromFile);
-                    }
+                    var file = GetFormFileFromDisk(physicalPath);
+                    if (file != null)
+                        allImages.Add(file);
                 }
             }
             var oldProductImages = await unitOfWork.ProductRepo.GetProductImages(id);
-            foreach (ProductImage productImage in oldProductImages)
+            foreach (var productImage in oldProductImages)
             {
-                string oldFullPath = productImage.ProductImagePath;
-                int startIndex = oldFullPath.IndexOf("/images/");
-                string relativePath = oldFullPath.Substring(startIndex + 1);
-                string physicalPath = Path.Combine(_IWebHostEnvironment.WebRootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-                if (File.Exists(physicalPath))
+                var physicalPath = GetPhysicalPathFromUrl(productImage.ProductImagePath);
+                if (!string.IsNullOrEmpty(physicalPath) && File.Exists(physicalPath))
                 {
-                    var fromFile = GetFormFileFromDisk(physicalPath);
-                    File.Delete(physicalPath);
+                    deleteImagePaths.Add(physicalPath);
                 }
             }
-            foreach (var img in newImages)
+            allImages.AddRange(newImages);
+            foreach (var path in deleteImagePaths)
             {
-                if (img is IFormFile file)
+                try
                 {
-                    string path = await SaveFileAsync(file);
-                    result.Add(new InsertProductImagesDTO { ProductId = id, ProductImagePath = path });
+                    File.Delete(path);
                 }
+                catch (Exception ex)
+                {
+                }
+            }
+            await unitOfWork.ProductRepo.DeleteOldProductImages(id);
+            foreach (var file in allImages)
+            {
+                var path = await SaveFileAsync(file);
+                result.Add(new InsertProductImagesDTO
+                {
+                    ProductId = id,
+                    ProductImagePath = path
+                });
             }
             return result;
+        }
+        private string GetPhysicalPathFromUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return null;
+            int startIndex = url.IndexOf("/images/");
+            if (startIndex == -1) return null;
+            string relativePath = url.Substring(startIndex + 1);
+            return Path.Combine(_IWebHostEnvironment.WebRootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
         }
         public IFormFile GetFormFileFromDisk(string path)
         {
@@ -227,6 +253,38 @@ namespace Blink_API.Services.Product
         public async Task DeleteProductAttributes(int productId)
         {
             await unitOfWork.ProductRepo.DeleteOldProductAttributes(productId);
+        }
+        public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(
+    Dictionary<int, List<string>> filtersProduct,
+    int pgNumber,
+    decimal fromPrice,
+    decimal toPrice,
+    int rating)
+        {
+            var products = await unitOfWork.ProductRepo.GetFillteredProducts(filtersProduct, pgNumber);
+
+            var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
+            if (fromPrice > 0)
+            {
+                mappedProducts = mappedProducts.Where(p => p.ProductPrice >= fromPrice).ToList();
+            }
+
+            if (toPrice > 0)
+            {
+                mappedProducts = mappedProducts.Where(p => p.ProductPrice <= toPrice).ToList();
+            }
+
+            if (rating >= 0)
+            {
+                mappedProducts = mappedProducts.Where(p => p.AverageRate == rating).ToList();
+            }
+
+            return mappedProducts;
+        }
+        public async Task<ICollection<StockProductInventory>> GetProductStock(int ProductId)
+        {
+            var productStock = await unitOfWork.ProductRepo.GetProductStock(ProductId);
+            return productStock;
         }
     }
 }

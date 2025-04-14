@@ -12,15 +12,29 @@ namespace Blink_API.Repositories.BiDataRepos
         {
             _context = context;
         }
-        public async Task<List<Product>> GetAllProducts()
+        public async IAsyncEnumerable<Product> GetAllProductsAsStream()
         {
-            return await _context.Products
+            await foreach (var product in _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.ProductImages)
                 .Include(p => p.ProductAttributes)
-                .ToListAsync();
+                .AsAsyncEnumerable())
+            {
+                yield return product;
+            }
         }
-       
+        #region old
+        //public async Task<List<Product>> GetAllProducts()
+        //{
+        //    return await _context.Products
+        //        .Include(p => p.Category)
+        //        .Include(p => p.Brand)
+        //        .Include(p => p.ProductImages)
+        //        .Include(p => p.ProductAttributes)
+        //        .ToListAsync();
+        //}
+        #endregion 
+
     }
 }

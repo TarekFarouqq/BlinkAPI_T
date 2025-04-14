@@ -1,4 +1,7 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.DTOs.ProductDTOs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories
@@ -169,6 +172,8 @@ namespace Blink_API.Repositories
         }
         public async Task AddProductImage(List<ProductImage> prdImages)
         {
+            if (prdImages.Count == 0)
+                return;
             var product = await GetById(prdImages[0].ProductId);
             if (product != null)
             {
@@ -235,12 +240,74 @@ namespace Blink_API.Repositories
                 .Where(pa => pa.ProductId == productId)
                 .ToListAsync();
         }
-        public async Task<ICollection<ProductImage>> GetProductImages(int ProductId)
+        public async Task<List<ProductImage>> GetProductImages(int ProductId)
         {
             return await db.ProductImages
                 .AsNoTracking()
                 .Where(p => p.ProductId == ProductId && !p.IsDeleted)
                 .ToListAsync();
+        }
+        public async Task DeleteOldProductImages(int productId)
+        {
+            var oldImages = await db.ProductImages
+                .Where(pi => pi.ProductId == productId)
+                .ToListAsync();
+            db.ProductImages.RemoveRange(oldImages);
+            await SaveChanges();
+        }
+        public async Task<ICollection<Product>> GetFillteredProducts([FromQuery] Dictionary<int, List<string>> filtersProduct,int pgNumber)
+        {
+            var resultProduct = db.Products
+                .AsNoTracking()
+                .Include(p => p.ProductAttributes)
+                .ThenInclude(fa => fa.FilterAttribute)
+                .Where(p => !p.IsDeleted)
+                .AsQueryable();
+            foreach(var filter in filtersProduct)
+            {
+                int AttributeId = filter.Key;
+                List<string> attributesValue = filter.Value;
+                foreach(var attribute in attributesValue)
+                {
+                    resultProduct = resultProduct.Where(p => p.ProductAttributes.Any(
+                            pa=>pa.AttributeId==AttributeId && pa.AttributeValue==attribute
+                        ));
+                }
+            }
+            var result = await resultProduct
+                .Where(p => !p.IsDeleted)
+                .Include(u => u.User)
+                .Include(b => b.Brand)
+                .Include(c => c.Category)
+                .Include(i => i.ProductImages.Where(pi => !pi.IsDeleted))
+                .Include(r => r.Reviews)
+                .ThenInclude(rc => rc.ReviewComments)
+                .Include(sip => sip.StockProductInventories)
+                .Include(pd => pd.ProductDiscounts)
+                .ThenInclude(d => d.Discount)
+                .Skip((pgNumber - 1) * 16)
+                .ToListAsync();
+            return result;
+        }
+        public async Task<ICollection<StockProductInventory>> GetProductStock(int productId)
+        {
+            return await db.StockProductInventories
+                .AsNoTracking()
+                .Where(sp => sp.ProductId == productId && !sp.IsDeleted)
+                .ToListAsync();
+        }
+        public async Task AddStockProducts(ICollection<StockProductInventory> stockProductInventories)
+        {
+            if (stockProductInventories == null || stockProductInventories.Count == 0)
+                return;
+            await db.StockProductInventories.AddRangeAsync(stockProductInventories);
+            await SaveChanges();
+        }
+        public async Task UpdateStockProducts(ICollection<StockProductInventory> stockProductInventories)
+        {
+            db.StockProductInventories.RemoveRange(stockProductInventories);
+            await SaveChanges();
+            await AddStockProducts(stockProductInventories);
         }
     }
 }

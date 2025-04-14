@@ -17,6 +17,7 @@ using Blink_API.Repositories.Order;
 using AutoMapper;
 
 using Blink_API.Repositories.BiDataRepos;
+
 using Blink_API.Repositories.Payment;
 
 
@@ -24,6 +25,10 @@ using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 using Blink_API.Repositories.Order;
 using AutoMapper;
+
+using Blink_API.Repositories.ProductRepos;
+using Blink_API.Repositories.UserRepos;
+
 
 
 namespace Blink_API
@@ -43,6 +48,7 @@ namespace Blink_API
 
         BrandRepos brandRepo;
         ProductRepo productRepo;
+        ProductSupplierRepo productSupplierRepo;
         CategoryRepo categoryRepo;
         DiscountRepo discountRepo;
         CartRepo cartRepo;
@@ -50,6 +56,7 @@ namespace Blink_API
         BranchRepos branchRepos;
         InventoryRepo inventoryRepo;
         orderRepo orderRepo;
+        UserRepos UserRepos;
 
 
         // **** for bi ***
@@ -73,7 +80,18 @@ namespace Blink_API
         }
 
        
-
+        // user :
+        public UserRepos UserRepo
+        {
+            get
+            {
+                if (UserRepos == null)
+                {
+                    UserRepos = new UserRepos(db);
+                }
+                return UserRepos;
+            }
+        }
         public orderRepo OrderRepo
         {
             get
@@ -96,6 +114,18 @@ namespace Blink_API
                     productRepo = new ProductRepo(db);
                 }
                 return productRepo;
+            }
+        }
+
+        public ProductSupplierRepo ProductSupplierRepo
+        {
+            get
+            {
+                if (productSupplierRepo == null)
+                {
+                    productSupplierRepo = new ProductSupplierRepo(db);
+                }
+                return productSupplierRepo;
             }
         }
 
@@ -187,6 +217,9 @@ namespace Blink_API
             }
         }
 
+
+
+       
 
 
 

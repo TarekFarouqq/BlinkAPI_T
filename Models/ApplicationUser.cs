@@ -18,17 +18,12 @@ namespace Blink_API.Models
         public string Address { get; set; }
         public DateTime CreatedIn { get; set; } = DateTime.UtcNow;
         public bool UserGranted { get; set; } // 
-
         public bool IsDeleted { get; set; } = false;
-
         public virtual WishList WishList { get; set; }
         public virtual Cart Cart { get; set; }
-
         public virtual ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
         public virtual ICollection<Product> Products { get; set; } = new HashSet<Product>();
-
         public virtual ICollection<TransactionDetail> TransactionDetails { get; set; } = new HashSet<TransactionDetail>();
-
-
+        public virtual ICollection<ReviewSuppliedProduct> ReviewsSuppliedProducts { get; set; }
     }
 }

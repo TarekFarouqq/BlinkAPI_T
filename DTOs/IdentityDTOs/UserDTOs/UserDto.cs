@@ -8,7 +8,6 @@
         public string UserName { get; set; }
         public string Token { get; set; }
         public bool UserGranted { get; set; } // 
-       
-
+        public object Role { get; internal set; }
     }
 }

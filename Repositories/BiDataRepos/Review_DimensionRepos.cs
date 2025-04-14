@@ -10,15 +10,28 @@ namespace Blink_API.Repositories.BiDataRepos
         {
             _blinkDbContext = blinkDbContext;
         }
-        public async override Task<List<Review>> GetAll()
+
+        public async IAsyncEnumerable<Review> GetAllAsStream()
         {
-            return await _blinkDbContext.Reviews
+            await foreach (var review in _blinkDbContext.Reviews
                 .Include(b => b.User)
                 .Include(b => b.Product)
                 .Where(b => b.IsDeleted == false)
-                .ToListAsync();
+                .AsAsyncEnumerable())
+            {
+                yield return review;
+            }
         }
-        
+
+        //public async override Task<List<Review>> GetAll()
+        //{
+        //    return await _blinkDbContext.Reviews
+        //        .Include(b => b.User)
+        //        .Include(b => b.Product)
+        //        .Where(b => b.IsDeleted == false)
+        //        .ToListAsync();
+        //}
+
     }
-    
+
 }

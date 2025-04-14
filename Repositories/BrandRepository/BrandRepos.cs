@@ -32,9 +32,11 @@ namespace Blink_API.Repositories.BrandRepository
                 .ToListAsync();
         }
 
+ 
 
         // insert brand
 
+ 
 
         public async Task<Brand> InsertBrand(Brand brand)
         {
