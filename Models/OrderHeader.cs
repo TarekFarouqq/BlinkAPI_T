@@ -30,6 +30,9 @@ namespace Blink_API.Models
         [ForeignKey("PaymentId")]
 
         public virtual Payment Payment { get; set; }
+        // ضروري عشان نتبع الاوردر 
+        public string PaymentIntentId { get; set; }
+
         public int CartId { get; set; }
 
         [ForeignKey("CartId")]

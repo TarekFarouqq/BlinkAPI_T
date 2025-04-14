@@ -31,5 +31,16 @@ namespace Blink_API.Repositories.Order
                 .FirstOrDefaultAsync(o => o.OrderHeaderId == id);
         }
 
+        public async Task<OrderHeader?> GetOrderByPaymentIntentId(string paymentIntentId)
+        {
+            return await _db.OrderHeaders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(p=>p.product)
+                 .ThenInclude(p => p.ProductImages)
+                .Include(o => o.Payment)
+                .Include(o => o.Cart)
+                .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
+        }
+
     }
 }
