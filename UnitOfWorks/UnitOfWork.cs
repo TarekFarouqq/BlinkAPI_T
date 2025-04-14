@@ -27,8 +27,18 @@ using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 using Blink_API.Repositories.Order;
 using AutoMapper;
+<<<<<<< HEAD
 >>>>>>> c646337 (resolve Secret key2)
+<<<<<<< HEAD
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+=======
+
+using Blink_API.Repositories.BiDataRepos;
+using Blink_API.Repositories.Payment;
+
+>>>>>>> 4815246 (testt)
+>>>>>>> 256852f (Create PAymeeent)
 
 namespace Blink_API
 {
@@ -47,9 +57,19 @@ namespace Blink_API
         internal object cart_DiminsionRepos;
 =======
 
+<<<<<<< HEAD
         public DbContext Context => db;
 >>>>>>> c646337 (resolve Secret key2)
+<<<<<<< HEAD
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+=======
+        
+
+        internal object cart_DiminsionRepos;
+
+>>>>>>> 4815246 (testt)
+>>>>>>> 256852f (Create PAymeeent)
         BrandRepos brandRepo;
         ProductRepo productRepo;
         CategoryRepo categoryRepo;
@@ -60,9 +80,13 @@ namespace Blink_API
         InventoryRepo inventoryRepo;
         orderRepo orderRepo;
 <<<<<<< HEAD
+<<<<<<< HEAD
         PaymentRepository paymentRepository;
 =======
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+        PaymentRepository paymentRepository;
+>>>>>>> 256852f (Create PAymeeent)
 
         // **** for bi ***
         BiDataRepos biDataRepos;
@@ -99,9 +123,13 @@ namespace Blink_API
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   
 =======
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+  
+>>>>>>> 256852f (Create PAymeeent)
         public ProductRepo ProductRepo
         {
             get

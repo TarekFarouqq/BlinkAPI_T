@@ -1,18 +1,26 @@
 ﻿using AutoMapper;
 using Blink_API.DTOs.CartDTOs;
 <<<<<<< HEAD
+<<<<<<< HEAD
 using Blink_API.DTOs.OrdersDTO;
 =======
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+using Blink_API.DTOs.OrdersDTO;
+>>>>>>> 256852f (Create PAymeeent)
 using Blink_API.DTOs.PaymentCart;
 using Blink_API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Stripe;
 <<<<<<< HEAD
+<<<<<<< HEAD
 using Stripe.Issuing;
 =======
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+using Stripe.Issuing;
+>>>>>>> 256852f (Create PAymeeent)
 
 namespace Blink_API.Services.PaymentServices
 {
@@ -38,6 +46,7 @@ namespace Blink_API.Services.PaymentServices
             ///_productService = productService;
         }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         public async Task<CartPaymentDTO?> CreateOrUpdatePayment(int cartId, string userId)
         {
@@ -94,53 +103,73 @@ namespace Blink_API.Services.PaymentServices
 
 
         public async Task<CartPaymentDTO?> CreateOrUpdatePayment(int cartId,string userId)
+=======
+        public async Task<CartPaymentDTO?> CreateOrUpdatePayment(int cartId, string userId)
+>>>>>>> 256852f (Create PAymeeent)
         {
             StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
 
+            var cart = await _unitOfWork.CartRepo.GetByUserId(userId);
+            var mappedBasket = _mapper.Map<CartPaymentDTO>(cart);
 
-            ///if (_cache.TryGetValue(cartId, out CartPaymentDTO cachedCart))
-            ///{
-            ///    return cachedCart; 
-            ///}
-            // get Cart 
-            var cart = await  _unitOfWork.CartRepo.GetByUserId(userId);
-            _unitOfWork.Context.Entry(cart!).State = EntityState.Detached;
-
-
-
-            #region Convert to dto
-            var mappedCartDTTo = _mapper.Map<ReadCartDTO>(cart);
-            var mappedBasket =_mapper.Map<CartPaymentDTO>(mappedCartDTTo);
-
-            #endregion
-
-            ///get cost from DeliveryMethodRepo but check if deliveryMethodId in basket .hasvalue
-            /// should have as another class
-            ///if (cart.DeliveryMethodId.HasValue)
-            ///{
-            ///    var deliveryMethod = await _unitOfWork.Repository<DeliveryMethod>().GetByAsync(cart.DeliveryMethodId.Value);
-            ///    cart.ShippingPrice = deliveryMethod.Cost;
-            ///    shippingPrice = deliveryMethod.Cost;
-            ///}
-
+            mappedBasket.SubTotal = mappedBasket.Items.Sum(item => item.Quantity * item.ProductUnitPrice);
+            mappedBasket.ShippingPrice = 10;
+            var totalAmount = (long)((mappedBasket.SubTotal + mappedBasket.ShippingPrice) * 100);
 
             var paymentIntentService = new PaymentIntentService();
-            PaymentIntent paymentIntent;
+            var paymentIntentToDelete = mappedBasket.PaymentIntentId;
+            PaymentIntent? paymentIntent = null;
 
-            if (string.IsNullOrEmpty(mappedBasket.PaymentIntentId))
-            { 
-            
-            
+            bool shouldCreateNewIntent = false;
+
+            if (!string.IsNullOrEmpty(mappedBasket.PaymentIntentId))
+            {
+                try
+                {
+                    var existingIntent = await paymentIntentService.GetAsync(mappedBasket.PaymentIntentId);
+
+                    if (existingIntent.Status != "requires_payment_method" && existingIntent.Status != "requires_confirmation")
+                    {
+                        shouldCreateNewIntent = true;
+                    }
+                    else
+                    {
+                        var updateOptions = new PaymentIntentUpdateOptions()
+                        {
+                            Amount = totalAmount
+                        };
+                        paymentIntent = await paymentIntentService.UpdateAsync(mappedBasket.PaymentIntentId, updateOptions);
+                    }
+                }
+                catch
+                {
+                    shouldCreateNewIntent = true;
+                }
+            }
+            else
+            {
+                shouldCreateNewIntent = true;
+            }
+
+            if (shouldCreateNewIntent)
+            {
                 var createOptions = new PaymentIntentCreateOptions()
                 {
+<<<<<<< HEAD
                     Amount = 1000,// this will be handle
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+                    Amount = totalAmount,
+>>>>>>> 256852f (Create PAymeeent)
                     Currency = "usd",
                     PaymentMethodTypes = new List<string> { "card" }
                 };
                 paymentIntent = await paymentIntentService.CreateAsync(createOptions);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 256852f (Create PAymeeent)
                 if (!string.IsNullOrEmpty(paymentIntentToDelete))
                 {
                     try
@@ -156,29 +185,29 @@ namespace Blink_API.Services.PaymentServices
 
             if (paymentIntent != null)
             {
+<<<<<<< HEAD
                 mappedBasket.PaymentIntentId = paymentIntent.Id;
                 mappedBasket.ClientSecret = paymentIntent.ClientSecret;
             }
 
 =======
+=======
+>>>>>>> 256852f (Create PAymeeent)
                 mappedBasket.PaymentIntentId = paymentIntent.Id;
                 mappedBasket.ClientSecret = paymentIntent.ClientSecret;
-
             }
-            else { 
-                var updateOptions = new PaymentIntentUpdateOptions()
-                {
-                    Amount = 10000 //this will be handle
-                };
-                await paymentIntentService.UpdateAsync(mappedBasket.PaymentIntentId, updateOptions);
 
+<<<<<<< HEAD
             }
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+>>>>>>> 256852f (Create PAymeeent)
             await _unitOfWork.CartRepo.UpdateCart(cart);
             return mappedBasket;
         }
 
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         public async Task<orderDTO?> UpdatePaymentIntentToSucceededOrFailed(string paymentIntentId, bool isSucceeded)
         {
@@ -198,34 +227,43 @@ namespace Blink_API.Services.PaymentServices
 =======
 
         public async Task<OrderHeader?> UpdatePaymentIntentToSucceededOrFailed(string paymentIntentId, bool isSucceeded)
+=======
+        public async Task<orderDTO?> UpdatePaymentIntentToSucceededOrFailed(string paymentIntentId, bool isSucceeded)
+>>>>>>> 256852f (Create PAymeeent)
         {
-            var orderList = await _unitOfWork.OrderRepo.GetAll(); 
+           
+            var orderHeader = await _unitOfWork.OrderRepo
+                .GetOrderByPaymentIntentId(paymentIntentId);
 
-            var order = orderList
-                .Where(o => Convert.ToString(o.PaymentId) == paymentIntentId)
-                .FirstOrDefault();
+            if (orderHeader == null) return null;
 
-            if (order == null) return null;
+            orderHeader.OrderStatus = isSucceeded ? "PaymentReceived" : "PaymentFailed";
 
-            if (isSucceeded)
-                order.OrderStatus = "PaymentReceived";
-            else
-                order.OrderStatus = "PaymentFailed";
-
-            _unitOfWork.OrderRepo.Update(order);
+            _unitOfWork.OrderRepo.Update(orderHeader);
             await _unitOfWork.CompleteAsync();
+<<<<<<< HEAD
             return order;
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+
+            var dto = _mapper.Map<orderDTO>(orderHeader);
+            return dto;
+>>>>>>> 256852f (Create PAymeeent)
         }
 
 
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 =======
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+
+
+>>>>>>> 256852f (Create PAymeeent)
     }
 
 

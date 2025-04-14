@@ -81,6 +81,7 @@ namespace Blink_API.Repositories.CartRepos
         ///    return await GetCartAsync(cart.CartId);
         ///}
 <<<<<<< HEAD
+<<<<<<< HEAD
 
         
 
@@ -88,6 +89,11 @@ namespace Blink_API.Repositories.CartRepos
      
         
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+
+        
+
+>>>>>>> 256852f (Create PAymeeent)
         public async Task UpdateCart(Cart cart)
         {
             try

@@ -101,10 +101,14 @@ namespace Blink_API
 
             // Add Order
 <<<<<<< HEAD
+<<<<<<< HEAD
             builder.Services.AddScoped<orderService>();
 =======
             builder.Services.AddScoped<orderServices>();
 >>>>>>> 7c1b2dc (create PAyment f)
+=======
+            builder.Services.AddScoped<orderService>();
+>>>>>>> 256852f (Create PAymeeent)
             builder.Services.AddScoped<orderRepo>();
             // Add Payment
             builder.Services.AddScoped<PaymentServices>();
