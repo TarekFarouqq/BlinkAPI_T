@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿using Blink_API.DTOs.OrdersDTO;
 using Blink_API.DTOs.PaymentCart;
 using Blink_API.Errors;
@@ -12,6 +13,16 @@ using System.Security.Claims;
 namespace Blink_API.Controllers.Payment
 {
     [Authorize]
+=======
+﻿using Blink_API.DTOs.PaymentCart;
+using Blink_API.Errors;
+using Blink_API.Services.PaymentServices;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Blink_API.Controllers.Payment
+{
+>>>>>>> 7c1b2dc (create PAyment f)
     [Route("api/[controller]")]
     [ApiController]
     public class PaymentController : ControllerBase
@@ -26,6 +37,7 @@ namespace Blink_API.Controllers.Payment
         }
 
         [HttpPost]
+<<<<<<< HEAD
         public async Task<ActionResult<CartPaymentDTO>> CreateOrUpdatePaymentIntent()
         {
             try
@@ -43,6 +55,28 @@ namespace Blink_API.Controllers.Payment
                     if (basket is null)
                     return BadRequest(new ApiResponse(400, "An error occurred while creating the payment"));
 
+=======
+        public async Task<ActionResult<CartPaymentDTO>> CreateOrUpdatePaymentIntent(CartPaymentDTO cartPayment)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(cartPayment.PaymentMethod))
+                {
+                    return NotFound(new ApiResponse(404, "Payment method is required."));
+                }
+
+                if (cartPayment == null) return NotFound(new ApiResponse(404, "Cart Not Found"));
+
+                var userId = cartPayment.UserId;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return BadRequest(new ApiResponse(400, "User ID is missing"));
+                }
+
+                var basket = await _paymentServices.CreateOrUpdatePayment(cartPayment.CartId, userId);
+
+                if (basket is null) return BadRequest(new ApiResponse(400, "An Error With your Cart!"));
+>>>>>>> 7c1b2dc (create PAyment f)
                 return Ok(basket);
             }
             catch (Exception ex)
@@ -51,6 +85,7 @@ namespace Blink_API.Controllers.Payment
             }
         }
 
+<<<<<<< HEAD
         [HttpPost("confirmPayment")]
         public async Task<ActionResult<orderDTO>> ConfirmPayment([FromBody] ConfirmPaymentDTO dto)
         {
@@ -138,6 +173,11 @@ namespace Blink_API.Controllers.Payment
 
         #endregion
 
+=======
+
+
+
+>>>>>>> 7c1b2dc (create PAyment f)
 
     }
 }

@@ -80,9 +80,14 @@ namespace Blink_API.Repositories.CartRepos
         ///    if (createdOrUpdated is false) return null;
         ///    return await GetCartAsync(cart.CartId);
         ///}
+<<<<<<< HEAD
 
         
 
+=======
+     
+        
+>>>>>>> 7c1b2dc (create PAyment f)
         public async Task UpdateCart(Cart cart)
         {
             try

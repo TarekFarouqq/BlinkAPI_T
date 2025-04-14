@@ -9,6 +9,7 @@ using Blink_API.Repositories.BranchRepos;
 using Blink_API.Repositories.CartRepos;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Repositories.InventoryRepos;
+<<<<<<< HEAD
 
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
@@ -18,18 +19,37 @@ using AutoMapper;
 using Blink_API.Repositories.BiDataRepos;
 using Blink_API.Repositories.Payment;
 
+=======
+<<<<<<< HEAD
+using Blink_API.Repositories.BiDataRepos;
+=======
+using StackExchange.Redis;
+using Microsoft.EntityFrameworkCore;
+using Blink_API.Repositories.Order;
+using AutoMapper;
+>>>>>>> c646337 (resolve Secret key2)
+>>>>>>> 7c1b2dc (create PAyment f)
 
 namespace Blink_API
 {
     public class UnitOfWork
     {
         private readonly BlinkDbContext db;
+<<<<<<< HEAD
 
 
         
 
         internal object cart_DiminsionRepos;
 
+=======
+<<<<<<< HEAD
+        internal object cart_DiminsionRepos;
+=======
+
+        public DbContext Context => db;
+>>>>>>> c646337 (resolve Secret key2)
+>>>>>>> 7c1b2dc (create PAyment f)
         BrandRepos brandRepo;
         ProductRepo productRepo;
         CategoryRepo categoryRepo;
@@ -39,7 +59,10 @@ namespace Blink_API
         BranchRepos branchRepos;
         InventoryRepo inventoryRepo;
         orderRepo orderRepo;
+<<<<<<< HEAD
         PaymentRepository paymentRepository;
+=======
+>>>>>>> 7c1b2dc (create PAyment f)
 
         // **** for bi ***
         BiDataRepos biDataRepos;
@@ -75,7 +98,10 @@ namespace Blink_API
             }
         }
 
+<<<<<<< HEAD
   
+=======
+>>>>>>> 7c1b2dc (create PAyment f)
         public ProductRepo ProductRepo
         {
             get
@@ -175,11 +201,15 @@ namespace Blink_API
                 return branchRepos;
             }
         }
+<<<<<<< HEAD
 
 
         public async Task<int> CompleteAsync()
          => await db.SaveChangesAsync();
 
+=======
+<<<<<<< HEAD
+>>>>>>> 7c1b2dc (create PAyment f)
         // *************************************  for bidatarepos ************************************:
         public BiDataRepos BiDataRepos
         {
@@ -373,4 +403,11 @@ namespace Blink_API
 
     }
     
+=======
+
+        public async Task<int> CompleteAsync()
+         => await db.SaveChangesAsync();
+
+    }
+>>>>>>> c646337 (resolve Secret key2)
 }

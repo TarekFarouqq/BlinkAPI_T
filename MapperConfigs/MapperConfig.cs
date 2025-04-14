@@ -17,11 +17,21 @@ using Blink_API.DTOs.InventoryDTOS;
 using Blink_API.DTOs.BiDataDtos;
 using Microsoft.AspNetCore.Identity;
 using Blink_API.DTOs.IdentityDTOs;
+<<<<<<< HEAD
 using Blink_API.DTOs.CartDTOs;
 using Blink_API.Services.PaymentServices;
 using Blink_API.DTOs.PaymentCart;
 using Blink_API.DTOs.OrdersDTO;
 
+=======
+<<<<<<< HEAD
+ 
+=======
+using Blink_API.DTOs.CartDTOs;
+using Blink_API.Services.PaymentServices;
+using Blink_API.DTOs.PaymentCart;
+>>>>>>> c646337 (resolve Secret key2)
+>>>>>>> 7c1b2dc (create PAyment f)
 
 
 
@@ -152,6 +162,7 @@ namespace Blink_API.MapperConfigs
                 .ReverseMap();
 
 
+<<<<<<< HEAD
 
             //Payment
 
@@ -258,6 +269,13 @@ namespace Blink_API.MapperConfigs
                  .ForMember(dest => dest.ReviewComments, opt => opt.MapFrom(src => src.ReviewComments.Select(c => c.Content).ToList()))
     
                 .ReverseMap();
+=======
+            //Payment
+            CreateMap<CartPaymentDTO, CustomerCart>();
+            CreateMap<CartPaymentDTO, Cart>().ReverseMap();
+            CreateMap<CartPaymentDTO,ReadCartDTO>().ReverseMap();
+            //CreateMap<BasketItemDto, BasketItem>();
+>>>>>>> c646337 (resolve Secret key2)
 
             // payment dimension :
             CreateMap<Payment, Payment_DimensionDto>()
