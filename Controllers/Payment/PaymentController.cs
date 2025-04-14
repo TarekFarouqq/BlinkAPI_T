@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 ﻿using Blink_API.DTOs.OrdersDTO;
 using Blink_API.DTOs.PaymentCart;
 using Blink_API.Errors;
@@ -14,28 +13,7 @@ using System.Security.Claims;
 namespace Blink_API.Controllers.Payment
 {
     [Authorize]
-=======
-﻿using Blink_API.DTOs.PaymentCart;
-=======
-﻿using Blink_API.DTOs.OrdersDTO;
-using Blink_API.DTOs.PaymentCart;
->>>>>>> 256852f (Create PAymeeent)
-using Blink_API.Errors;
-using Blink_API.Models;
-using Blink_API.Services.PaymentServices;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Stripe;
-using System.Security.Claims;
 
-namespace Blink_API.Controllers.Payment
-{
-<<<<<<< HEAD
->>>>>>> 7c1b2dc (create PAyment f)
-=======
-    [Authorize]
->>>>>>> 256852f (Create PAymeeent)
     [Route("api/[controller]")]
     [ApiController]
     public class PaymentController : ControllerBase
@@ -50,51 +28,28 @@ namespace Blink_API.Controllers.Payment
         }
 
         [HttpPost]
-<<<<<<< HEAD
-<<<<<<< HEAD
         public async Task<ActionResult<CartPaymentDTO>> CreateOrUpdatePaymentIntent()
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userId))
-                    return Unauthorized(new ApiResponse(401, "Unauthorized"));
+                {
+                    return Unauthorized(new ApiResponse(401, "User is not authenticated"));
+                }
 
+              
                 var cart = await _unitOfWork.CartRepo.GetByUserId(userId);
                 if (cart == null)
-                    return NotFound(new ApiResponse(404, "Cart not found"));
+                {
+                    return NotFound(new ApiResponse(404, "Cart not found for the current user"));
+                }
 
                 var basket = await _paymentServices.CreateOrUpdatePayment(cart.CartId, userId);
-                    if (basket is null)
-                    return BadRequest(new ApiResponse(400, "An error occurred while creating the payment"));
 
-=======
-        public async Task<ActionResult<CartPaymentDTO>> CreateOrUpdatePaymentIntent(CartPaymentDTO cartPayment)
-=======
-        public async Task<ActionResult<CartPaymentDTO>> CreateOrUpdatePaymentIntent()
->>>>>>> 256852f (Create PAymeeent)
-        {
-            try
-            {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (basket is null)
+                    return BadRequest(new ApiResponse(400, "An error occurred while processing your cart"));
 
-                if (string.IsNullOrEmpty(userId))
-                    return Unauthorized(new ApiResponse(401, "Unauthorized"));
-
-                var cart = await _unitOfWork.CartRepo.GetByUserId(userId);
-                if (cart == null)
-                    return NotFound(new ApiResponse(404, "Cart not found"));
-
-                var basket = await _paymentServices.CreateOrUpdatePayment(cart.CartId, userId);
-                    if (basket is null)
-                    return BadRequest(new ApiResponse(400, "An error occurred while creating the payment"));
-
-<<<<<<< HEAD
-                if (basket is null) return BadRequest(new ApiResponse(400, "An Error With your Cart!"));
->>>>>>> 7c1b2dc (create PAyment f)
-=======
->>>>>>> 256852f (Create PAymeeent)
                 return Ok(basket);
             }
             catch (Exception ex)
@@ -103,10 +58,7 @@ namespace Blink_API.Controllers.Payment
             }
         }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 256852f (Create PAymeeent)
+
         [HttpPost("confirmPayment")]
         public async Task<ActionResult<orderDTO>> ConfirmPayment([FromBody] ConfirmPaymentDTO dto)
         {
@@ -194,14 +146,6 @@ namespace Blink_API.Controllers.Payment
 
         #endregion
 
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 7c1b2dc (create PAyment f)
-=======
->>>>>>> 256852f (Create PAymeeent)
 
     }
 }

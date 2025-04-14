@@ -20,27 +20,15 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Blink_API.Services.InventoryService;
 using Blink_API.Repositories.InventoryRepos;
-<<<<<<< HEAD
 
-using Microsoft.AspNetCore.Builder;
-using StackExchange.Redis;
-using Blink_API.Services.OrderServicees;
-using Blink_API.Repositories.Order;
-using Blink_API.Services.PaymentServices;
-using Microsoft.Extensions.Options;
-
-=======
-<<<<<<< HEAD
->>>>>>> 7c1b2dc (create PAyment f)
 using Blink_API.Services.BiDataService;
-=======
+
 using Microsoft.AspNetCore.Builder;
 using StackExchange.Redis;
 using Blink_API.Services.OrderServicees;
 using Blink_API.Repositories.Order;
 using Blink_API.Services.PaymentServices;
 using Microsoft.Extensions.Options;
->>>>>>> c646337 (resolve Secret key2)
 
 
 namespace Blink_API
@@ -100,15 +88,9 @@ namespace Blink_API
             builder.Services.AddScoped<BrandService>();
 
             // Add Order
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+
             builder.Services.AddScoped<orderService>();
-=======
-            builder.Services.AddScoped<orderServices>();
->>>>>>> 7c1b2dc (create PAyment f)
-=======
-            builder.Services.AddScoped<orderService>();
->>>>>>> 256852f (Create PAymeeent)
             builder.Services.AddScoped<orderRepo>();
             // Add Payment
             builder.Services.AddScoped<PaymentServices>();

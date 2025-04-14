@@ -9,7 +9,7 @@ using Blink_API.Repositories.BranchRepos;
 using Blink_API.Repositories.CartRepos;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Repositories.InventoryRepos;
-<<<<<<< HEAD
+
 
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
@@ -19,57 +19,28 @@ using AutoMapper;
 using Blink_API.Repositories.BiDataRepos;
 using Blink_API.Repositories.Payment;
 
-=======
-<<<<<<< HEAD
-using Blink_API.Repositories.BiDataRepos;
-=======
+
 using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 using Blink_API.Repositories.Order;
 using AutoMapper;
-<<<<<<< HEAD
->>>>>>> c646337 (resolve Secret key2)
-<<<<<<< HEAD
->>>>>>> 7c1b2dc (create PAyment f)
-=======
-=======
 
-using Blink_API.Repositories.BiDataRepos;
-using Blink_API.Repositories.Payment;
-
->>>>>>> 4815246 (testt)
->>>>>>> 256852f (Create PAymeeent)
 
 namespace Blink_API
 {
     public class UnitOfWork
     {
         private readonly BlinkDbContext db;
-<<<<<<< HEAD
 
 
         
 
         internal object cart_DiminsionRepos;
 
-=======
-<<<<<<< HEAD
-        internal object cart_DiminsionRepos;
-=======
 
-<<<<<<< HEAD
+ 
         public DbContext Context => db;
->>>>>>> c646337 (resolve Secret key2)
-<<<<<<< HEAD
->>>>>>> 7c1b2dc (create PAyment f)
-=======
-=======
-        
 
-        internal object cart_DiminsionRepos;
-
->>>>>>> 4815246 (testt)
->>>>>>> 256852f (Create PAymeeent)
         BrandRepos brandRepo;
         ProductRepo productRepo;
         CategoryRepo categoryRepo;
@@ -79,14 +50,7 @@ namespace Blink_API
         BranchRepos branchRepos;
         InventoryRepo inventoryRepo;
         orderRepo orderRepo;
-<<<<<<< HEAD
-<<<<<<< HEAD
-        PaymentRepository paymentRepository;
-=======
->>>>>>> 7c1b2dc (create PAyment f)
-=======
-        PaymentRepository paymentRepository;
->>>>>>> 256852f (Create PAymeeent)
+
 
         // **** for bi ***
         BiDataRepos biDataRepos;
@@ -122,14 +86,7 @@ namespace Blink_API
             }
         }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  
-=======
->>>>>>> 7c1b2dc (create PAyment f)
-=======
-  
->>>>>>> 256852f (Create PAymeeent)
+
         public ProductRepo ProductRepo
         {
             get
@@ -229,15 +186,10 @@ namespace Blink_API
                 return branchRepos;
             }
         }
-<<<<<<< HEAD
 
 
-        public async Task<int> CompleteAsync()
-         => await db.SaveChangesAsync();
 
-=======
-<<<<<<< HEAD
->>>>>>> 7c1b2dc (create PAyment f)
+
         // *************************************  for bidatarepos ************************************:
         public BiDataRepos BiDataRepos
         {
@@ -428,17 +380,13 @@ namespace Blink_API
             }
         }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 11de893 (complete bi)
-    }
     
-=======
+    
+
 
         public async Task<int> CompleteAsync()
          => await db.SaveChangesAsync();
 
     }
->>>>>>> c646337 (resolve Secret key2)
 }
