@@ -16,6 +16,7 @@ using AutoMapper;
 
 using Blink_API.Repositories.BiDataRepos;
 using Blink_API.Repositories.ProductRepos;
+using Blink_API.Repositories.UserRepos;
 
 
 namespace Blink_API
@@ -39,6 +40,7 @@ namespace Blink_API
         BranchRepos branchRepos;
         InventoryRepo inventoryRepo;
         orderRepo orderRepo;
+        UserRepos UserRepos;
 
         // **** for bi ***
         BiDataRepos biDataRepos;
@@ -61,7 +63,18 @@ namespace Blink_API
         }
 
        
-
+        // user :
+        public UserRepos UserRepo
+        {
+            get
+            {
+                if (UserRepos == null)
+                {
+                    UserRepos = new UserRepos(db);
+                }
+                return UserRepos;
+            }
+        }
         public orderRepo OrderRepo
         {
             get
@@ -187,8 +200,13 @@ namespace Blink_API
         }
 
 
+
         public async Task<int> CompleteAsync()
          => await db.SaveChangesAsync();
+
+       
+
+
 
         // *************************************  for bidatarepos ************************************:
         public BiDataRepos BiDataRepos
