@@ -14,7 +14,7 @@ namespace Blink_API.Models
         [StringLength(500)]
         public string CategoryDescription { get; set; }
         public string CategoryImage { get; set; }
-        public bool IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; } =false;
         public int? ParentCategoryId { get; set; }
         [ForeignKey("ParentCategoryId")]
         public virtual Category ParentCategory { get; set; } // Reference to Parent

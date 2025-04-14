@@ -245,6 +245,17 @@ namespace Blink_API.Controllers.Product
             var reviewSuppliedProduct = await reviewSuppliedProductsService.GetSuppliedProductByRequestId(requestId);
             if (reviewSuppliedProduct == null)
                 return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            if(reviewSuppliedProduct.ProductImages.Count > 0)
+            {
+                foreach (var ProductImage in reviewSuppliedProduct.ProductImages)
+                {
+                    if (ProductImage != null)
+                    {
+                        ProductImage.ImageUrl = $"{baseUrl}{ProductImage.ImageUrl.Replace("wwwroot/", "").TrimStart('/')}";
+                    }
+                }
+            }
             return Ok(reviewSuppliedProduct);
         }
         [HttpPost("AddRequestSuppliedProduct")]
@@ -259,16 +270,13 @@ namespace Blink_API.Controllers.Product
             return Ok();
         }
         [HttpPut("UpdateRequestSuppliedProduct/{requestId}")]
-        public async Task<ActionResult> UpdateRequestSupplierProduct(int requestId,bool status)
+        public async Task<ActionResult> UpdateRequestSupplierProduct( int requestId, [FromBody]ReadReviewSuppliedProductDTO model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            if (requestId <= 0)
-                return BadRequest();
-             await reviewSuppliedProductsService.UpdateRequestProduct(requestId, status);
-            return Ok(status);
+                return BadRequest(new { error = "Model State is Invalid" });
+            await reviewSuppliedProductsService.UpdateRequestProduct(requestId,model);
+            return Ok(new { success = "Product Reviewed Success" });
         }
-
         #endregion
     }
 }

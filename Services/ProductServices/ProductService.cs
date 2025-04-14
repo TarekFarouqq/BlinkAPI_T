@@ -264,7 +264,6 @@ namespace Blink_API.Services.Product
             var products = await unitOfWork.ProductRepo.GetFillteredProducts(filtersProduct, pgNumber);
 
             var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
-            // Apply additional filters before mapping
             if (fromPrice > 0)
             {
                 mappedProducts = mappedProducts.Where(p => p.ProductPrice >= fromPrice).ToList();

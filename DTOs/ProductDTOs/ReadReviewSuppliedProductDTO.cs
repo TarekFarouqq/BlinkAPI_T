@@ -17,5 +17,11 @@
         public string InventoryName { get; set; }
         public double ProductPrice { get; set; }
         public int ProductQuantity { get; set; }
+        public List<ReadReviewSuppliedProductImagesDTO> ProductImages { get; set; }
+    }
+    public class ReadReviewSuppliedProductImagesDTO
+    {
+        public int RequestId { get; set; }
+        public string ImageUrl { get; set; }
     }
 }

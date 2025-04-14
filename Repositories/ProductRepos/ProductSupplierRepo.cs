@@ -1,4 +1,6 @@
-﻿using Blink_API.Models;
+﻿using System.Configuration;
+using Blink_API.DTOs.ProductDTOs;
+using Blink_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.ProductRepos
@@ -17,6 +19,7 @@ namespace Blink_API.Repositories.ProductRepos
                 .Include(p => p.Category)
                 .Include(p => p.Inventory)
                 .Include(p => p.Supplier)
+                .Include(p=>p.ReviewSuppliedProductImages)
                 .ToListAsync();
             return products;
         }
@@ -27,6 +30,7 @@ namespace Blink_API.Repositories.ProductRepos
                 .Include(p => p.Category)
                 .Include(p => p.Inventory)
                 .Include(p => p.Supplier)
+                .Include(p=>p.ReviewSuppliedProductImages)
                 .FirstOrDefaultAsync(p => p.RequestId == requestId);
             return product;
         }
@@ -41,15 +45,36 @@ namespace Blink_API.Repositories.ProductRepos
             await db.ReviewSuppliedProductImages.AddRangeAsync(productImages);
             await SaveChanges();
         }
-        public async Task UpdateRequestProduct(int requestId,bool status)
+        public async Task<bool> UpdateRequestProduct(int requestId,ReadReviewSuppliedProductDTO model)
         {
-            var requestProduct = await db.ReviewSuppliedProducts.FirstOrDefaultAsync(rp=>rp.RequestId == requestId);
-            if (requestProduct != null)
+            var currentRequest = await db.ReviewSuppliedProducts.FirstOrDefaultAsync(rp=>rp.RequestId==requestId);
+            if (currentRequest != null)
             {
-                requestProduct.RequestStatus = status;
-                db.ReviewSuppliedProducts.Update(requestProduct);
+                currentRequest.RequestStatus = model.RequestStatus;
+                currentRequest.InventoryId = model.InventoryId;
+                currentRequest.CategoryId = model.CategoryId;
+                currentRequest.BrandId = model.BrandId;
+                currentRequest.ProductQuantity = model.ProductQuantity;
+                currentRequest.ProductPrice = model.ProductPrice;
+                db.Entry(currentRequest).Property(r => r.RequestStatus).IsModified = true;
+                db.Entry(currentRequest).Property(r => r.InventoryId).IsModified = true;
+                db.Entry(currentRequest).Property(r => r.CategoryId).IsModified = true;
+                db.Entry(currentRequest).Property(r => r.BrandId).IsModified = true;
+                await db.SaveChangesAsync();
+                return true;
             }
-            await db.SaveChangesAsync();
+            return false;
+        }
+        public async Task<List<ReviewSuppliedProductImages>> GetRequestImages(int RequestId)
+        {
+            var images = await db.ReviewSuppliedProductImages.Where(i => i.RequestId == RequestId).ToListAsync();
+            return images;
+        }
+        public async Task DeleteRequestedProductImage(int RequestId)
+        {
+            var images = await db.ReviewSuppliedProductImages.Where(pi => pi.RequestId == RequestId).ToListAsync();
+            db.ReviewSuppliedProductImages.RemoveRange(images);
+            await SaveChanges();
         }
     }
 }
