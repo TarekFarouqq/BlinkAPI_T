@@ -1,5 +1,6 @@
 ﻿using Blink_API.Models;
 using Blink_API.Repositories;
+using Blink_API.Repositories;
 
 using Blink_API.Repositories.BrandRepository;
 
@@ -15,6 +16,7 @@ using Blink_API.Repositories.Order;
 using AutoMapper;
 
 using Blink_API.Repositories.BiDataRepos;
+using Blink_API.Repositories.Payment;
 
 
 namespace Blink_API
@@ -24,7 +26,7 @@ namespace Blink_API
         private readonly BlinkDbContext db;
 
 
-        public DbContext Context => db;
+        
 
         internal object cart_DiminsionRepos;
 
@@ -37,6 +39,7 @@ namespace Blink_API
         BranchRepos branchRepos;
         InventoryRepo inventoryRepo;
         orderRepo orderRepo;
+        PaymentRepository paymentRepository;
 
         // **** for bi ***
         BiDataRepos biDataRepos;
@@ -72,6 +75,7 @@ namespace Blink_API
             }
         }
 
+  
         public ProductRepo ProductRepo
         {
             get

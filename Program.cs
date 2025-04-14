@@ -88,7 +88,7 @@ namespace Blink_API
             builder.Services.AddScoped<BrandService>();
 
             // Add Order
-            builder.Services.AddScoped<orderServices>();
+            builder.Services.AddScoped<orderService>();
             builder.Services.AddScoped<orderRepo>();
             // Add Payment
             builder.Services.AddScoped<PaymentServices>();
@@ -143,14 +143,17 @@ namespace Blink_API
             builder.Services.AddControllers();
                 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
                 builder.Services.AddOpenApi();
-                builder.Services.AddCors(Options =>
+                builder.Services.AddCors(options =>
                 {
-                    Options.AddDefaultPolicy(builder =>
+                    options.AddPolicy("AllowAngularApp", policy =>
                     {
-                        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                        policy.WithOrigins("http://localhost:4200")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
                     });
                 });
-                var app = builder.Build();
+
+            var app = builder.Build();
 
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
@@ -162,9 +165,9 @@ namespace Blink_API
             app.UseStaticFiles();
 
                 app.UseHttpsRedirection();
+                app.UseCors("AllowAngularApp");
                 app.UseAuthentication();
                 app.UseAuthorization();
-                app.UseCors();
 
                 app.MapControllers();
 
