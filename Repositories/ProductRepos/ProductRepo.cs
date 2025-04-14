@@ -172,6 +172,8 @@ namespace Blink_API.Repositories
         }
         public async Task AddProductImage(List<ProductImage> prdImages)
         {
+            if (prdImages.Count == 0)
+                return;
             var product = await GetById(prdImages[0].ProductId);
             if (product != null)
             {
