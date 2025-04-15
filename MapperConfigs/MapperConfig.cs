@@ -170,7 +170,8 @@ namespace Blink_API.MapperConfigs
 
             // user :
             CreateMap<ApplicationUser, UserDto>()
-                  .ForMember(dest => dest.Role, opt => opt.Ignore())   
+                  // map role in aspnetroles :
+                  .ForMember(dest => dest.Role, opt => opt.Ignore())
                  
 
                 .ReverseMap();
