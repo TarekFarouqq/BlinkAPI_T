@@ -1,31 +1,14 @@
 ﻿using Blink_API.Models;
 using Blink_API.Repositories;
-using Blink_API.Repositories;
-
 using Blink_API.Repositories.BrandRepository;
-
 using Blink_API.Repositories.BranchRepos;
- 
 using Blink_API.Repositories.CartRepos;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Repositories.InventoryRepos;
-
-
-using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 using Blink_API.Repositories.Order;
 using AutoMapper;
-
 using Blink_API.Repositories.BiDataRepos;
-
-using Blink_API.Repositories.Payment;
-
-
-using StackExchange.Redis;
-using Microsoft.EntityFrameworkCore;
-using Blink_API.Repositories.Order;
-using AutoMapper;
-
 using Blink_API.Repositories.ProductRepos;
 using Blink_API.Repositories.UserRepos;
 
@@ -36,14 +19,7 @@ namespace Blink_API
     public class UnitOfWork
     {
         private readonly BlinkDbContext db;
-
-
-        
-
         internal object cart_DiminsionRepos;
-
-
- 
         public DbContext Context => db;
 
         BrandRepos brandRepo;
