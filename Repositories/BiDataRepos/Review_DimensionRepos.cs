@@ -15,8 +15,10 @@ namespace Blink_API.Repositories.BiDataRepos
         {
             await foreach (var review in _blinkDbContext.Reviews
                 .Include(b => b.User)
+                 .Include(r => r.ReviewComments)
+
                 .Include(b => b.Product)
-                .Where(b => b.IsDeleted == false)
+                    .AsNoTracking()
                 .AsAsyncEnumerable())
             {
                 yield return review;

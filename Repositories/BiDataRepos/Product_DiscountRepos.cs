@@ -14,9 +14,9 @@ namespace Blink_API.Repositories.BiDataRepos
         public async IAsyncEnumerable<ProductDiscount> GetAllAsStream()
         {
             await foreach (var productDiscount in _blinkDbContext.ProductDiscounts
-                .Include(b => b.Discount)
-                .Include(b => b.Product)
-                .Where(b => b.IsDeleted == false)
+                  // .Include(b => b.Discount)
+                  // .Include(b => b.Product)
+                  .AsNoTracking()
                 .AsAsyncEnumerable())
             {
                 yield return productDiscount;

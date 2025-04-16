@@ -48,7 +48,7 @@ namespace Blink_API
             // Add services to the container.
             builder.Services.AddDbContext<BlinkDbContext>(s =>
             { s.UseSqlServer(builder.Configuration.GetConnectionString("conString"));
-                s.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+               // s.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 
             });
 

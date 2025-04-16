@@ -23,7 +23,8 @@ namespace Blink_API.Services.BiDataService
 
         //}
         #endregion
-        
+      
+
         public async IAsyncEnumerable<List<stock_factDto>> GetAllStockFactsInChunks()
         {
             var chunkSize = 1000;
@@ -83,36 +84,36 @@ namespace Blink_API.Services.BiDataService
 
         // get all from payment :
 
-        public async IAsyncEnumerable<List<Payment_DimensionDto>> GetAllPaymentsInChunks()
-        {
-            var chunkSize = 1000;
-            var chunk = new List<Payment_DimensionDto>();
+        //public async IAsyncEnumerable<List<Payment_DimensionDto>> GetAllPaymentsInChunks()
+        //{
+        //    var chunkSize = 1000;
+        //    var chunk = new List<Payment_DimensionDto>();
 
-            await foreach (var payment in _unitOfWork.Payment_DimensionRepos.GetAllAsStream())
-            {
-                var paymentDto = _mapper.Map<Payment_DimensionDto>(payment);
-                chunk.Add(paymentDto);
+        //    await foreach (var payment in _unitOfWork.Payment_DimensionRepos.GetAllAsStream())
+        //    {
+        //        var paymentDto = _mapper.Map<Payment_DimensionDto>(payment);
+        //        chunk.Add(paymentDto);
 
-                if (chunk.Count == chunkSize)
-                {
-                    yield return new List<Payment_DimensionDto>(chunk);
-                    chunk.Clear();
-                }
-            }
+        //        if (chunk.Count == chunkSize)
+        //        {
+        //            yield return new List<Payment_DimensionDto>(chunk);
+        //            chunk.Clear();
+        //        }
+        //    }
 
-            if (chunk.Count > 0)
-            {
-                yield return chunk;
-            }
-        }
+        //    if (chunk.Count > 0)
+        //    {
+        //        yield return chunk;
+        //    }
+        //}
 
         #region old 
-        //public async Task<List<Payment_DimensionDto>> GetAllPayments()
-        //{
-        //    var payments = await _unitOfWork.Payment_DimensionRepos.GetAll();
-        //    var paymentsDto = _mapper.Map<List<Payment_DimensionDto>>(payments);
-        //    return paymentsDto;
-        //}
+        public async Task<List<Payment_DimensionDto>> GetAllPayments()
+        {
+            var payments = await _unitOfWork.Payment_DimensionRepos.GetAll();
+            var paymentsDto = _mapper.Map<List<Payment_DimensionDto>>(payments);
+            return paymentsDto;
+        }
         #endregion
         // get all from user role :
 
