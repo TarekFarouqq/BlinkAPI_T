@@ -19,6 +19,7 @@ namespace Blink_API.Repositories.BiDataRepos
                 .Include(p => p.Brand)
                 .Include(p => p.ProductImages)
                 .Include(p => p.ProductAttributes)
+                 .AsNoTracking()
                 .AsAsyncEnumerable())
             {
                 yield return product;

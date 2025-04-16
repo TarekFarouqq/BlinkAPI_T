@@ -279,17 +279,25 @@ namespace Blink_API.MapperConfigs
             ////// ************* BIII ******************
             // 1- stock_fact :
             CreateMap<StockProductInventory, stock_factDto>()
-                .ForMember(dest => dest.ProductId, option => option.MapFrom(src => src.Product.ProductId))
-                .ForMember(dest => dest.InventoryId, option => option.MapFrom(src => src.Inventory.InventoryId))
-                .ForMember(dest => dest.StockUnitPrice, option => option.MapFrom(src => src.StockUnitPrice))
-                .ForMember(dest => dest.StockQuantity, option => option.MapFrom(src => src.StockQuantity))
-                .ReverseMap();
+     .ForMember(dest => dest.InventoryId, option => option.MapFrom(src => src.InventoryId))
+     .ForMember(dest => dest.ProductId, option => option.MapFrom(src => src.ProductId))
+     .ForMember(dest => dest.StockUnitPrice, option => option.MapFrom(src => src.StockUnitPrice))
+     .ForMember(dest => dest.StockQuantity, option => option.MapFrom(src => src.StockQuantity))
+     .ReverseMap();
 
             // review diminsiion :
             CreateMap<Review, Review_DimensionDto>()
 
-                .ForMember(dest => dest.ProductId, option => option.MapFrom(src => src.ProductId))
-                 .ForMember(dest => dest.ReviewComments, opt => opt.MapFrom(src => src.ReviewComments.Select(c => c.Content).ToList()))
+                 .ForMember(dest => dest.ReviewId, opt => opt.MapFrom(src => src.ReviewId))
+    .ForMember(dest => dest.Rate, opt => opt.MapFrom(src => src.Rate))
+    .ForMember(dest => dest.CreationDate, opt => opt.MapFrom(src => src.CreationDate))
+    .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+    .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId.ToString()))
+    .ForMember(dest => dest.ReviewComments, opt => opt.MapFrom(src =>
+        src.ReviewComments
+             
+            .Select(c => c.Content)
+            .ToList()))
 
                 .ReverseMap();
             //Payment
@@ -300,10 +308,11 @@ namespace Blink_API.MapperConfigs
 
             // payment dimension :
             CreateMap<Payment, Payment_DimensionDto>()
+     .ForMember(dest => dest.Method, option => option.MapFrom(src => src.Method))
+     .ForMember(dest => dest.PaymentDate, option => option.MapFrom(src => src.PaymentDate))
+     .ForMember(dest => dest.PaymentStatus, option => option.MapFrom(src => src.PaymentStatus))
+     .ReverseMap();
 
-                .ForMember(dest => dest.Method, option => option.MapFrom(src => src.Method))
-                .ForMember(dest => dest.PaymentDate, option => option.MapFrom(src => src.PaymentDate))
-                .ReverseMap();
 
             // user role :
             CreateMap<IdentityUserRole<string>, UserRoles_DimensionDto>()
@@ -336,6 +345,7 @@ namespace Blink_API.MapperConfigs
             CreateMap<ProductDiscount, Product_DiscountDto>()
 
                 .ForMember(dest => dest.DiscountId, option => option.MapFrom(src => src.DiscountId))
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
                 .ForMember(dest => dest.DiscountAmount, option => option.MapFrom(src => src.DiscountAmount))
                 .ReverseMap();
 
@@ -346,11 +356,14 @@ namespace Blink_API.MapperConfigs
                .ForMember(dest => dest.InventoryId, option => option.MapFrom(src => src.Inventories.FirstOrDefault().InventoryId))
                .ReverseMap();
 
-            // cart diminsion :
-            CreateMap<Cart, cart_DiminsionDto>()
-                .ForMember(dest => dest.CreationDate, option => option.MapFrom(src => src.CartDetails.FirstOrDefault().CreationDate))
-                .ForMember(dest => dest.ProductId, option => option.MapFrom(src => src.CartDetails.FirstOrDefault().ProductId))
-                .ForMember(dest => dest.Quantity, option => option.MapFrom(src => src.CartDetails.FirstOrDefault().Quantity))
+            // cart diminsion : 
+                 CreateMap<CartDetail, cart_DiminsionDto>()
+            .ForMember(dest => dest.CartId, opt => opt.MapFrom(src => src.CartId))
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Cart.UserId))
+            .ForMember(dest => dest.CreationDate, opt => opt.MapFrom(src => src.CreationDate))
+            .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDeleted))
+            .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
+            .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
                 .ReverseMap();
 
             // order_fact :
@@ -372,40 +385,45 @@ namespace Blink_API.MapperConfigs
            .ReverseMap();
 
             // discount :
-            CreateMap<Discount, Discount_DimensionDto>()
+             
 
-                .ForMember(dest => dest.DiscountPercentage, option => option.MapFrom(src => src.DiscountPercentage))
-                .ForMember(dest => dest.DiscountFromDate, option => option.MapFrom(src => src.DiscountFromDate))
-                .ForMember(dest => dest.DiscountEndDate, option => option.MapFrom(src => src.DiscountEndDate))
-                .ForMember(dest => dest.DiscountAmount, option => option.MapFrom(src => src.ProductDiscounts.FirstOrDefault().DiscountAmount))
-                .ForMember(dest => dest.ProductId, option => option.MapFrom(src => src.ProductDiscounts.FirstOrDefault().ProductId))
+                 CreateMap<ProductDiscount, Discount_DimensionDto>()
+            .ForMember(dest => dest.DiscountId, opt => opt.MapFrom(src => src.DiscountId))
+            .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
+            .ForMember(dest => dest.DiscountPercentage, opt => opt.MapFrom(src => src.Discount.DiscountPercentage))
+            .ForMember(dest => dest.DiscountAmount, opt => opt.MapFrom(src => src.DiscountAmount))
+            .ForMember(dest => dest.DiscountFromDate, opt => opt.MapFrom(src => src.Discount.DiscountFromDate))
+            .ForMember(dest => dest.DiscountEndDate, opt => opt.MapFrom(src => src.Discount.DiscountEndDate))
+
                 .ReverseMap();
 
             // branch inventory :
-            CreateMap<Branch, Branch_inventoryDto>()
-
-                .ForMember(dest => dest.InventoryId, option => option.MapFrom(src => src.Inventories.FirstOrDefault().InventoryId))
-                .ForMember(dest => dest.InventoryName, option => option.MapFrom(src => src.Inventories.FirstOrDefault().InventoryName))
-                .ForMember(dest => dest.InventoryAddress, option => option.MapFrom(src => src.Inventories.FirstOrDefault().InventoryAddress))
-                .ForMember(dest => dest.BranchPhone, option => option.MapFrom(src => src.Phone))
-                .ForMember(dest => dest.BranchAddress, option => option.MapFrom(src => src.BranchAddress))
-                .ForMember(dest => dest.InventoryPhone, option => option.MapFrom(src => src.Inventories.FirstOrDefault().Phone))
-                .ReverseMap();
+            CreateMap<Inventory, Branch_inventoryDto>()
+           .ForMember(dest => dest.InventoryName, opt => opt.MapFrom(src => src.InventoryName))
+           .ForMember(dest => dest.InventoryId, opt => opt.MapFrom(src => src.InventoryId))
+           .ForMember(dest => dest.InventoryAddress, opt => opt.MapFrom(src => src.InventoryAddress))
+           .ForMember(dest => dest.InventoryPhone, opt => opt.MapFrom(src => src.Phone))
+           .ForMember(dest => dest.BranchId, opt => opt.MapFrom(src => src.BranchId))
+           .ForMember(dest => dest.BranchName, opt => opt.MapFrom(src => src.Branch.BranchName))
+           .ForMember(dest => dest.BranchAddress, opt => opt.MapFrom(src => src.Branch.BranchAddress))
+           .ForMember(dest => dest.BranchPhone, opt => opt.MapFrom(src => src.Branch.Phone))
+    .ReverseMap();
 
 
             // inventory transaction fact :
-            CreateMap<TransactionDetail, InventoryTransaction_FactDto>()
+            CreateMap<TransactionProduct, InventoryTransaction_FactDto>()
 
-                .ForMember(dest => dest.TransactionDate, option => option.MapFrom(src => src.InventoryTransactionHeader.InventoryTransactionDate))
-                .ForMember(dest => dest.TransactionType, option => option.MapFrom(src => src.InventoryTransactionHeader.InventoryTransactionType))
-                .ForMember(dest => dest.InventoryTransactionHeaderId, option => option.MapFrom(src => src.InventoryTransactionHeaderId))
-                .ForMember(dest => dest.SrcInventoryId, option => option.MapFrom(src => src.SrcInventory.InventoryId))
-                .ForMember(dest => dest.DistInventoryId, option => option.MapFrom(src => src.DistInventory.InventoryId))
-                .ForMember(dest => dest.InventoryTransactionHeaderId, option => option.MapFrom(src => src.InventoryTransactionHeader.InventoryTransactionHeaderId))
-                // .ForMember(dest => dest.Quantity, option => option.MapFrom(src => src.InventoryTransactionHeader.InventoryTransactionDetails.Sum(s => s.SellQuantity)))
-                // .ForMember(dest => dest.ProductId, option => option.MapFrom(src => src.InventoryTransactionHeader.InventoryTransactionDetails.FirstOrDefault().ProductId))
+                  .ForMember(dest => dest.InventoryTransactionHeaderId, opt => opt.MapFrom(src => src.InventoryTransactionId))
+            .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
+            .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.TransactionQuantity))
+            .ForMember(dest => dest.TransactionDate, opt => opt.MapFrom(src => src.InventoryTransactionHeader.InventoryTransactionDate))
+            .ForMember(dest => dest.TransactionType, opt => opt.MapFrom(src => src.InventoryTransactionHeader.InventoryTransactionType.ToString()))
+            .ForMember(dest => dest.SrcInventoryId, opt => opt.MapFrom(src => src.InventoryTransactionHeader.TransactionDetail.SrcInventoryId))
+            .ForMember(dest => dest.DistInventoryId, opt => opt.MapFrom(src => src.InventoryTransactionHeader.TransactionDetail.DistInventoryId))
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.InventoryTransactionHeader.TransactionDetail.UserId))
+            // .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.InventoryTransactionHeader.TransactionDetail.User.FirstName + " " + src.InventoryTransactionHeader.TransactionDetail.User.LastName));
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.InventoryTransactionHeader.TransactionDetail.User.UserName));
 
-                .ReverseMap();
 
             // product diminsion :
             CreateMap<Product, Product_DiminsionDto>()
@@ -418,8 +436,11 @@ namespace Blink_API.MapperConfigs
                 .ForMember(dest => dest.BrandId, option => option.MapFrom(src => src.Brand.BrandId))
                 .ForMember(dest => dest.BrandImage, option => option.MapFrom(src => src.Brand.BrandImage))
                 .ForMember(dest => dest.BrandDescription, option => option.MapFrom(src => src.Brand.BrandDescription))
-                .ForMember(dest => dest.ProductImagePath, option => option.MapFrom(src => src.ProductImages.FirstOrDefault().ProductImagePath))
-                // .ForMember(dest => dest.BrandWebSiteURL, option => option.MapFrom(src => src.Brand.WebSiteURL))
+              
+                .ForMember(dest => dest.BrandWebSiteURL, option => option.MapFrom(src => src.Brand.BrandWebSiteURL))
+                 .ForMember(dest => dest.ProductImagePaths, opt => opt.MapFrom(src =>
+        src.ProductImages.Select(pi => pi.ProductImagePath).ToList()))
+    
                 .ReverseMap();
 
 

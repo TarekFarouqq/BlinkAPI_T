@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BiDataRepos
 {
-    public class Discount_DiminsionRepo : GenericRepo<Discount, int>
+    public class Discount_DiminsionRepo : GenericRepo<ProductDiscount, int>
     {
         private readonly BlinkDbContext _blinkDbContext;
         public Discount_DiminsionRepo(BlinkDbContext blinkDbContext) : base(blinkDbContext)
@@ -11,10 +11,11 @@ namespace Blink_API.Repositories.BiDataRepos
             _blinkDbContext = blinkDbContext;
         }
 
-        public async IAsyncEnumerable<Discount> GetAllAsStream()
+        public async IAsyncEnumerable<ProductDiscount> GetAllAsStream()
         {
-            await foreach (var item in _blinkDbContext.Discounts
-                .Where(b => b.IsDeleted == false)
+            await foreach (var item in _blinkDbContext.ProductDiscounts
+                 .Include(pd => pd.Discount)
+                // .Where(b => b.IsDeleted == false)
                 .AsAsyncEnumerable())
             {
                 yield return item;
