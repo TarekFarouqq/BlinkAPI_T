@@ -13,18 +13,26 @@
 
         private string? GetDefaultMessageForStatusCode(int statusCode)
         {
-
             return statusCode switch
             {
-
                 400 => "A Bad Request, You Have Made",
                 401 => "Authorized, You Are Not",
                 404 => "Resource Was Not Found",
                 500 => "Errors Are The Path To The Dark Side. Errors Lead To Anger. Anger Leads To Hate. Hate Leads To Career Change",
                 _ => null
             };
+        }
+    }
 
+    // ✅ النسخة الجينيريك اللي بترجع Data مع الرسالة
+    public class ApiResponse<T> : ApiResponse
+    {
+        public T? Data { get; set; }
 
+        public ApiResponse(int statusCode, string? message = null, T? data = default)
+            : base(statusCode, message)
+        {
+            Data = data;
         }
     }
 }

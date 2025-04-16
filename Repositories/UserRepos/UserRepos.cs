@@ -100,5 +100,15 @@ namespace Blink_API.Repositories.UserRepos
 
         }
 
+        public async Task<ApplicationUser> UpdateUserPhoneNumber(string id, string newPhone)
+        {
+            var user = await GetById(id);
+            if (user != null)
+                user.PhoneNumber = newPhone;
+            db.Users.Update(user);
+            await SaveChanges();
+            return user;
+        }
+
     }
 }
