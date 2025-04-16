@@ -33,10 +33,7 @@ namespace Blink_API
 
             // Add services to the container.
             builder.Services.AddDbContext<BlinkDbContext>(s =>
-s.UseSqlServer(builder.Configuration.GetConnectionString("conString")));
-            { s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=>sqlOption.CommandTimeout(300));
-                
-            });
+s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=>sqlOption.CommandTimeout(300)));
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<BlinkDbContext>()
                 .AddDefaultTokenProviders()

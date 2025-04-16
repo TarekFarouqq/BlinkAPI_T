@@ -448,7 +448,7 @@ namespace Blink_API.MapperConfigs
                 .ForMember(dest => dest.BrandId, option => option.MapFrom(src => src.Brand.BrandId))
                 .ForMember(dest => dest.BrandImage, option => option.MapFrom(src => src.Brand.BrandImage))
                 .ForMember(dest => dest.BrandDescription, option => option.MapFrom(src => src.Brand.BrandDescription))
-                .ForMember(dest => dest.ProductImagePath, option => option.MapFrom(src => src.ProductImages.FirstOrDefault().ProductImagePath))
+                .ForMember(dest => dest.ProductImagePaths, option => option.MapFrom(src => src.ProductImages.FirstOrDefault().ProductImagePath))
                 // .ForMember(dest => dest.BrandWebSiteURL, option => option.MapFrom(src => src.Brand.WebSiteURL))
                 .ReverseMap();
 
