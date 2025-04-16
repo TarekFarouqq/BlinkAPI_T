@@ -26,6 +26,7 @@ namespace Blink_API.Repositories.BiDataRepos
         public async IAsyncEnumerable<StockProductInventory> GetAllAsStream()
         {
             await foreach (var stockFact in _blinkDbContext.StockProductInventories
+                .AsNoTracking()
                 .Include(b => b.Inventory)
                 .Include(b => b.Product)
               .Where(s => s.IsDeleted || !s.IsDeleted)

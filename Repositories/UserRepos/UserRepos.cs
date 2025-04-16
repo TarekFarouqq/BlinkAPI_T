@@ -70,5 +70,23 @@ namespace Blink_API.Repositories.UserRepos
             }
         }
 
+        public async Task<List<ApplicationUser>> GetAllPaginated(int pageNumber, int pageSize)
+        {
+            return await db.Users
+                .Where(u => !u.IsDeleted)
+                .OrderBy(u => u.UserName)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        // Get number of pages
+        public async Task<int> GetPagesCount(int pageSize)
+        {
+            var count = await db.Users.CountAsync(u => !u.IsDeleted);
+            return (int)Math.Ceiling(count / (double)pageSize);
+        }
+
     }
 }
