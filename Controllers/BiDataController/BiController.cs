@@ -15,6 +15,7 @@ namespace Blink_API.Controllers.BiDataController
         {
             _biStockService = biStockService;
         }
+       
 
         // Stock_Fact
         [HttpGet]
@@ -58,24 +59,24 @@ namespace Blink_API.Controllers.BiDataController
         //}
         #endregion
         // payment_diminsion
-        [HttpGet]
-        [Route("GetAllPaymentsInChunks")]
-        public async IAsyncEnumerable<List<Payment_DimensionDto>> GetAllPaymentsInChunks()
-        {
-            await foreach (var chunk in _biStockService.GetAllPaymentsInChunks())
-            {
-                yield return chunk;
-            }
-        }
+        //[HttpGet]
+        //[Route("GetAllPaymentsInChunks")]
+        //public async IAsyncEnumerable<List<Payment_DimensionDto>> GetAllPaymentsInChunks()
+        //{
+        //    await foreach (var chunk in _biStockService.GetAllPaymentsInChunks())
+        //    {
+        //        yield return chunk;
+        //    }
+        //}
 
         #region old
-        //[HttpGet]
-        //[Route("GetAllPayments")]
-        //public async Task<ActionResult> GetAllPayments()
-        //{
-        //    var payments = await _biStockService.GetAllPayments();
-        //    return Ok(payments);
-        //}
+        [HttpGet]
+        [Route("GetAllPayments")]
+        public async Task<ActionResult> GetAllPayments()
+        {
+            var payments = await _biStockService.GetAllPayments();
+            return Ok(payments);
+        }
         #endregion
         // user_roles_diminsion
         [HttpGet]

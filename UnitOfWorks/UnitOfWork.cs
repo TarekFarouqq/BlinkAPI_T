@@ -1,34 +1,19 @@
 ﻿using Blink_API.Models;
 using Blink_API.Repositories;
-using Blink_API.Repositories;
-
 using Blink_API.Repositories.BrandRepository;
-
 using Blink_API.Repositories.BranchRepos;
- 
 using Blink_API.Repositories.CartRepos;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Repositories.InventoryRepos;
-
-
-using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 using Blink_API.Repositories.Order;
 using AutoMapper;
-
 using Blink_API.Repositories.BiDataRepos;
-
-using Blink_API.Repositories.Payment;
-
-
-using StackExchange.Redis;
-using Microsoft.EntityFrameworkCore;
-using Blink_API.Repositories.Order;
-using AutoMapper;
-
 using Blink_API.Repositories.ProductRepos;
 using Blink_API.Repositories.UserRepos;
+
 using Blink_API.Repositories.StockProductInventoryRepo;
+
 
 
 
@@ -37,18 +22,11 @@ namespace Blink_API
     public class UnitOfWork
     {
         private readonly BlinkDbContext db;
-
-
-        
-
         internal object cart_DiminsionRepos;
-
-
- 
         public DbContext Context => db;
-
         BrandRepos brandRepo;
         ProductRepo productRepo;
+        ProductReviewRepo productReviewRepo;
         ProductSupplierRepo productSupplierRepo;
         CategoryRepo categoryRepo;
         DiscountRepo discountRepo;
@@ -60,8 +38,6 @@ namespace Blink_API
         OrderHeaderRepository orderRepo;
         OrderDetailsRepository orderDetailsRepo;
         UserRepos UserRepos;
-
-
         // **** for bi ***
         BiDataRepos biDataRepos;
         Review_DimensionRepos reviewDiminsionRepo;
@@ -82,7 +58,6 @@ namespace Blink_API
         {
             db = _db;
         }
-
        
         // user :
         public UserRepos UserRepo
@@ -108,6 +83,7 @@ namespace Blink_API
             }
         }
 
+
         public OrderDetailsRepository OrderDetailRepo
         {
             get
@@ -131,7 +107,17 @@ namespace Blink_API
                 return productRepo;
             }
         }
-
+        public ProductReviewRepo ProductReviewRepo
+        {
+            get
+            {
+                if (productReviewRepo == null)
+                {
+                    productReviewRepo = new ProductReviewRepo(db);
+                }
+                return productReviewRepo;
+            }
+        }
         public ProductSupplierRepo ProductSupplierRepo
         {
             get
@@ -143,7 +129,6 @@ namespace Blink_API
                 return productSupplierRepo;
             }
         }
-
         public InventoryRepo InventoryRepo
         {
             get
@@ -155,6 +140,7 @@ namespace Blink_API
                 return inventoryRepo;
             }
         }
+
         public StockProductInventoryRepository  StockProductInventoryRepo
         {
             get
@@ -178,7 +164,6 @@ namespace Blink_API
                 return categoryRepo;
             }
         }
-
         public DiscountRepo DiscountRepo
         {
             get
@@ -190,8 +175,6 @@ namespace Blink_API
                 return discountRepo;
             }
         }
-
-
         public CartRepo CartRepo
         {
             get
@@ -203,7 +186,6 @@ namespace Blink_API
                 return cartRepo;
             }
         }
-
         public CartDetailsRepo CartDetailsRepo
         {
             get
@@ -215,8 +197,6 @@ namespace Blink_API
                 return cartDetailsRepo;
             }
         }
-
-
         public BrandRepos BrandRepos
         {
             get
@@ -228,9 +208,6 @@ namespace Blink_API
                 return brandRepo;
             }
         }
-
-
-
         public BranchRepos BranchRepos
         {
             get
@@ -242,12 +219,6 @@ namespace Blink_API
                 return branchRepos;
             }
         }
-
-
-
-       
-
-
 
         // *************************************  for bidatarepos ************************************:
         public BiDataRepos BiDataRepos
@@ -338,8 +309,6 @@ namespace Blink_API
                 return productDiscountRepo;
             }
         }
-
-        
         public Inventory_transactionRepo InventoryTransactionRepo
         {
             get
@@ -355,9 +324,7 @@ namespace Blink_API
                 inventoryTransactionRepo = value;
             }
         }
-
         // cart diminsion:
-
         public cart_DiminsionRepos CartDiminsionRepos
         {
             get
@@ -397,7 +364,6 @@ namespace Blink_API
             }
         }
 
-        
         public Branch_InventoryRepos BranchInventoryRepos
         {
             get
@@ -423,10 +389,7 @@ namespace Blink_API
             }
         }
 
-
         // product dimintion :
-
-
         public Product_DiminsionRepos ProductDiminsionRepos
         {
             get
@@ -438,11 +401,6 @@ namespace Blink_API
                 return _productDiminsionRepos;
             }
         }
-
-
-    
-    
-
 
         public async Task<int> CompleteAsync()
          => await db.SaveChangesAsync();

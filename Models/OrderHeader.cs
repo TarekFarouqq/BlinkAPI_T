@@ -24,7 +24,7 @@ namespace Blink_API.Models
         public decimal OrderTotalAmount { get; set; }
         [Required]
         [StringLength(50)]
-        public string OrderStatus { get; set; }
+        public string OrderStatus { get; set; } 
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new HashSet<OrderDetail>();
         public int PaymentId { get; set; }
         [ForeignKey("PaymentId")]

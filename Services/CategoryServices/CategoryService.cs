@@ -4,6 +4,7 @@ using Blink_API.DTOs.CategoryDTOs;
 using Blink_API.Models;
 using Blink_API.Repositories;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace Blink_API.Services
 {
@@ -40,11 +41,7 @@ namespace Blink_API.Services
             var resultMapping= mapper.Map<ChildCategoryDTO>(category);
             return resultMapping;
         }
-
-
-
-        //adding category
-         public async Task<string> AddedCategory(CreateCategoryDTO dTO)
+        public async Task<string> AddedCategory(CreateCategoryDTO dTO)
         {
             if(dTO.ParentCategoryId.HasValue && dTO.ParentCategoryId.Value > 0)
             {
@@ -62,8 +59,6 @@ namespace Blink_API.Services
             
             return "category is added";
         }
-
-
         public async Task<string> SoftDeleteCategory(int id)
         {
             var category = await unitOfWork.CategoryRepo.GetById(id);
@@ -73,9 +68,6 @@ namespace Blink_API.Services
             await unitOfWork.CategoryRepo.Delete(id);
             return "Category soft deleted successfully.";
         }
-
-
-
         public async Task<string> UpdateCategory(int id, UpdateCategoryDTO dto)
         {
             // Fetch the existing category
@@ -101,19 +93,109 @@ namespace Blink_API.Services
             category.CategoryImage = dto.CategoryImage;
             category.ParentCategoryId = dto.ParentCategoryId;
 
-            await unitOfWork.CategoryRepo.UpdateCategoryAsync(category);
+            //await unitOfWork.CategoryRepo.UpdateCategoryAsync(category);
 
             return "Category updated successfully.";
         }
-
-
-
         public async Task<ICollection<ChildCategoryDTO>> GetChildCategoryByParentId(int id)
         {
             var category = await unitOfWork.CategoryRepo.GetChildCategoryByParentId(id);
             var resultMapping = mapper.Map<ICollection<ChildCategoryDTO>>(category);
             return resultMapping;
         }
+        #region Sprint 3
+        public async Task<List<ReadCategoryDTO>> GetAll()
+        {
+            var categories = await unitOfWork.CategoryRepo.GetAll();
+            var resultMapping = mapper.Map<List<ReadCategoryDTO>>(categories);
+            return resultMapping;
+        }
+        public async Task<ReadCategoryDTO> GetById(int id)
+        {
+            var categories = await unitOfWork.CategoryRepo.GetById(id);
+            var resultMapping = mapper.Map<ReadCategoryDTO>(categories);
+            return resultMapping;
+        }
+        public async Task<bool> DeleteParentCategory(int id)
+        {
+            return await unitOfWork.CategoryRepo.DeleteParentCategory(id);
+        }
+        public async Task<bool> DeleteChildCategory(int id)
+        {
+            return await unitOfWork.CategoryRepo.DeleteSubCategory(id);
+        }        
+        public async Task<bool> AddCategory(InsertCategoryDTO insertCategoryDTO)
+        {
+            var parentCategory = mapper.Map<Category>(insertCategoryDTO);
+            if(insertCategoryDTO.CategoryImage != null)
+            {
+                parentCategory.CategoryImage = await SaveImageAsync(insertCategoryDTO.CategoryImage);
+            }
+            parentCategory.SubCategories = new List<Category>();
+            if(insertCategoryDTO?.SubCategories!= null)
+            {
+                foreach (var subDTO in insertCategoryDTO.SubCategories)
+                {
+                    var subCategory = mapper.Map<Category>(subDTO);
+                    subCategory.ParentCategory = parentCategory;
+                    if (subDTO.CategoryImage != null)
+                    {
+                        subCategory.CategoryImage = await SaveImageAsync(subDTO.CategoryImage);
+                    }
+                    parentCategory.SubCategories.Add(subCategory);
+                }
+            }
+            bool isInserted = await unitOfWork.CategoryRepo.AddCategory(parentCategory);
+            return isInserted;
+        }
+        public async Task<bool> UpdateCategory(UpdateParentCategoryDTO dto)
+        {
+            var category = mapper.Map<Category>(dto);
+            if (dto.NewImage != null && dto.NewImage.Length > 0)
+            {
+                category.CategoryImage = await SaveImageAsync(dto.NewImage);
+            }
+            else if (!string.IsNullOrEmpty(dto.OldImage))
+            {
+                category.CategoryImage = dto.OldImage.StartsWith("/images") ? dto.OldImage : "/images/" + dto.OldImage;
+            }
+            category.SubCategories = new List<Category>();
+            if (dto.SubCategories != null && dto.SubCategories.Any())
+            {
+                foreach (var subDto in dto.SubCategories)
+                {
+                    var subCategory = mapper.Map<Category>(subDto);
+                    subCategory.ParentCategoryId = category.CategoryId;
 
+                    if (subDto.NewImage != null && subDto.NewImage.Length > 0)
+                    {
+                        subCategory.CategoryImage = await SaveImageAsync(subDto.NewImage);
+                    }
+                    else if (!string.IsNullOrEmpty(subDto.OldImage))
+                    {
+                        subCategory.CategoryImage = subDto.OldImage.StartsWith("/images") ? subDto.OldImage : "/images/" + subDto.OldImage;
+                    }
+                    category.SubCategories.Add(subCategory);
+                }
+            }
+            return await unitOfWork.CategoryRepo.UpdateCategoryWithChildren(category);
+        }
+
+        public async Task<string> SaveImageAsync(IFormFile imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "category");
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var fullPath = Path.Combine(folderPath, uniqueFileName);
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+            return "/" + Path.Combine("images", "category", uniqueFileName).Replace("\\", "/");
+        }
+        #endregion
     }
 }

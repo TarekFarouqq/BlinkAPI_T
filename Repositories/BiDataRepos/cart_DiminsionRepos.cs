@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BiDataRepos
 {
-    public class cart_DiminsionRepos:GenericRepo<Cart, int>
+    public class cart_DiminsionRepos:GenericRepo<CartDetail, int>
 
     {
         private readonly BlinkDbContext _blinkDbContext;
@@ -11,12 +11,12 @@ namespace Blink_API.Repositories.BiDataRepos
         {
             _blinkDbContext = blinkDbContext;
         }
-        public async IAsyncEnumerable<Cart> GetAllAsStream()
+        public async IAsyncEnumerable<CartDetail> GetAllAsStream()
         {
-            await foreach (var item in _blinkDbContext.Carts
-                .Include(b => b.CartDetails)
-                .ThenInclude(b => b.Product)
-                .Where(b => b.IsDeleted == false)
+            await foreach (var item in _blinkDbContext.CartDetails
+                .Include(b => b.Cart)
+               // .ThenInclude(b => b.Product)
+               // .Where(b => b.IsDeleted == false)
                 .AsAsyncEnumerable())
             {
                 yield return item;

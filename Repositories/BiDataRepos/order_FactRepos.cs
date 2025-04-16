@@ -17,7 +17,7 @@ namespace Blink_API.Repositories.BiDataRepos
             await foreach (var item in _blinkDbContext.OrderDetails
                 .Include(b => b.OrderHeader)
                 .Include(b => b.product)
-                .Where(b => b.IsDeleted == false)
+               
                 .AsAsyncEnumerable())
             {
                 yield return item;

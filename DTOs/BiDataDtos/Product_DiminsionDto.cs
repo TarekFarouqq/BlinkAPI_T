@@ -26,7 +26,7 @@ namespace Blink_API.DTOs.BiDataDtos
         public string BrandDescription { get; set; }
 
 
-        public string ProductImagePath { get; set; }
+        public List<string> ProductImagePaths { get; set; }
 
         public string BrandWebSiteURL { get; set; }
 

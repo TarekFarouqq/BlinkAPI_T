@@ -4,17 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BiDataRepos
 {
-    public class Branch_InventoryRepos: GenericRepo<Branch,int>
+    public class Branch_InventoryRepos: GenericRepo<Inventory, int>
     {
         private readonly BlinkDbContext _blinkDbContext;
         public Branch_InventoryRepos(BlinkDbContext context) : base(context)
         {
             _blinkDbContext = context;
         }
-        public async IAsyncEnumerable<Branch> GetAllAsStream()
+        public async IAsyncEnumerable<Inventory> GetAllAsStream()
         {
-            await foreach (var item in _blinkDbContext.Branches
-                .Where(b => b.IsDeleted == false)
+            await foreach (var item in _blinkDbContext.Inventories
+                 .Include(i => i.Branch)
+                // .Where(b => b.IsDeleted == false)
                 .AsAsyncEnumerable())
             {
                 yield return item;
