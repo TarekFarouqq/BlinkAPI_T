@@ -286,5 +286,13 @@ namespace Blink_API.Services.Product
             var productStock = await unitOfWork.ProductRepo.GetProductStock(ProductId);
             return productStock;
         }
+        #region Sprint3
+        public async Task<bool> CheckUserAvailableToReview(string userId, int productId)
+        {
+            if (userId == null & productId <= 0)
+                return false;
+            return await unitOfWork.ProductRepo.CheckUserAvailableToReview(userId,productId);
+        }
+        #endregion
     }
 }

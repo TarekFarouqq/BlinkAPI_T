@@ -1,13 +1,20 @@
 ﻿using Blink_API.DTOs.OrdersDTO;
+using Blink_API.Errors;
+using Blink_API.Models;
 
 namespace Blink_API.Services.OrderServicees
 {
-    //public interface IOrderServices
-    //{
-    //    Task<orderDTO?> CreateOrderAsync(string userId);
-    //    Task<orderDTO?> GetOrderByPaymentIntentIdAsync(string paymentIntentId);
-    //    Task<IEnumerable<orderDTO>> GetOrdersForUserAsync(string userId);
-    //    Task<orderDTO?> UpdatePaymentStatusAsync(string paymentIntentId, bool isSucceeded);
+    public interface IOrderServices
+    {
+        
+        Task<OrderToReturnDto> CreateOrderAsync(CreateOrderDTO createOrderDTO);
 
-    //}
+
+        Task<OrderToReturnDto> GetOrderByIdAsync(int orderId);
+
+      
+
+        Task<bool> DeleteOrderAsync(int orderId);
+
+    }
 }

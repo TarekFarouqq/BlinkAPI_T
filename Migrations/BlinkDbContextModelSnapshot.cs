@@ -22,6 +22,29 @@ namespace Blink_API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Blink_API.Models.Advertisment", b =>
+                {
+                    b.Property<int>("AdvertismentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AdvertismentId"));
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("isDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("AdvertismentId");
+
+                    b.ToTable("Advertisments");
+                });
+
             modelBuilder.Entity("Blink_API.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -197,8 +220,7 @@ namespace Blink_API.Migrations
 
                     b.HasKey("CartId");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Carts");
                 });

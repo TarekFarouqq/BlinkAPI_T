@@ -17,7 +17,6 @@ namespace Blink_API.Models
         public decimal StockUnitPrice { get; set; }
         public int StockQuantity { get; set; }
         public bool IsDeleted { get; set; } = false;
-
         // Fleunt pk
     }
 }

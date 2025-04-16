@@ -54,7 +54,7 @@ namespace Blink_API.Repositories.CartRepos
 
             var cart = await GetByUserId(id);
 
-            if (cart == null)
+            if (cart == null || cart.IsDeleted == true )
             {
                 cart = new Cart() { UserId = id };
                 await db.Carts.AddAsync(cart);

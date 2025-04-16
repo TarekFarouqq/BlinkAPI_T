@@ -70,6 +70,7 @@ namespace Blink_API.Repositories.UserRepos
             }
         }
 
+<<<<<<< HEAD
         public async Task<List<ApplicationUser>> GetAllPaginated(int pageNumber, int pageSize)
         {
             return await db.Users
@@ -86,6 +87,17 @@ namespace Blink_API.Repositories.UserRepos
         {
             var count = await db.Users.CountAsync(u => !u.IsDeleted);
             return (int)Math.Ceiling(count / (double)pageSize);
+=======
+
+        public async Task<ApplicationUser> UpdateUserAddress(string id, string newAddress)
+        {
+            var user = await GetById(id);
+            if (user != null) 
+            user.Address = newAddress;
+            db.Users.Update(user);
+            await SaveChanges();
+            return user;
+>>>>>>> 4b9a6b3b4b2363ff62e3fdf1a8992134e4a307b6
         }
 
     }

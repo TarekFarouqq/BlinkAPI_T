@@ -3,159 +3,186 @@
 using Blink_API.Models;
 using Blink_API;
 using Blink_API.Services;
-public class orderService 
+using Blink_API.Services.OrderServicees;
+using Blink_API.DTOs.OrdersDTO;
+using Blink_API.Services.UserService;
+using Blink_API.Services.InventoryService;
+using Blink_API.Errors;
+using System.Runtime.CompilerServices;
+using Blink_API.Services.Helpers;
+public class orderService :IOrderServices
 {
     private readonly UnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly InventoryService _inventoryService;
 
-    public orderService(UnitOfWork unitOfWork, IMapper mapper)
+    public orderService(UnitOfWork unitOfWork, IMapper mapper,InventoryService inventoryService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+       _inventoryService = inventoryService;
     }
 
-    /////public async Task<orderDTO?> CreateOrderAsync(string userId)
-    /////{
-    /////    var cart = await _unitOfWork.CartRepo.GetByUserId(userId);
-    /////    if (cart == null || cart.CartDetails.Count == 0) return null;
-    ///
-    /////    var payment = await _unitOfWork.PaymentRepo.GetByPaymentIntentId(cart.OrderHeader.PaymentIntentId);
-    /////    if (payment == null) return null;
-    ///
-    /////    var order = new OrderHeader
-    /////    {
-    /////        OrderDate = DateTime.UtcNow,
-    /////        OrderStatus = "Pending",
-    /////        OrderSubtotal = cart.CartDetails.Sum(i => i.Quantity * i.Product.),
-    /////        OrderShippingCost = cart.ShippingPrice,
-    /////        OrderTax = 0, // أو تحسب الضريبة حسب اللوجيك بتاعك
-    /////        OrderTotalAmount = cart.CartItems.Sum(i => i.Quantity * i.Product.GetCurrentPrice()) + cart.ShippingPrice,
-    /////        PaymentIntentId = cart.PaymentIntentId,
-    /////        PaymentId = payment.PaymentId,
-    /////        CartId = cart.CartId
-    /////    };
-    ///
-    /////    foreach (var item in cart.CartItems)
-    /////    {
-    /////        order.OrderDetails.Add(new OrderDetail
-    /////        {
-    /////            ProductId = item.ProductId,
-    /////            SellQuantity = item.Quantity,
-    /////            SellPrice = item.Product.GetCurrentPrice()
-    /////        });
-    /////    }
-    ///
-    /////    await _unitOfWork.OrderRepo.AddAsync(order);
-    /////    await _unitOfWork.CompleteAsync();
-    ///
-    /////    return _mapper.Map<orderDTO>(order);
-    /////}
-    ///
-    /////public async Task<orderDTO?> GetOrderByPaymentIntentIdAsync(string paymentIntentId)
-    /////{
-    /////    var order = await _unitOfWork.OrderRepo.GetOrderByPaymentIntentId(paymentIntentId);
-    /////    return order != null ? _mapper.Map<orderDTO>(order) : null;
-    /////}
-    ///
-    /////public async Task<IEnumerable<orderDTO>> GetOrdersForUserAsync(string userId)
-    /////{
-    /////    var orders = await _unitOfWork.OrderRepo.GetOrdersByUserId(userId);
-    /////    return _mapper.Map<IEnumerable<orderDTO>>(orders);
-    /////}
-    ///
-    /////public async Task<orderDTO?> UpdatePaymentStatusAsync(string paymentIntentId, bool isSucceeded)
-    /////{
-    /////    var order = await _unitOfWork.OrderRepo.GetOrderByPaymentIntentId(paymentIntentId);
-    /////    if (order == null) return null;
-    ///
-    /////    order.OrderStatus = isSucceeded ? "PaymentReceived" : "PaymentFailed";
-    /////    _unitOfWork.OrderRepo.Update(order);
-    /////    await _unitOfWork.CompleteAsync();
-    ///
-    /////    return _mapper.Map<orderDTO>(order);
-    /////}
+
+    #region  Abdelazez FInish Order 
 
 
 
 
-    #region Abdelazez 
-    public async Task<List<OrderHeader>> GetAllOrders()
+    public async Task<OrderToReturnDto> CreateOrderAsync(CreateOrderDTO createOrderDTO)
     {
-        return await _unitOfWork.OrderRepo.GetOrdersWithDetails();
-    }
-    public async Task<OrderHeader?> GetOrderById(int id)
-    {
-        return await _unitOfWork.OrderRepo.GetOrderByIdWithDetails(id);
-    }
+        // Get Cart + Cart Details + Product + StockProductInventories
+        var cart = await _unitOfWork.CartRepo.GetByUserId(createOrderDTO.UserId);
+        if (cart == null || !cart.CartDetails.Any())
+            throw new Exception("Cart is empty or not found.");
 
-    public async Task AddOrder(OrderHeader order)
-    {
-        _unitOfWork.OrderRepo.Add(order);
+        // prepare List of OrderDetails
+        List<OrderDetail> orderDetails = new List<OrderDetail>();
+
+        // looping on cartDetails
+        foreach (var cartDetail in cart.CartDetails)
+        {
+            if (cartDetail.Product == null)
+                throw new Exception($"Product with ID {cartDetail.ProductId} not found in cart.");
+
+            var productId = cartDetail.ProductId;
+            var quantity = cartDetail.Quantity;
+            //var inventories = cartDetail.Product.StockProductInventories
+            //    .Where(sp => !sp.IsDeleted && sp.ProductId == productId);
+            var inventories = await _unitOfWork.StockProductInventoryRepo.GetAvailableInventoriesForProduct(productId);
+
+
+
+            var closestInventory = inventories
+                .Where(i => i.StockQuantity >= quantity)
+                .OrderBy(i => Helper.CalculateDistance(createOrderDTO.Lat, createOrderDTO.Long, i.Inventory.Lat, i.Inventory.Long))
+                .FirstOrDefault();
+
+            if (closestInventory == null)
+                throw new Exception($"No available inventory found for product {productId}");
+
+            closestInventory.StockQuantity -= quantity;
+            if (closestInventory.StockQuantity <= 0)
+            {
+                closestInventory.IsDeleted = true;
+            }
+            _unitOfWork.StockProductInventoryRepo.Update(closestInventory);
+            decimal avgPrice = inventories.Any() ? inventories.Average(s => s.StockUnitPrice) : 0;
+
+            orderDetails.Add(new OrderDetail
+            {
+                ProductId = productId,
+                SellQuantity = quantity,
+                SellPrice = avgPrice
+            });
+
+            // Update StockProductInventory
+            var inventoryItem = inventories.FirstOrDefault();
+            if (inventoryItem != null)
+            {
+                inventoryItem.StockQuantity -= quantity;
+
+                if (inventoryItem.StockQuantity <= 0)
+                {
+                    inventoryItem.IsDeleted = true;
+                }
+
+                _unitOfWork.StockProductInventoryRepo.Update(inventoryItem);
+            }
+        }
+
+        // Create OrderHeader
+        var orderHeader = new OrderHeader
+        {
+            CartId = cart.CartId,
+            OrderDate = DateTime.UtcNow,
+            OrderStatus = "shipped",
+            OrderTotalAmount = orderDetails.Sum(od => od.SellQuantity * od.SellPrice),
+            Payment = new Payment
+            {
+                Method = createOrderDTO.PaymentMethod,
+                PaymentDate = DateTime.UtcNow,
+                PaymentStatus = "pending",
+                PaymentIntentId = "0"
+            },
+            PaymentIntentId = "0",
+            OrderShippingCost = 10,
+            OrderTax = 14,
+        };
+
+        // Save OrderHeader
+        _unitOfWork.OrderRepo.Add(orderHeader);
         await _unitOfWork.CompleteAsync();
-    }
 
-    public async Task DeleteOrder(int id)
-    {
-        await _unitOfWork.OrderRepo.Delete(id);
+        // Assign OrderHeaderId to OrderDetails
+        foreach (var detail in orderDetails)
+        {
+            detail.OrderHeaderId = orderHeader.OrderHeaderId;
+            _unitOfWork.OrderDetailRepo.Add(detail);
+        }
+
         await _unitOfWork.CompleteAsync();
+
+        // Clear Cart 
+        cart.IsDeleted = true;
+        _unitOfWork.CartRepo.Update(cart);
+
+        // Update User Address
+        await _unitOfWork.UserRepo.UpdateUserAddress(createOrderDTO.UserId, createOrderDTO.Address);
+        await _unitOfWork.CompleteAsync();
+
+        // Map OrderHeader to OrderToReturnDto
+        var orderToReturn = _mapper.Map<OrderToReturnDto>(orderHeader);
+        return orderToReturn;
     }
 
 
-    public async Task UpdateOrder(OrderHeader order)
+    //  get Order by Id
+    public async Task<OrderToReturnDto> GetOrderByIdAsync(int orderId)
     {
+        if (orderId <= 0)
+            throw new Exception("Order number Encorrect");
+        var order = await _unitOfWork.OrderRepo.GetOrderByIdWithDetails(orderId);
+        if (order is null)
+            throw new Exception("Order Not Found");
+        return _mapper.Map<OrderToReturnDto>(order);
+
+
+    }
+
+
+
+    public async Task<bool> DeleteOrderAsync(int orderId)
+    {
+        var order = await _unitOfWork.OrderRepo.GetOrderByIdWithDetails(orderId);
+
+        if (order is null) return false;
+        else
+        {
+            foreach (var item in order.OrderDetails)
+            {
+                item.IsDeleted = true;
+                _unitOfWork.OrderDetailRepo.Update(item);
+            }
+            order.IsDeleted = true;
+            order.OrderStatus = "cancelled";
+        }
         _unitOfWork.OrderRepo.Update(order);
-        await _unitOfWork.CompleteAsync();
 
+        var inventoryReturned = await _inventoryService.ReturnInventoryQuantityAfterOrderDelete(orderId);
+
+        if (!inventoryReturned) return false;
+
+        await _unitOfWork.CompleteAsync();
+        return true;
     }
+
+
+
 
     #endregion
 
 
 
-
-}
-
-
-
-namespace Blink_API.Services.OrderServicees
-{
-    public class orderServices
-    {
-        private readonly UnitOfWork _unitOfWork;
-
-        public orderServices(UnitOfWork unitOfWork)
-        {
-           _unitOfWork = unitOfWork;
-        }
-
-        public async Task<List<OrderHeader>> GetAllOrders()
-        {
-            return await _unitOfWork.OrderRepo.GetOrdersWithDetails();
-        }
-        public async Task<OrderHeader?> GetOrderById(int id)
-        {
-            return await _unitOfWork.OrderRepo.GetOrderByIdWithDetails(id);
-        }
-
-        public async Task AddOrder(OrderHeader order)
-        {
-             _unitOfWork.OrderRepo.Add(order);
-           await _unitOfWork.CompleteAsync();
-        }
-
-        public async Task DeleteOrder(int id)
-        {
-            await _unitOfWork.OrderRepo.Delete(id);
-            await _unitOfWork.CompleteAsync();
-        }
-
-
-        public async Task UpdateOrder(OrderHeader order)
-        {
-            _unitOfWork.OrderRepo.Update(order);
-            await _unitOfWork.CompleteAsync();
-
-        }
-    }
 }
 

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Reflection.Emit;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,6 +32,7 @@ namespace Blink_API.Models
         public DbSet<ProductAttributes> ProductAttributes { get; set; }
         public DbSet<ReviewSuppliedProduct> ReviewSuppliedProducts { get; set; }
         public DbSet<ReviewSuppliedProductImages> ReviewSuppliedProductImages { get; set; }
+        public DbSet<Advertisment> Advertisments { get; set; }
         public BlinkDbContext() : base() 
         {
 
@@ -43,9 +45,11 @@ namespace Blink_API.Models
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-           
+
             base.OnModelCreating(builder);
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+
         }
 
     }

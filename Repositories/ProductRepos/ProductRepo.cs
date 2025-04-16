@@ -8,11 +8,7 @@ namespace Blink_API.Repositories
 {
     public class ProductRepo : GenericRepo<Product, int>
     {
-        private readonly BlinkDbContext db;
-        public ProductRepo(BlinkDbContext _db) : base(_db)
-        {
-            db = _db;
-        }
+        public ProductRepo(BlinkDbContext db) : base(db){}
         public override async Task<List<Product>> GetAll()
         {
             return await db.Products
@@ -24,6 +20,8 @@ namespace Blink_API.Repositories
                 .Include(i => i.ProductImages.Where(pi => !pi.IsDeleted))
                 .Include(r => r.Reviews)
                 .ThenInclude(rc => rc.ReviewComments)
+                .Include(r=>r.Reviews)
+                .ThenInclude(ru=>ru.User)
                 .Include(sip => sip.StockProductInventories)
                 .Include(pd => pd.ProductDiscounts)
                 .ThenInclude(d => d.Discount)
@@ -78,11 +76,14 @@ namespace Blink_API.Repositories
         {
             return await db.Products
                .Include(u => u.User)
+                .Include(u => u.User)
                 .Include(b => b.Brand)
                 .Include(c => c.Category)
                 .Include(i => i.ProductImages.Where(pi => !pi.IsDeleted))
                 .Include(r => r.Reviews)
                 .ThenInclude(rc => rc.ReviewComments)
+                .Include(r => r.Reviews)
+                .ThenInclude(ru => ru.User)
                 .Include(sip => sip.StockProductInventories)
                 .Include(pd => pd.ProductDiscounts)
                 .ThenInclude(d => d.Discount)
@@ -303,20 +304,23 @@ namespace Blink_API.Repositories
             await db.StockProductInventories.AddRangeAsync(stockProductInventories);
             await SaveChanges();
         }
-        public async Task UpdateStockProducts(ICollection<StockProductInventory> stockProductInventories)
+        public async Task UpdateStockProducts(ICollection<StockProductInventory> newStockProductInventories)
         {
-            db.StockProductInventories.RemoveRange(stockProductInventories);
+            if (!newStockProductInventories.Any()) return;
+            int productId = newStockProductInventories.First().ProductId;
+            var existingStockProducts = await db.StockProductInventories
+                .Where(sp => sp.ProductId == productId)
+                .ToListAsync();
+            db.StockProductInventories.RemoveRange(existingStockProducts);
             await SaveChanges();
-            await AddStockProducts(stockProductInventories);
+            await AddStockProducts(newStockProductInventories);
         }
-
-        // count products to check brand:
-        //public async Task <int> productsCount(int brandId)
-        //{
-        //    return await db.Products.Where(p=>p.BrandId == brandId).CountAsync();
-        //}
-
-
-        
+        public async Task<bool> CheckUserAvailableToReview(string userId, int productId)
+        {
+            return await db.OrderDetails
+                         .AsNoTracking()
+                         .AnyAsync(od => od.ProductId == productId
+                                      && od.OrderHeader.Cart.UserId == userId);
+        }
     }
 }
