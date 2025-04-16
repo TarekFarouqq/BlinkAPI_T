@@ -3,18 +3,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BiDataRepos
 {
-    public class InventoryTransaction_factRepos : GenericRepo<TransactionDetail, int>
+    public class InventoryTransaction_factRepos : GenericRepo<TransactionProduct, int>
     {
         private readonly BlinkDbContext _blinkDbContext;
         public InventoryTransaction_factRepos(BlinkDbContext blinkDbContext) : base(blinkDbContext)
         {
             _blinkDbContext = blinkDbContext;
         }
-        public async IAsyncEnumerable<TransactionDetail> GetAllAsStream()
+        public async IAsyncEnumerable<TransactionProduct> GetAllAsStream()
         {
-            await foreach (var item in _blinkDbContext.TransactionDetails
+            await foreach (var item in _blinkDbContext.TransactionProducts
                 .Include(b => b.InventoryTransactionHeader)
-                .Where(b => b.IsDeleted == false)
+                .ThenInclude(th => th.TransactionDetail)
+            .ThenInclude(td => td.User)
+    .AsNoTracking()
+
                 .AsAsyncEnumerable())
             {
                 yield return item;

@@ -44,5 +44,12 @@ namespace Blink_API.Repositories
         {
             await db.SaveChangesAsync();
         }
+
+        // for testttt
+        public virtual IAsyncEnumerable<TEntity> GetAllAsStream()
+        {
+            return db.Set<TEntity>().AsAsyncEnumerable();
+        }
+
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using AutoMapper;
 using Blink_API.DTOs.Product;
 using Blink_API.DTOs.Category;

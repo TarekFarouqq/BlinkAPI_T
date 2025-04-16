@@ -84,15 +84,15 @@ namespace Blink_API.Controllers.Brand
         }
         [HttpDelete("{id}")]
         public async Task<ActionResult> SoftDeleteBrand(int id)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+        { 
             if(id == 0 )
                 return BadRequest();
             var result = await brandService.SoftDeleteBrand(id);
 
-            if(result.StatusCode != 200)
-                return NotFound(new ApiResponse(404,"Brand Not Found"));
+            if (result.StatusCode ==404)
+                return NotFound(new ApiResponse(404, "Brand Not Found"));
+            if (result.StatusCode == 409)
+                return Conflict(result);
 
             return Ok(result);
         }

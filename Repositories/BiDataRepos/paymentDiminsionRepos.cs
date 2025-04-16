@@ -10,7 +10,6 @@ namespace Blink_API.Repositories.BiDataRepos
         {
             _blinkDbContext = blinkDbContext;
         }
-
         //public async override Task<List<Blink_API.Models.Payment>> GetAll();
 
 
@@ -24,16 +23,22 @@ namespace Blink_API.Repositories.BiDataRepos
                 yield return payment;
             }
         }
-
-
         #region old
-        //public async override Task<List<Payment>> GetAll()
+        //public async override Task<List<Blink_API.Models.Payment>> GetAll()
         //{
         //    return await _blinkDbContext.Payments
-
         //        .Where(b => b.IsDeleted == false)
         //        .ToListAsync();
         //}
+
+        public override  IAsyncEnumerable<Blink_API.Models.Payment> GetAllAsStream()
+{
+            return _blinkDbContext.Payments
+                        .AsNoTracking()
+       // .Where(p => p.IsDeleted == false)
+        .AsAsyncEnumerable();
+}
+
         #endregion
     }
 }

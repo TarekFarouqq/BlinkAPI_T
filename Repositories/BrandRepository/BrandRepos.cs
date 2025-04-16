@@ -17,12 +17,14 @@ namespace Blink_API.Repositories.BrandRepository
             return await db.Brands
                 .AsNoTracking()
                 .Where(b => !b.IsDeleted)
+                .Include(b=>b.Products)
                 .ToListAsync();
         }
         public async override Task<Brand?> GetById(int id)
         {
             return await db.Brands
                 .Where(b => b.BrandId == id && !b.IsDeleted)
+                  .Include(b => b.Products)
                 .FirstOrDefaultAsync();
         }
         public async Task<List<Brand>> GetByName(string name)
@@ -57,14 +59,37 @@ namespace Blink_API.Repositories.BrandRepository
             }
             return brand;
         }
-        public async Task SoftDeleteBrand2(int id)
+        public async Task<bool> SoftDeleteBrand(int id)
         {
-            var brand = await GetById(id);
+            bool canDelete = true;
+            var brand = await db.Brands
+                .Include(b => b.Products)
+                .FirstOrDefaultAsync(b => b.BrandId == id);
             if (brand != null)
             {
-                brand.IsDeleted = true;
+                var products = brand.Products.ToList();
+                foreach (var product in products)
+                {
+                    if (product.IsDeleted == false)
+                    {
+                        canDelete = false;
+                    }
+                }
+                if (canDelete)
+                {
+                    brand.IsDeleted = true;
+                    await SaveChanges();
+                }
             }
-            await SaveChanges();
+            return canDelete;
+        
+            
+            //var brand = await GetById(id);
+            //if (brand != null)
+            //{
+            //    brand.IsDeleted = true;
+            //}
+            //await SaveChanges();
         }
         public async Task<bool> SoftDeleteBrand(int id)
         {

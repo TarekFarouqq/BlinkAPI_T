@@ -7,6 +7,7 @@ using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Repositories.InventoryRepos;
 using Microsoft.EntityFrameworkCore;
 using Blink_API.Repositories.Order;
+using AutoMapper;
 using Blink_API.Repositories.BiDataRepos;
 using Blink_API.Repositories.ProductRepos;
 using Blink_API.Repositories.UserRepos;
