@@ -64,6 +64,33 @@ namespace Blink_API.Repositories.CartRepos
             return cart.CartId;
         }
 
+
+        public async Task<bool> DeleteCart(int id)
+        {
+            var cart = await db.Carts
+                .Include(p => p.CartDetails)
+                .FirstOrDefaultAsync(c => c.CartId == id && !c.IsDeleted);
+
+            if (cart == null)
+                return false;
+
+            bool hasCartDetails = cart.CartDetails.Any(p => !p.IsDeleted);
+
+            if (hasCartDetails)
+            {
+                foreach (var cartDetail in cart.CartDetails)
+                {
+                    cartDetail.IsDeleted = true;
+                }
+            }
+
+
+            cart.IsDeleted = true;
+            await db.SaveChangesAsync();
+
+            return true;
+        }
+
         #region Handle cart
         ///public async Task<bool> DeleteCartAsync(string basketId)
         ///{
