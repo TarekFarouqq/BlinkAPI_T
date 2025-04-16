@@ -66,7 +66,7 @@ namespace Blink_API.Services.CartService
                 }
             
 
-            await unitOfWork.CartDetailsRepo.SaveChanges();
+            await unitOfWork.CompleteAsync();
 
             // Fetch the updated cart after adding items
             var updatedCart = await unitOfWork.CartRepo.GetByUserId(Userid);
