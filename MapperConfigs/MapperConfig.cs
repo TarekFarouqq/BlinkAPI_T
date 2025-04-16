@@ -27,6 +27,7 @@ using Blink_API.DTOs.OrdersDTO;
 using Blink_API.DTOs.CartDTOs;
 using Blink_API.Services.PaymentServices;
 using Blink_API.DTOs.PaymentCart;
+using Blink_API.DTOs.IdentityDTOs.UserDTOs;
 
 
 
@@ -309,7 +310,7 @@ namespace Blink_API.MapperConfigs
             //    .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.OrderDetails));
 
             //// OrderDetail → ConfirmedOrderItemDTO
-          
+
             //// Payment → PaymentDTO
             //CreateMap<Payment, PaymentDTO>()
             //    .ForMember(dest => dest.PaymentIntentId, opt => opt.MapFrom(src => src.PaymentIntentId))
@@ -325,7 +326,7 @@ namespace Blink_API.MapperConfigs
             // user :
             CreateMap<ApplicationUser, UserDto>()
                   // map role in aspnetroles :
-                  .ForMember(dest => dest.Role, opt => opt.Ignore())
+                  .ForMember(dest => dest.Role, opt => opt.Ignore());
                  
 
 
@@ -522,8 +523,8 @@ namespace Blink_API.MapperConfigs
                  .ForMember(dest => dest.ProductImagePaths, opt => opt.MapFrom(src =>
         src.ProductImages.Select(pi => pi.ProductImagePath).ToList()))
     
+                //.ForMember(dest => dest.ProductImagePaths, option => option.MapFrom(src => src.ProductImages.FirstOrDefault().ProductImagePath))
                 .ReverseMap();
-                .ForMember(dest => dest.ProductImagePath, option => option.MapFrom(src => src.ProductImages.FirstOrDefault().ProductImagePath))
                // .ForMember(dest => dest.BrandWebSiteURL, option => option.MapFrom(src => src.Brand.WebSiteURL))
  
 
@@ -531,7 +532,6 @@ namespace Blink_API.MapperConfigs
 
 
 
-                .ReverseMap();
 
         }
     }

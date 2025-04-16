@@ -27,7 +27,7 @@ namespace Blink_API.Services.BiDataService
 
         public async IAsyncEnumerable<List<stock_factDto>> GetAllStockFactsInChunks()
         {
-            var chunkSize = 1000;
+            var chunkSize = 5000;
             var chunk = new List<stock_factDto>();
 
             await foreach (var stockFact in _unitOfWork.BiDataRepos.GetAllAsStream())
@@ -445,7 +445,7 @@ namespace Blink_API.Services.BiDataService
         //get all product diminsion :
         public async IAsyncEnumerable<List<Product_DiminsionDto>> GetAllProductDimensionsInChunks()
         {
-            var chunkSize = 1000;   
+            var chunkSize = 25000;   
             var chunk = new List<Product_DiminsionDto>();
 
             await foreach (var product in _unitOfWork.ProductDiminsionRepos.GetAllProductsAsStream())
