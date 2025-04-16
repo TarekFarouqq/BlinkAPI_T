@@ -31,15 +31,12 @@ public class orderService :IOrderServices
 
     public async Task<OrderToReturnDto> CreateOrderAsync(CreateOrderDTO createOrderDTO)
     {
-        // Get Cart + Cart Details + Product + StockProductInventories
         var cart = await _unitOfWork.CartRepo.GetByUserId(createOrderDTO.UserId);
         if (cart == null || !cart.CartDetails.Any())
             throw new Exception("Cart is empty or not found.");
 
-        // prepare List of OrderDetails
         List<OrderDetail> orderDetails = new List<OrderDetail>();
 
-        // looping on cartDetails
         foreach (var cartDetail in cart.CartDetails)
         {
             if (cartDetail.Product == null)
@@ -47,51 +44,52 @@ public class orderService :IOrderServices
 
             var productId = cartDetail.ProductId;
             var quantity = cartDetail.Quantity;
-            //var inventories = cartDetail.Product.StockProductInventories
-            //    .Where(sp => !sp.IsDeleted && sp.ProductId == productId);
+
             var inventories = await _unitOfWork.StockProductInventoryRepo.GetAvailableInventoriesForProduct(productId);
 
+            var sortedInventories = inventories
+                .Where(i => i.StockQuantity > 0)
+                .OrderBy(i => Helper.CalculateDistance(
+                    createOrderDTO.Lat,
+                    createOrderDTO.Long,
+                    i.Inventory.Lat,
+                    i.Inventory.Long))
+                .ToList();
 
+            int remainingQuantity = quantity;
+            decimal totalPrice = 0;
+            int totalTaken = 0;
 
-            var closestInventory = inventories
-                .Where(i => i.StockQuantity >= quantity)
-                .OrderBy(i => Helper.CalculateDistance(createOrderDTO.Lat, createOrderDTO.Long, i.Inventory.Lat, i.Inventory.Long))
-                .FirstOrDefault();
-
-            if (closestInventory == null)
-                throw new Exception($"No available inventory found for product {productId}");
-
-            closestInventory.StockQuantity -= quantity;
-            if (closestInventory.StockQuantity <= 0)
+            foreach (var inventory in sortedInventories)
             {
-                closestInventory.IsDeleted = true;
+                if (remainingQuantity <= 0)
+                    break;
+
+                int takeQty = Math.Min(inventory.StockQuantity, remainingQuantity);
+                inventory.StockQuantity -= takeQty;
+                totalPrice += takeQty * inventory.StockUnitPrice;
+                totalTaken += takeQty;
+                remainingQuantity -= takeQty;
+
+                if (inventory.StockQuantity <= 0)
+                    inventory.IsDeleted = true;
+
+                _unitOfWork.StockProductInventoryRepo.Update(inventory);
             }
-            _unitOfWork.StockProductInventoryRepo.Update(closestInventory);
-            decimal avgPrice = inventories.Any() ? inventories.Average(s => s.StockUnitPrice) : 0;
+
+            if (totalTaken < quantity)
+                throw new Exception($"Not enough inventory available for product {productId}");
+
+            decimal avgPrice = totalPrice / totalTaken;
 
             orderDetails.Add(new OrderDetail
             {
                 ProductId = productId,
-                SellQuantity = quantity,
+                SellQuantity = totalTaken,
                 SellPrice = avgPrice
             });
-
-            // Update StockProductInventory
-            var inventoryItem = inventories.FirstOrDefault();
-            if (inventoryItem != null)
-            {
-                inventoryItem.StockQuantity -= quantity;
-
-                if (inventoryItem.StockQuantity <= 0)
-                {
-                    inventoryItem.IsDeleted = true;
-                }
-
-                _unitOfWork.StockProductInventoryRepo.Update(inventoryItem);
-            }
         }
 
-        // Create OrderHeader
         var orderHeader = new OrderHeader
         {
             CartId = cart.CartId,
@@ -110,11 +108,9 @@ public class orderService :IOrderServices
             OrderTax = 14,
         };
 
-        // Save OrderHeader
         _unitOfWork.OrderRepo.Add(orderHeader);
         await _unitOfWork.CompleteAsync();
 
-        // Assign OrderHeaderId to OrderDetails
         foreach (var detail in orderDetails)
         {
             detail.OrderHeaderId = orderHeader.OrderHeaderId;
@@ -123,19 +119,15 @@ public class orderService :IOrderServices
 
         await _unitOfWork.CompleteAsync();
 
-        // Clear Cart 
         cart.IsDeleted = true;
         _unitOfWork.CartRepo.Update(cart);
 
-        // Update User Address
         await _unitOfWork.UserRepo.UpdateUserAddress(createOrderDTO.UserId, createOrderDTO.Address);
         await _unitOfWork.CompleteAsync();
 
-        // Update UserPhoneNumber
-        await _unitOfWork.UserRepo.UpdateUserPhoneNumber(createOrderDTO.UserId,createOrderDTO.PhoneNumber);
+        await _unitOfWork.UserRepo.UpdateUserPhoneNumber(createOrderDTO.UserId, createOrderDTO.PhoneNumber);
         await _unitOfWork.CompleteAsync();
 
-        // Map OrderHeader to OrderToReturnDto
         var orderToReturn = _mapper.Map<OrderToReturnDto>(orderHeader);
         return orderToReturn;
     }
