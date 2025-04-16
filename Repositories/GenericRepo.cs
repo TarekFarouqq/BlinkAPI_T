@@ -4,7 +4,7 @@ namespace Blink_API.Repositories
 {
     public class GenericRepo<TEntity, Tkey> where TEntity : class
     {
-        private readonly BlinkDbContext db;
+        protected readonly BlinkDbContext db;
         public GenericRepo(BlinkDbContext _db)
         {
             db = _db;

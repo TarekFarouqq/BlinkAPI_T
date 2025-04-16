@@ -89,7 +89,7 @@ namespace Blink_API.Services.BrandServices
             }
             else
             {
-                return new ApiResponse(409, "Brand Can't Delete Because there is an Products Related to it");
+                return new ApiResponse(200, "Brand Can't Delete Because there is an Products Related to it");
             }
         }
         private async Task<string> SaveFileAsync(IFormFile file)
