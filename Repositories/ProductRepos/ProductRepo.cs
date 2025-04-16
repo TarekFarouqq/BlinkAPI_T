@@ -309,5 +309,14 @@ namespace Blink_API.Repositories
             await SaveChanges();
             await AddStockProducts(stockProductInventories);
         }
+
+        // count products to check brand:
+        //public async Task <int> productsCount(int brandId)
+        //{
+        //    return await db.Products.Where(p=>p.BrandId == brandId).CountAsync();
+        //}
+
+
+        
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Blink_API.DTOs.Product;
+using Blink_API.Models;
 
 namespace Blink_API.DTOs.BrandDtos
 {
@@ -11,9 +13,7 @@ namespace Blink_API.DTOs.BrandDtos
         public string BrandDescription { get; set; }
         public string BrandWebSiteURL { get; set; }
 
-        // product within this brand :
-       // public List<string> Products { get; set; }
-
-
+         
+      // public List<ProductDetailsDTO> Products { get; set; }
     }
 }

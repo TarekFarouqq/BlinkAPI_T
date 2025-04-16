@@ -322,6 +322,12 @@ namespace Blink_API.MapperConfigs
 
 
 
+            // user :
+            CreateMap<ApplicationUser, UserDto>()
+                  // map role in aspnetroles :
+                  .ForMember(dest => dest.Role, opt => opt.Ignore())
+                 
+
 
 
 
@@ -345,7 +351,7 @@ namespace Blink_API.MapperConfigs
                  .ForMember(dest => dest.ReviewComments, opt => opt.MapFrom(src => src.ReviewComments.Select(c => c.Content).ToList()))
     
                 .ReverseMap();
-=======
+
             //Payment
             CreateMap<CartPaymentDTO, CustomerCart>();
             CreateMap<CartPaymentDTO, Cart>().ReverseMap();

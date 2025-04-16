@@ -27,7 +27,16 @@ namespace Blink_API.Services.UserService
         public async Task<ICollection<UserDto>> GetAllUsers()
         {
             var users = await unitOfWork.UserRepo.GetAll();
-            return mapper.Map<ICollection<UserDto>>(users);
+            var usersDto = mapper.Map<List<UserDto>>(users);
+
+            for (int i = 0; i < users.Count; i++)
+            {
+                var roles = await userManager.GetRolesAsync(users[i]);
+                usersDto[i].Role = roles.FirstOrDefault();
+            }
+
+            return usersDto;
+            // return mapper.Map<ICollection<UserDto>>(users);
         }
 
         // get by id :
@@ -35,7 +44,12 @@ namespace Blink_API.Services.UserService
         {
             var user = await unitOfWork.UserRepo.GetById(id);
             if (user == null) return null;
-            return mapper.Map<UserDto>(user);
+            var userDto = mapper.Map<UserDto>(user);
+            var roles = await userManager.GetRolesAsync(user);
+            userDto.Role = roles.FirstOrDefault();
+
+            return userDto;
+            // return mapper.Map<UserDto>(user);
         }
         // get by name :
         public async Task<List<UserDto>> GetUserByName(string name)
@@ -43,13 +57,12 @@ namespace Blink_API.Services.UserService
             var users = await unitOfWork.UserRepo.GetByUserName(name);
             if (users == null || !users.Any()) return new List<UserDto>();
             var usersDto = mapper.Map<List<UserDto>>(users);
-            foreach (var usrer in users)
+            for (int i = 0; i < users.Count; i++)
             {
-                var roles = await userManager.GetRolesAsync(usrer);
-                var userDto = mapper.Map<UserDto>(usrer);
-                userDto.Role = roles.FirstOrDefault();
-
+                var roles = await userManager.GetRolesAsync(users[i]);
+                usersDto[i].Role = roles.FirstOrDefault();
             }
+
             return usersDto;
         }
 
