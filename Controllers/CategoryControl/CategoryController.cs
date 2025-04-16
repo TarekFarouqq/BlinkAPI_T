@@ -183,7 +183,7 @@ namespace Blink_API.Controllers
                 return BadRequest(new { Message = "Failed To Insert New Category" });
             }
         }
-        [HttpPut]
+        [HttpPost("UpdateCategory")]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult> UpdateCategory([FromForm] UpdateParentCategoryDTO updateCategoryDTO)
         {
