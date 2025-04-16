@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Reflection.Metadata.Ecma335;
+using Blink_API.DTOs.Product;
 using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Models;
 using Blink_API.Services.Product;
@@ -14,10 +15,12 @@ namespace Blink_API.Controllers.Product
     {
         private readonly ProductService productService;
         private readonly ReviewSuppliedProductService reviewSuppliedProductsService;
-        public ProductController(ProductService _productService , ReviewSuppliedProductService _reviewSuppliedProductsService)
+        private readonly ProductReviewService productReviewService;
+        public ProductController(ProductService _productService , ReviewSuppliedProductService _reviewSuppliedProductsService, ProductReviewService _productReviewService)
         {
             productService = _productService;
             reviewSuppliedProductsService = _reviewSuppliedProductsService;
+            productReviewService = _productReviewService;
         }
         [HttpGet]
         public async Task<ActionResult> GetAll()
@@ -274,8 +277,35 @@ namespace Blink_API.Controllers.Product
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { error = "Model State is Invalid" });
+            if(model == null)
+                return BadRequest(new { error = "Model is Null" });
             await reviewSuppliedProductsService.UpdateRequestProduct(requestId,model);
             return Ok(new { success = "Product Reviewed Success" });
+        }
+        #endregion
+        #region Sprint3
+        [HttpGet("CheckUserAvailableToReview/{userId}/{productId}")]
+        public async Task<ActionResult> CheckUserAvailableToReview(string userId, int productId)
+        {
+            var result = await productService.CheckUserAvailableToReview(userId, productId);
+            return Ok(new {userAllow= result });
+        }
+        [HttpPost("AddReview")]
+        public async Task<ActionResult> AddReview(UserReviewCommentDTO reviewCommentDTO)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { Message = "Model State is Invalid" });
+            if (reviewCommentDTO == null)
+                return BadRequest(new { Message = "Model is Null" });
+            var result = await productReviewService.AddRevew(reviewCommentDTO);
+            if (result)
+            {
+                return Ok(new { Message = "Review Added Success" });
+            }
+            else
+            {
+                return BadRequest(new { Message = "There is an error happened" });
+            }
         }
         #endregion
     }

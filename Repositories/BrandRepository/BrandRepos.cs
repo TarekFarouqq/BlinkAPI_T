@@ -57,7 +57,7 @@ namespace Blink_API.Repositories.BrandRepository
             }
             return brand;
         }
-        public async Task SoftDeleteBrand(int id)
+        public async Task SoftDeleteBrand2(int id)
         {
             var brand = await GetById(id);
             if (brand != null)
@@ -65,6 +65,30 @@ namespace Blink_API.Repositories.BrandRepository
                 brand.IsDeleted = true;
             }
             await SaveChanges();
+        }
+        public async Task<bool> SoftDeleteBrand(int id)
+        {
+            bool canDelete = true;
+            var brand = await db.Brands
+                .Include(b => b.Products)
+                .FirstOrDefaultAsync(b => b.BrandId == id);
+            if (brand != null)
+            {
+                var products = brand.Products.ToList();
+                foreach (var product in products)
+                {
+                    if (product.IsDeleted == false)
+                    {
+                        canDelete = false;
+                    }
+                }
+                if (canDelete)
+                {
+                    brand.IsDeleted = true;
+                    await SaveChanges();
+                }
+            }
+            return canDelete;
         }
     }
 }

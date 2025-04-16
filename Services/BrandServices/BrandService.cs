@@ -82,8 +82,15 @@ namespace Blink_API.Services.BrandServices
             var brand = await unitOfWork.BrandRepos.GetById(id);
             if (brand == null)
                 throw new Exception("Brand Not Found");
-            await unitOfWork.BrandRepos.SoftDeleteBrand(id);
-            return new ApiResponse(200, "Brand Successfull Deleted");
+            bool isDeleted = await unitOfWork.BrandRepos.SoftDeleteBrand(id);
+            if (isDeleted)
+            {
+                return new ApiResponse(200, "Brand Successfull Deleted");
+            }
+            else
+            {
+                return new ApiResponse(200, "Brand Can't Delete Because there is an Products Related to it");
+            }
         }
         private async Task<string> SaveFileAsync(IFormFile file)
         {

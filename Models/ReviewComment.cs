@@ -13,9 +13,8 @@ namespace Blink_API.Models
         [Required]
         [StringLength(500, ErrorMessage = "Comment content cannot exceed 500 characters.")]
         public string Content { get; set; }
+        public bool IsDeleted { get; set; } = false;
         [ForeignKey("ReviewId")]
         public virtual Review Review { get; set; }
-        public bool IsDeleted { get; set; } = false;
-
     }
 }

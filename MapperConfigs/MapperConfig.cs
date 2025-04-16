@@ -41,27 +41,52 @@ namespace Blink_API.MapperConfigs
     {
         public MapperConfig()
         {
+            // Start Category
             CreateMap<Category, ParentCategoryDTO>().ReverseMap();
-            ///////
             CreateMap<Category, ChildCategoryDTO>().ReverseMap();
-            ///////
-            CreateMap<Product, ProductDetailsDTO>()
-                .ForMember(dest => dest.SupplierName, option => option.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
-                .ForMember(dest => dest.BrandName, option => option.MapFrom(src => src.Brand.BrandName))
-                .ForMember(dest => dest.CategoryName, option => option.MapFrom(src => src.Category.CategoryName))
-                .ForMember(dest => dest.ProductImages, option => option.MapFrom(src => src.ProductImages.Select(img => img.ProductImagePath).ToList()))
-                .ForMember(dest => dest.AverageRate, option => option.MapFrom(src => src.Reviews.Any() == true ? src.Reviews.Average(r => r.Rate) : 0))
-                .ForMember(dest => dest.ProductReviews, option => option.MapFrom(src => src.Reviews.Select(r => new ReviewCommentDTO
+            CreateMap<Category, ReadCategoryDTO>()
+               .ForMember(dest => dest.SubCategories, opt => opt.MapFrom(src =>
+                   src.SubCategories.Where(c => !c.IsDeleted)));
+            CreateMap<Category, ReadChildCategoryDTO>();
+            CreateMap<InsertChildCategoryDTO, Category>()
+           .ForMember(dest => dest.CategoryImage, opt => opt.Ignore())
+           .ForMember(dest => dest.SubCategories, opt => opt.Ignore()) 
+           .ForMember(dest => dest.ParentCategory, opt => opt.Ignore())
+           .ForMember(dest => dest.ParentCategoryId, opt => opt.Ignore());
+
+            CreateMap<InsertCategoryDTO, Category>()
+                .ForMember(dest => dest.CategoryImage, opt => opt.Ignore())
+                .ForMember(dest => dest.SubCategories, opt => opt.Ignore()) 
+                .ForMember(dest => dest.ParentCategory, opt => opt.Ignore())
+                .ForMember(dest => dest.ParentCategoryId, opt => opt.Ignore());
+
+            CreateMap<UpdateParentCategoryDTO, Category>()
+            .ForMember(dest => dest.CategoryImage, opt => opt.Ignore())
+            .ForMember(dest => dest.SubCategories, opt => opt.Ignore())
+            .ForMember(dest => dest.ParentCategory, opt => opt.Ignore());
+
+            CreateMap<UpdateChildCategoryDTO, Category>()
+                .ForMember(dest => dest.CategoryImage, opt => opt.Ignore())
+                .ForMember(dest => dest.SubCategories, opt => opt.Ignore())
+                .ForMember(dest => dest.ParentCategory, opt => opt.Ignore());
+
+            // End Of Category
+            //Review Comment
+            CreateMap<UserReviewCommentDTO, Review>()
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+            .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
+            .ForMember(dest => dest.Rate, opt => opt.MapFrom(src => src.ReviewRate))
+            .ForMember(dest => dest.CreationDate, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.ReviewComments, opt => opt.MapFrom(src => new List<ReviewComment>
+            {
+                new ReviewComment
                 {
-                    Rate = r.Rate,
-                    ReviewComment = r.ReviewComments.Select(rc => rc.Content).ToList()
-                })))
-                .ForMember(dest => dest.CountOfRates, option => option.MapFrom(src => src.Reviews.Select(r => r.ReviewId).Count()))
-                .ForMember(dest => dest.ProductPrice, option =>
-                option.MapFrom(src => src.StockProductInventories.Any() == true ? src.StockProductInventories.Average(p => p.StockUnitPrice) : 0))
-                .ForMember(dest => dest.StockQuantity, option =>
-                option.MapFrom(src => src.StockProductInventories.Any() == true ? src.StockProductInventories.Sum(s => s.StockQuantity) : 0))
-                .ReverseMap();
+                    Content = src.Comment,
+                    IsDeleted = false
+                }
+            }))
+            .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => false)).ReverseMap();
+            // End Of Review Comment
             ///////
             CreateMap<Discount, DiscountDetailsDTO>()
                 .ForMember(dest => dest.DiscountProducts, option => option.MapFrom(src => src.ProductDiscounts.Select(dp => new DiscountProductDetailsDTO
@@ -86,7 +111,7 @@ namespace Blink_API.MapperConfigs
                 }
             ))).ReverseMap();
             ///////
-
+           
 
             CreateMap<CreateCategoryDTO, Category>();
 
@@ -96,12 +121,18 @@ namespace Blink_API.MapperConfigs
                 .ForMember(dest => dest.BrandName, option => option.MapFrom(src => src.Brand.BrandName))
                 .ForMember(dest => dest.CategoryName, option => option.MapFrom(src => src.Category.CategoryName))
                 .ForMember(dest => dest.ProductImages, option => option.MapFrom(src => src.ProductImages.Select(img => img.ProductImagePath).ToList()))
-                .ForMember(dest => dest.AverageRate, option => option.MapFrom(src => src.Reviews.Any() == true ? src.Reviews.Average(r => r.Rate) : 0))
-                 .ForMember(dest => dest.ProductReviews, option => option.MapFrom(src => src.Reviews.Select(r => new ReviewCommentDTO
-                 {
-                     Rate = r.Rate,
-                     ReviewComment = r.ReviewComments.Select(rc => rc.Content).ToList()
-                 })))
+                .ForMember(dest => dest.AverageRate, option => 
+                option.MapFrom(src => src.Reviews.Any() == true ? src.Reviews.Average(r => r.Rate) : 0))
+                .ForMember(dest => dest.ProductReviews, option => 
+                option.MapFrom(src => src.Reviews != null ? src.Reviews.Select(r => new ReviewCommentDTO
+                    {
+                        Username = r.User != null ? r.User.UserName : "Unknown User",
+                        Rate = r.Rate,
+                        ReviewComment = r.ReviewComments != null
+                            ? r.ReviewComments.Select(rc => rc.Content).ToList()
+                            : new List<string>()
+                    }).ToList()
+                    : new List<ReviewCommentDTO>()))
                 .ForMember(dest => dest.CountOfRates, option => option.MapFrom(src => src.Reviews.Select(r => r.ReviewId).Count()))
                 .ForMember(dest => dest.ProductPrice, option =>
                 option.MapFrom(src => src.StockProductInventories.Any() == true ? src.StockProductInventories.Average(p => p.StockUnitPrice) : 0))
