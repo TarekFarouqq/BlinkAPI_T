@@ -203,7 +203,7 @@ namespace Blink_API.Controllers.Product
             return Ok(productAttributes);
         }
         [HttpGet("GetFillteredProducts/{pgNumber}/{fromPrice}/{toPrice}/{rating}")]
-        public async Task<ActionResult> GetFillteredProducts(int pgNumber,decimal fromPrice,decimal toPrice,int rating)
+        public async Task<ActionResult> GetFillteredProducts(int pgNumber,decimal fromPrice,decimal toPrice,int rating,int categoryId)
         {
             var filters = HttpContext.Request.Query;
             var filtersProduct = new Dictionary<int, List<string>>();
@@ -219,7 +219,7 @@ namespace Blink_API.Controllers.Product
                     filtersProduct[attributeId].AddRange(filters[key]);
                 }
             }
-            var products = await productService.GetFillteredProducts(filtersProduct, pgNumber,fromPrice,toPrice,rating);
+            var products = await productService.GetFillteredProducts(filtersProduct, pgNumber,fromPrice,toPrice,rating,categoryId);
             return Ok(products);
         }
         #endregion
@@ -285,10 +285,11 @@ namespace Blink_API.Controllers.Product
         #endregion
         #region Sprint3
         [HttpGet("CheckUserAvailableToReview/{userId}/{productId}")]
-        public async Task<ActionResult> CheckUserAvailableToReview(string userId, int productId)
+        public async Task<bool> CheckUserAvailableToReview(string userId, int productId)
         {
             var result = await productService.CheckUserAvailableToReview(userId, productId);
-            return Ok(new {userAllow= result });
+            //return Ok(new {userAllow= result });
+            return result;
         }
         [HttpPost("AddReview")]
         public async Task<ActionResult> AddReview(UserReviewCommentDTO reviewCommentDTO)

@@ -259,7 +259,8 @@ namespace Blink_API.Services.Product
     int pgNumber,
     decimal fromPrice,
     decimal toPrice,
-    int rating)
+    int rating,
+    int categoryId)
         {
             var products = await unitOfWork.ProductRepo.GetFillteredProducts(filtersProduct, pgNumber);
 
@@ -278,7 +279,10 @@ namespace Blink_API.Services.Product
             {
                 mappedProducts = mappedProducts.Where(p => p.AverageRate == rating).ToList();
             }
-
+            if(categoryId >= 0)
+            {
+                mappedProducts=mappedProducts.Where(p=>p.CategoryId==categoryId).ToList();
+            }
             return mappedProducts;
         }
         public async Task<ICollection<StockProductInventory>> GetProductStock(int ProductId)

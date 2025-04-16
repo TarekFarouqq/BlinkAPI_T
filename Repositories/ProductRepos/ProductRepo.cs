@@ -262,6 +262,7 @@ namespace Blink_API.Repositories
                 .AsNoTracking()
                 .Include(p => p.ProductAttributes)
                 .ThenInclude(fa => fa.FilterAttribute)
+                .Include(c=>c.Category)
                 .Where(p => !p.IsDeleted)
                 .AsQueryable();
             foreach(var filter in filtersProduct)
