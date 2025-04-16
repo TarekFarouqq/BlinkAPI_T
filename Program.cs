@@ -99,7 +99,7 @@ namespace Blink_API
 
 
             builder.Services.AddScoped<orderService>();
-            builder.Services.AddScoped<orderRepo>();
+            builder.Services.AddScoped<OrderHeaderRepository>();
             // Add Payment
             builder.Services.AddScoped<PaymentServices>();
 

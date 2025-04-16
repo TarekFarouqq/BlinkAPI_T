@@ -79,5 +79,31 @@ namespace Blink_API.Services.InventoryService
             return new ApiResponse(200, "Inventory deleted successfully.");
         }
 
+
+        public async Task<bool> ReturnInventoryQuantityAfterOrderDelete(int orderId)
+        {
+            var orderDetails = await unitOfWork.OrderDetailRepo.GetDetailsByOrderId(orderId);
+
+            if (orderDetails == null || !orderDetails.Any())
+            {
+                return false;
+            }
+
+            foreach (var detail in orderDetails)
+            {
+                var inventory = detail.product.StockProductInventories
+                    .FirstOrDefault(i => !i.IsDeleted && i.ProductId == detail.ProductId);
+
+                if (inventory != null)
+                {
+                    inventory.StockQuantity += detail.SellQuantity;
+                    unitOfWork.StockProductInventoryRepo.Update(inventory);
+                }
+            }
+
+            return true;
+        }
+   
+
     }
 }

@@ -28,6 +28,7 @@ using AutoMapper;
 
 using Blink_API.Repositories.ProductRepos;
 using Blink_API.Repositories.UserRepos;
+using Blink_API.Repositories.StockProductInventoryRepo;
 
 
 
@@ -55,7 +56,9 @@ namespace Blink_API
         CartDetailsRepo cartDetailsRepo;
         BranchRepos branchRepos;
         InventoryRepo inventoryRepo;
-        orderRepo orderRepo;
+        StockProductInventoryRepository stockProductInventoryRepo;
+        OrderHeaderRepository orderRepo;
+        OrderDetailsRepository orderDetailsRepo;
         UserRepos UserRepos;
 
 
@@ -74,6 +77,7 @@ namespace Blink_API
         Branch_InventoryRepos branchInventoryRepos;
         InventoryTransaction_factRepos inventoryTransactionfactRepo;
         Product_DiminsionRepos _productDiminsionRepos;
+
         public UnitOfWork(BlinkDbContext _db)
         {
             db = _db;
@@ -92,18 +96,29 @@ namespace Blink_API
                 return UserRepos;
             }
         }
-        public orderRepo OrderRepo
+        public OrderHeaderRepository OrderRepo
         {
             get
             {
                 if (orderRepo == null)
                 {
-                    orderRepo = new orderRepo(db);
+                    orderRepo = new OrderHeaderRepository(db);
                 }
                 return orderRepo;
             }
         }
 
+        public OrderDetailsRepository OrderDetailRepo
+        {
+            get
+            {
+                if (orderDetailsRepo == null)
+                {
+                    orderDetailsRepo = new OrderDetailsRepository(db);
+                }
+                return orderDetailsRepo;
+            }
+        }
 
         public ProductRepo ProductRepo
         {
@@ -138,6 +153,17 @@ namespace Blink_API
                     inventoryRepo = new InventoryRepo(db);
                 }
                 return inventoryRepo;
+            }
+        }
+        public StockProductInventoryRepository  StockProductInventoryRepo
+        {
+            get
+            {
+                if (stockProductInventoryRepo == null)
+                {
+                    stockProductInventoryRepo = new StockProductInventoryRepository(db);
+                }
+                return stockProductInventoryRepo;
             }
         }
 

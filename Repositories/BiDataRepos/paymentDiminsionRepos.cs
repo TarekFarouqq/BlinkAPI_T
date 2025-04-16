@@ -11,10 +11,10 @@ namespace Blink_API.Repositories.BiDataRepos
             _blinkDbContext = blinkDbContext;
         }
 
-        public async override Task<List<Blink_API.Models.Payment>> GetAll()
+        //public  override Task<List<Blink_API.Models.Payment>> GetAll();
 
 
-        public async IAsyncEnumerable<Payment> GetAllAsStream()
+        public async IAsyncEnumerable<Blink_API.Models.Payment> GetAllAsStream()
 
         {
             await foreach (var payment in _blinkDbContext.Payments

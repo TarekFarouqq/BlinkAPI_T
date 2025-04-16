@@ -70,5 +70,16 @@ namespace Blink_API.Repositories.UserRepos
             }
         }
 
+
+        public async Task<ApplicationUser> UpdateUserAddress(string id, string newAddress)
+        {
+            var user = await GetById(id);
+            if (user != null) 
+            user.Address = newAddress;
+            db.Users.Update(user);
+            await SaveChanges();
+            return user;
+        }
+
     }
 }
