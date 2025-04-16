@@ -72,5 +72,22 @@ namespace Blink_API.Controllers.Users
              
             return Ok(result);
         }
+
+        [HttpGet("GetAllPaginated")]
+        public async Task<ActionResult> GetAllUsersPaginated(int pageNumber = 1, int pageSize = 10)
+        {
+            var users = await userService.GetAllUsersPaginated(pageNumber, pageSize);
+            if (users == null || !users.Any())
+                return NotFound(new ApiResponse(404, "No users found."));
+            return Ok(users);
+        }
+
+        [HttpGet("GetPagesCount")]
+        public async Task<ActionResult> GetPagesCount(int pageSize = 10)
+        {
+            var count = await userService.GetPagesCount(pageSize);
+            return Ok(count);
+        }
+
     }
 }

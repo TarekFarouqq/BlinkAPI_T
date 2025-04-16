@@ -129,5 +129,22 @@ namespace Blink_API.Services.UserService
             return new ApiResponse(200, "User deleted successfully.");
         }
 
+        public async Task<ICollection<UserDto>> GetAllUsersPaginated(int pageNumber, int pageSize)
+        {
+            var users = await unitOfWork.UserRepo.GetAllPaginated(pageNumber, pageSize);
+            var usersDto = mapper.Map<List<UserDto>>(users);
+            for (int i = 0; i < users.Count; i++)
+            {
+                var roles = await userManager.GetRolesAsync(users[i]);
+                usersDto[i].Role = roles.FirstOrDefault();
+            }
+            return usersDto;
+        }
+
+        public async Task<int> GetPagesCount(int pageSize)
+        {
+            return await unitOfWork.UserRepo.GetPagesCount(pageSize);
+        }
+
     }
 }
