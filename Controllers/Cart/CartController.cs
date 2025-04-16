@@ -62,6 +62,17 @@ namespace Blink_API.Controllers.Cart
             return Ok(addedCart);
         }
 
+        [HttpDelete("DeleteCart/{cartId}")]
+        public async Task<ActionResult> DeleteCart(int cartId)
+        {
+            if (cartId <= 0) // Fix: Added a valid condition to check for invalid id
+            {
+                return BadRequest("Invalid cart Id.");
+            }
+
+            await cartService.DeleteCart(cartId); 
+            return NoContent(); 
+        }
 
     }
 }
