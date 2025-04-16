@@ -3,6 +3,7 @@ using Blink_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace Blink_API.Repositories
 {
@@ -154,6 +155,23 @@ namespace Blink_API.Repositories
                 product.IsDeleted = true;
                 product.ProductModificationDate = DateTime.Now;
                 await UpdateProduct(id, product);
+                var cartDetailsContainProducts = await db.CartDetails.Where(cp => cp.ProductId == id && !cp.IsDeleted).ToListAsync();
+                if(cartDetailsContainProducts.Count> 0)
+                {
+                    foreach(var cartDetail in cartDetailsContainProducts)
+                    {
+                        cartDetail.IsDeleted = true;
+                    }
+                }
+                var productReviews = await db.Reviews.Where(rp=>rp.ProductId == id && !rp.IsDeleted).ToListAsync();
+                if(productReviews.Count > 0)
+                {
+                    foreach(var review in productReviews)
+                    {
+                        review.IsDeleted = true;
+                    }
+                }
+                await SaveChanges();
             }
         }
         private async Task RemoveOldImages(int prdId)

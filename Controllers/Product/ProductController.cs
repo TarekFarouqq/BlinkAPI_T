@@ -202,7 +202,7 @@ namespace Blink_API.Controllers.Product
             var productAttributes = await productService.GetProductAttributes(id);
             return Ok(productAttributes);
         }
-        [HttpGet("GetFillteredProducts/{pgNumber}/{fromPrice}/{toPrice}/{rating}")]
+        [HttpGet("GetFillteredProducts/{pgNumber}/{fromPrice}/{toPrice}/{rating}/{categoryId}")]
         public async Task<ActionResult> GetFillteredProducts(int pgNumber,decimal fromPrice,decimal toPrice,int rating,int categoryId)
         {
             var filters = HttpContext.Request.Query;
@@ -288,7 +288,6 @@ namespace Blink_API.Controllers.Product
         public async Task<bool> CheckUserAvailableToReview(string userId, int productId)
         {
             var result = await productService.CheckUserAvailableToReview(userId, productId);
-            //return Ok(new {userAllow= result });
             return result;
         }
         [HttpPost("AddReview")]

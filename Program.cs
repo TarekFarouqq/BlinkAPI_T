@@ -133,9 +133,9 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             builder.Services.AddOpenApi();
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAngularApp", policy =>
+                options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200")
+                    policy.AllowAnyOrigin()
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
@@ -149,7 +149,7 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             }
             app.UseStaticFiles();
             app.UseHttpsRedirection();
-            app.UseCors("AllowAngularApp");
+            app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
