@@ -525,23 +525,18 @@ namespace Blink_API.MapperConfigs
                 .ForMember(dest => dest.BrandId, option => option.MapFrom(src => src.Brand.BrandId))
                 .ForMember(dest => dest.BrandImage, option => option.MapFrom(src => src.Brand.BrandImage))
                 .ForMember(dest => dest.BrandDescription, option => option.MapFrom(src => src.Brand.BrandDescription))
-<<<<<<< HEAD
               
                 .ForMember(dest => dest.BrandWebSiteURL, option => option.MapFrom(src => src.Brand.BrandWebSiteURL))
                  .ForMember(dest => dest.ProductImagePaths, opt => opt.MapFrom(src =>
         src.ProductImages.Select(pi => pi.ProductImagePath).ToList()))
  
     
-                //.ForMember(dest => dest.ProductImagePaths, option => option.MapFrom(src => src.ProductImages.FirstOrDefault().ProductImagePath))
  
-=======
+
                 .ForMember(dest => dest.ProductImagePaths, option => option.MapFrom(src => src.ProductImages.FirstOrDefault().ProductImagePath))
-                // .ForMember(dest => dest.BrandWebSiteURL, option => option.MapFrom(src => src.Brand.WebSiteURL))
->>>>>>> 4b9a6b3b4b2363ff62e3fdf1a8992134e4a307b6
+
                 .ReverseMap();
 
-<<<<<<< HEAD
-=======
 
 
 
@@ -597,9 +592,6 @@ namespace Blink_API.MapperConfigs
              .ReverseMap();
             #endregion
 
-
-
->>>>>>> 4b9a6b3b4b2363ff62e3fdf1a8992134e4a307b6
         }
     }
  
