@@ -91,29 +91,29 @@ namespace Blink_API.Repositories.BrandRepository
             //}
             //await SaveChanges();
         }
-        public async Task<bool> SoftDeleteBrand(int id)
-        {
-            bool canDelete = true;
-            var brand = await db.Brands
-                .Include(b => b.Products)
-                .FirstOrDefaultAsync(b => b.BrandId == id);
-            if (brand != null)
-            {
-                var products = brand.Products.ToList();
-                foreach (var product in products)
-                {
-                    if (product.IsDeleted == false)
-                    {
-                        canDelete = false;
-                    }
-                }
-                if (canDelete)
-                {
-                    brand.IsDeleted = true;
-                    await SaveChanges();
-                }
-            }
-            return canDelete;
-        }
+        //public async Task<bool> SoftDeleteBrand(int id)
+        //{
+        //    bool canDelete = true;
+        //    var brand = await db.Brands
+        //        .Include(b => b.Products)
+        //        .FirstOrDefaultAsync(b => b.BrandId == id);
+        //    if (brand != null)
+        //    {
+        //        var products = brand.Products.ToList();
+        //        foreach (var product in products)
+        //        {
+        //            if (product.IsDeleted == false)
+        //            {
+        //                canDelete = false;
+        //            }
+        //        }
+        //        if (canDelete)
+        //        {
+        //            brand.IsDeleted = true;
+        //            await SaveChanges();
+        //        }
+        //    }
+        //    return canDelete;
+        //}
     }
 }
