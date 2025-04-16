@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.Order
 {
-    public class orderRepo:GenericRepo<OrderHeader,int>
+    public class OrderHeaderRepository:GenericRepo<OrderHeader,int>
     {
         private readonly BlinkDbContext _db;
 
-        public orderRepo(BlinkDbContext db) : base(db)
+        public OrderHeaderRepository(BlinkDbContext db) : base(db)
         {
             _db = db;
         }
@@ -22,13 +22,16 @@ namespace Blink_API.Repositories.Order
 
 
         }
-        public async Task<OrderHeader?> GetOrderByIdWithDetails(int id)
+        public async Task<OrderHeader?> GetOrderByIdWithDetails(int orderId)
         {
             return await _db.OrderHeaders
-                .Include(o => o.OrderDetails)
-                .Include(o => o.Payment)
+               
+                .Include(o => o.OrderDetails.Where(od => !od.IsDeleted))
+                    .ThenInclude(od => od.product) 
+                .Include(o => o.Payment) 
                 .Include(o => o.Cart)
-                .FirstOrDefaultAsync(o => o.OrderHeaderId == id);
+                .Where(o => !o.IsDeleted && o.OrderHeaderId == orderId)
+                 .FirstOrDefaultAsync();
         }
 
         public async Task<OrderHeader?> GetOrderByPaymentIntentId(string paymentIntentId)
@@ -41,6 +44,9 @@ namespace Blink_API.Repositories.Order
                 .Include(o => o.Cart)
                 .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
         }
+
+    
+
 
     }
 }

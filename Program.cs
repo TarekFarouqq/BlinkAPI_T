@@ -77,7 +77,7 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             builder.Services.AddScoped<BrandService>();
             // Add Order
             builder.Services.AddScoped<orderService>();
-            builder.Services.AddScoped<orderRepo>();
+            builder.Services.AddScoped<OrderHeaderRepository>();
             // Add Payment
             builder.Services.AddScoped<PaymentServices>();
             // Add users :

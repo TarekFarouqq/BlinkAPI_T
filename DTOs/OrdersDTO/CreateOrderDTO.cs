@@ -2,9 +2,13 @@
 {
     public class CreateOrderDTO
     {
-        public int CartId { get; set; }
-        public string PaymentIntentId { get; set; } = string.Empty;
-        public decimal ShippingPrice { get; set; }
-        public decimal Tax { get; set; }
+
+        public string UserId { get; set; }
+
+        public string Address { get; set; }
+        public decimal Lat { get; set; }
+        public decimal Long { get; set; }
+
+        public string PaymentMethod { get; set; }  
     }
 }

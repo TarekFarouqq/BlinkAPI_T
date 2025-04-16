@@ -25,11 +25,13 @@ using Blink_API.DTOs.PaymentCart;
 using Blink_API.DTOs.OrdersDTO;
 
 
+
  
 
 using Blink_API.DTOs.IdentityDTOs.UserDTOs;
 using Blink_API.DTOs.UsersDtos;
 using UserDto = Blink_API.DTOs.UsersDtos.UserDto;
+
 
 
 
@@ -200,6 +202,11 @@ namespace Blink_API.MapperConfigs
                 .ReverseMap();
 
 
+
+
+            #region Payment
+
+
             //Payment
 
 
@@ -217,8 +224,8 @@ namespace Blink_API.MapperConfigs
                         .Select(d => d.DiscountAmount)
                         .FirstOrDefault()
                 )))
-            .ForMember(dest => dest.ShippingPrice, opt => opt.Ignore()) 
-            .ForMember(dest => dest.PaymentStatus, opt => opt.Ignore()) 
+            .ForMember(dest => dest.ShippingPrice, opt => opt.Ignore())
+            .ForMember(dest => dest.PaymentStatus, opt => opt.Ignore())
             .ForMember(dest => dest.PaymentIntentId, opt => opt.Ignore())
             .ForMember(dest => dest.PaymentMethod, opt => opt.Ignore())
             .ForMember(dest => dest.ClientSecret, opt => opt.Ignore());
@@ -237,6 +244,8 @@ namespace Blink_API.MapperConfigs
                .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity));
             CreateMap<ReadCartDTO, CartPaymentDTO>().ReverseMap();
 
+
+            #endregion
 
             // orderrrrrrr
             CreateMap<OrderHeader, orderDTO>()
@@ -284,8 +293,70 @@ namespace Blink_API.MapperConfigs
 
 
 
+            CreateMap<CartDetail, CartDetailsDTO>()
+               .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
+               .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName))
+               .ForMember(dest => dest.ProductImageUrl, opt => opt.MapFrom(src =>
+                   src.Product.ProductImages.FirstOrDefault().ProductImagePath)) // Assuming one main image
+               .ForMember(dest => dest.ProductUnitPrice, opt => opt.MapFrom(src =>
+                   src.Product.ProductDiscounts
+                       .Where(d => !d.IsDeleted)
+                       .OrderByDescending(d => d.DiscountAmount)
+                       .Select(d => d.DiscountAmount)
+                       .FirstOrDefault()))
+               .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity));
+            CreateMap<ReadCartDTO, CartPaymentDTO>().ReverseMap();
 
 
+            #region Orderr
+
+            // orderrrrrrr
+            //CreateMap<OrderHeader, orderDTO>()
+            //.ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderHeaderId))
+            //.ForMember(dest => dest.Subtotal, opt => opt.MapFrom(src => src.OrderSubtotal))
+            //.ForMember(dest => dest.Tax, opt => opt.MapFrom(src => src.OrderTax))
+            //.ForMember(dest => dest.Shipping, opt => opt.MapFrom(src => src.OrderShippingCost))
+            //.ForMember(dest => dest.Total, opt => opt.MapFrom(src => src.OrderTotalAmount))
+            //.ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.OrderDetails));
+
+            //CreateMap<OrderDetail, ConfirmedOrderItemDTO>()
+            //    .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.product.ProductName))
+            //    .ForMember(dest => dest.ProductImageUrl, opt => opt.MapFrom(src =>
+            //       src.product.ProductImages != null && src.product.ProductImages.Any()
+            //             ? src.product.ProductImages.FirstOrDefault().ProductImagePath
+            //             : null
+            //         ))
+            //    .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.SellQuantity))
+            //    .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.SellPrice));
+
+            //CreateMap<CreateOrderDTO, OrderHeader>()
+            //    .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => DateTime.UtcNow))  
+            //    .ForPath(dest => dest.Cart.UserId, opt => opt.MapFrom(src => src.UserId));
+
+
+
+
+
+            #region Finish Order..
+
+            CreateMap<OrderHeader, OrderToReturnDto>()
+         .ForMember(dest => dest.Payment, opt => opt.MapFrom(src => src.Payment))
+         .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetails));
+
+            CreateMap<OrderDetail, OrderDetailDto>()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.product.ProductId))
+                .ForMember(dest => dest.SellQuantity, opt => opt.MapFrom(src => src.SellQuantity))
+                .ForMember(dest => dest.SellPrice, opt => opt.MapFrom(src => src.SellPrice));
+
+
+            CreateMap<Payment, PaymentDto>()
+                .ForMember(dest => dest.Method, opt => opt.MapFrom(src => src.Method))
+                .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.PaymentStatus))
+                .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => src.PaymentDate)); 
+
+            #endregion
+
+            #endregion
 
             CreateMap<CartPaymentDTO, CustomerCart>();
             CreateMap<CartPaymentDTO, Cart>().ReverseMap();
@@ -294,8 +365,14 @@ namespace Blink_API.MapperConfigs
 
 
             // user :
+
+            CreateMap<ApplicationUser,UserDto>()
+                  // map role in aspnetroles :
+                  .ForMember(dest => dest.Role, opt => opt.Ignore());
+
             CreateMap<ApplicationUser, UserDto>()
                   .ForMember(dest => dest.Role, opt => opt.Ignore())   
+
                  
 
                 .ReverseMap();
