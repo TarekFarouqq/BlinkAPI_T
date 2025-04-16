@@ -263,26 +263,21 @@ namespace Blink_API.Services.Product
     int categoryId)
         {
             var products = await unitOfWork.ProductRepo.GetFillteredProducts(filtersProduct, pgNumber);
-
-            var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
             if (fromPrice > 0)
-            {
-                mappedProducts = mappedProducts.Where(p => p.ProductPrice >= fromPrice).ToList();
-            }
+                products = products
+                    .Where(p => p.StockProductInventories.Any() &&
+                                p.StockProductInventories.Average(ps => ps.StockUnitPrice) >= fromPrice)
+                    .ToList();
 
             if (toPrice > 0)
-            {
-                mappedProducts = mappedProducts.Where(p => p.ProductPrice <= toPrice).ToList();
-            }
-
-            if (rating >= 0)
-            {
-                mappedProducts = mappedProducts.Where(p => p.AverageRate == rating).ToList();
-            }
-            if(categoryId >= 0)
-            {
-                mappedProducts=mappedProducts.Where(p=>p.CategoryId==categoryId).ToList();
-            }
+                products = products
+                    .Where(p => p.StockProductInventories.Any() &&
+                                p.StockProductInventories.Average(ps => ps.StockUnitPrice) <= toPrice)
+                    .ToList();
+            if (categoryId > 0)
+                products=products.Where(p=>p.Category.CategoryId==categoryId || p.Category.ParentCategoryId==categoryId).ToList();
+            var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
+            mappedProducts = mappedProducts.Where(r => r.AverageRate == rating).ToList();
             return mappedProducts;
         }
         public async Task<ICollection<StockProductInventory>> GetProductStock(int ProductId)

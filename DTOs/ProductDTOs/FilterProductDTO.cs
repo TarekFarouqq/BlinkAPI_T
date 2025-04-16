@@ -2,7 +2,7 @@
 {
     public class FilterProductDTO
     {
-        public string AttributeName { get; set; } // Color
-        public string AttributeValue { get; set; } // Red
+        public string AttributeName { get; set; } 
+        public string AttributeValue { get; set; } 
     }
 }
