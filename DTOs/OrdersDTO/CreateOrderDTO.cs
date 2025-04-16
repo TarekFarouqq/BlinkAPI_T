@@ -9,6 +9,8 @@
         public decimal Lat { get; set; }
         public decimal Long { get; set; }
 
+        public string PhoneNumber { get; set; }
+
         public string PaymentMethod { get; set; }  
     }
 }

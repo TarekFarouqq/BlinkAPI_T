@@ -131,6 +131,10 @@ public class orderService :IOrderServices
         await _unitOfWork.UserRepo.UpdateUserAddress(createOrderDTO.UserId, createOrderDTO.Address);
         await _unitOfWork.CompleteAsync();
 
+        // Update UserPhoneNumber
+        await _unitOfWork.UserRepo.UpdateUserPhoneNumber(createOrderDTO.UserId,createOrderDTO.PhoneNumber);
+        await _unitOfWork.CompleteAsync();
+
         // Map OrderHeader to OrderToReturnDto
         var orderToReturn = _mapper.Map<OrderToReturnDto>(orderHeader);
         return orderToReturn;

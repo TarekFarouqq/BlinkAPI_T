@@ -20,7 +20,7 @@ namespace Blink_API.Controllers.Order
             _orderService = orderService;
             _unitOfWork = unitOfWork;
         }
-        [HttpPost("creat")]
+        [HttpPost("create")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
@@ -36,11 +36,11 @@ namespace Blink_API.Controllers.Order
                 if (order == null)
                     return BadRequest(new ApiResponse(400, "Failed to create order"));
 
-                return Ok(new ApiResponse(200, "Order created successfully"));
+                return Ok(new ApiResponse<OrderToReturnDto>(200, "Order created successfully",order));
             }
             catch
             {
-                return StatusCode(500, new ApiResponse(500, "Internal server error"));
+                return StatusCode(500, new ApiResponse(500));
             }
         }
 
