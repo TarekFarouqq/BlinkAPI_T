@@ -79,6 +79,16 @@ namespace Blink_API.Services.InventoryService
             return new ApiResponse(200, "Inventory deleted successfully.");
         }
 
+        public async Task<bool> IsInventoryHasProducts(int id)
+        {
+            var prodcutsExists = await unitOfWork.InventoryRepo.IsInventoryHasProducts(id);
+            if (prodcutsExists)
+            {
+                return true;
+            }
+            return false;
+        }
+
 
         public async Task<bool> ReturnInventoryQuantityAfterOrderDelete(int orderId)
         {
