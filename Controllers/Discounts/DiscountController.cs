@@ -34,7 +34,7 @@ namespace Blink_API.Controllers.Discounts
             return Ok(await discountService.GetAllDiscounts());
         }
         [HttpGet("GetDiscountById/{id}")]
-        public async Task<ActionResult> GetAll(int id)
+        public async Task<ActionResult> GetById(int id)
         {
             return Ok(await discountService.GetDiscountById(id));
         }

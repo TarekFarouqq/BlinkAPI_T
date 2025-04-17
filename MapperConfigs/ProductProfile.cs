@@ -170,7 +170,7 @@ namespace Blink_API.MapperConfigs
                 .ForMember(dest=>dest.SubCategoryName,option=>option.MapFrom(src=>src.Product.Category.CategoryName))
                 .ForMember(dest=>dest.ParentCategoryName,option=>option.MapFrom(src=>src.Product.Category.ParentCategory.CategoryName))
                 .ForMember(dest=>dest.BrandName,option=>option.MapFrom(src=>src.Product.Brand.BrandName))
-                .ForMember(dest=>dest.ProductPrice,option=>option.MapFrom(src=>src.Product.StockProductInventories.Average(spi=>spi.StockUnitPrice)))
+                .ForMember(dest => dest.ProductPrice, option => option.MapFrom(src => src.Product.StockProductInventories.Any() ? src.Product.StockProductInventories.Average(spi => spi.StockUnitPrice): 0))
                 .ReverseMap();
             CreateMap<Discount, InsertDiscountDetailsDTO>().ReverseMap();
             CreateMap<ProductDiscount, InsertProductDiscountDetailsDTO>().ReverseMap();

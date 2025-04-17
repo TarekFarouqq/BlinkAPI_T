@@ -1,4 +1,5 @@
-﻿using Blink_API.Models;
+using System.Runtime.Intrinsics.Arm;
+using Blink_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.DiscountRepos
@@ -32,47 +33,48 @@ namespace Blink_API.Repositories.DiscountRepos
         }
         public async Task<ICollection<Discount>> GetAllDiscounts()
         {
-            var result= await db.Discounts
+            var result =  await db.Discounts
+                .Include(pd => pd.ProductDiscounts)
+                    .ThenInclude(p => p.Product)
                 .Include(pd=>pd.ProductDiscounts)
                     .ThenInclude(p=>p.Product)
                         .ThenInclude(b=>b.Brand)
-                .Include(pd=>pd.ProductDiscounts)
-                    .ThenInclude(p=>p.Product)
-                        .ThenInclude(c=>c.Category)
+                .Include(pd => pd.ProductDiscounts)
+                    .ThenInclude(p => p.Product)
+                        .ThenInclude(b => b.Category)
                             .ThenInclude(pc=>pc.ParentCategory)
-                .Include(pd=>pd.ProductDiscounts)
-                    .ThenInclude(p=>p.Product)
-                        .ThenInclude(spi=>spi.StockProductInventories)
-                            .Where(spi=>!spi.IsDeleted)
-                .Where(d=>d.DiscountFromDate <= DateTime.UtcNow && d.DiscountEndDate >= DateTime.UtcNow && !d.IsDeleted)
+                .Include(pd => pd.ProductDiscounts)
+                    .ThenInclude(p => p.Product)
+                        .ThenInclude(b => b.StockProductInventories)
+                .Where(pd=>pd.ProductDiscounts.Count> 0)
                 .ToListAsync();
-
-            foreach (var discount in result)
+            foreach(var discount in result)
             {
-                discount.ProductDiscounts = discount.ProductDiscounts
-                    .Where(pd => !pd.Product.IsDeleted)
-                    .ToList();
+                discount.ProductDiscounts = discount.ProductDiscounts.Where(p => !p.Product.IsDeleted).ToList();
             }
+            result=result.Where(d=>!d.IsDeleted).ToList();
             return result;
         }
         public async Task<Discount?> GetDiscountById(int id)
         {
-            var discount= await db.Discounts
-               .Include(pd => pd.ProductDiscounts)
-                   .ThenInclude(p => p.Product)
-                       .ThenInclude(b => b.Brand)
-               .Include(pd => pd.ProductDiscounts)
-                   .ThenInclude(p => p.Product)
-                       .ThenInclude(c => c.Category)
-                           .ThenInclude(pc => pc.ParentCategory)
-               .Include(pd => pd.ProductDiscounts)
-                   .ThenInclude(p => p.Product)
-                       .ThenInclude(spi => spi.StockProductInventories)
-                           .Where(spi => !spi.IsDeleted)
-               .Where(d => d.DiscountFromDate <= DateTime.UtcNow && d.DiscountEndDate >= DateTime.UtcNow && !d.IsDeleted)
-               .FirstOrDefaultAsync();
-            discount.ProductDiscounts= discount.ProductDiscounts.Where(pd=>!pd.Product.IsDeleted).ToList();
-            return discount;
+            var result = await db.Discounts
+                .Include(pd => pd.ProductDiscounts)
+                    .ThenInclude(p => p.Product)
+                .Include(pd => pd.ProductDiscounts)
+                    .ThenInclude(p => p.Product)
+                        .ThenInclude(b => b.Brand)
+                .Include(pd => pd.ProductDiscounts)
+                    .ThenInclude(p => p.Product)
+                        .ThenInclude(b => b.Category)
+                            .ThenInclude(pc => pc.ParentCategory)
+                .Include(pd => pd.ProductDiscounts)
+                    .ThenInclude(p => p.Product)
+                        .ThenInclude(b => b.StockProductInventories)
+                .Where(pd => pd.ProductDiscounts.Count > 0)
+                .FirstOrDefaultAsync(d=>d.DiscountId==id && !d.IsDeleted);
+
+            result.ProductDiscounts = result.ProductDiscounts.Where(p => !p.Product.IsDeleted).ToList();
+            return result;
         }
         public async Task CreateDiscount(Discount discount)
         {
