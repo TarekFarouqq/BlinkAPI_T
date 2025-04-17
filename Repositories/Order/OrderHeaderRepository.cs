@@ -24,14 +24,14 @@ namespace Blink_API.Repositories.Order
         }
         public async Task<OrderHeader?> GetOrderByIdWithDetails(int orderId)
         {
-            return await _db.OrderHeaders
-               
-                .Include(o => o.OrderDetails.Where(od => !od.IsDeleted))
+            var order = await _db.OrderHeaders.Include(o => o.OrderDetails.Where(od => !od.IsDeleted))
                     .ThenInclude(od => od.product) 
                 .Include(o => o.Payment) 
                 .Include(o => o.Cart)
                 .Where(o => !o.IsDeleted && o.OrderHeaderId == orderId)
                  .FirstOrDefaultAsync();
+
+            return order;
         }
 
         public async Task<OrderHeader?> GetOrderByPaymentIntentId(string paymentIntentId)

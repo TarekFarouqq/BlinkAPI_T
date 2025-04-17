@@ -38,13 +38,14 @@ namespace Blink_API.Controllers.Payment
                     return Unauthorized(new ApiResponse(401, "User is not authenticated"));
                 }
 
-              
                 var cart = await _unitOfWork.CartRepo.GetByUserId(userId);
                 if (cart == null)
                 {
                     return NotFound(new ApiResponse(404, "Cart not found for the current user"));
                 }
 
+                
+                // Now call the payment service to create or update the PaymentIntent
                 var basket = await _paymentServices.CreateOrUpdatePayment(cart.CartId, userId);
 
                 if (basket is null)
@@ -57,7 +58,6 @@ namespace Blink_API.Controllers.Payment
                 return StatusCode(500, new ApiResponse(500, "Internal Server Error: " + ex.Message));
             }
         }
-
 
         [HttpPost("confirmPayment")]
         public async Task<ActionResult<orderDTO>> ConfirmPayment([FromBody] ConfirmPaymentDTO dto)
@@ -75,7 +75,6 @@ namespace Blink_API.Controllers.Payment
                 return StatusCode(500, new ApiResponse(500, "Internal Server Error: " + ex.Message));
             }
         }
-
         #region create WebHook
 
         //[HttpPost("webhook")] //api/Payment/webhook

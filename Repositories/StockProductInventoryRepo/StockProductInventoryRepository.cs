@@ -16,10 +16,13 @@ namespace Blink_API.Repositories.StockProductInventoryRepo
 
         public async Task<List<StockProductInventory>> GetAvailableInventoriesForProduct(int productId)
         {
-            return await _blinkDbContext.StockProductInventories
-                .Include(sp => sp.Inventory)
-                .Where(sp => !sp.IsDeleted && sp.ProductId == productId)
-                .ToListAsync();
+            var inventories = await _blinkDbContext.StockProductInventories
+                   .Where(i => i.ProductId == productId && i.StockQuantity > 0)
+                   .OrderBy(i => i.Inventory.InventoryId)
+                   .AsNoTracking()  
+                   .ToListAsync();
+
+            return inventories;
         }
 
     }
