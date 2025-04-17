@@ -1,4 +1,4 @@
-﻿using System.Runtime.Intrinsics.Arm;
+using System.Runtime.Intrinsics.Arm;
 using Blink_API.Models;
 using Microsoft.EntityFrameworkCore;
 
