@@ -119,7 +119,7 @@ namespace Blink_API.Services.PaymentServices
                             // Update the existing PaymentIntent with the new amount
                             var updateOptions = new PaymentIntentUpdateOptions()
                             {
-                                Amount = (long)((cart.OrderHeader.OrderSubtotal + cart.OrderHeader.OrderTax + cart.OrderHeader.OrderShippingCost) * 100),
+                                Amount = 10000,
                             };
                             paymentIntent = await paymentIntentService.UpdateAsync(cart.OrderHeader.PaymentIntentId, updateOptions);
                         }
@@ -143,7 +143,7 @@ namespace Blink_API.Services.PaymentServices
                 {
                     var createOptions = new PaymentIntentCreateOptions()
                     {
-                        Amount = stripeAmount,
+                        Amount = 100000, // will by calculated
                         Currency = "usd", // Currency for the payment
                         PaymentMethodTypes = new List<string> { "card" } // Supported payment methods
                     };
