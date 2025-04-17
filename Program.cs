@@ -43,7 +43,9 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             //addonf category services 
             builder.Services.AddScoped<CategoryService>();
             // Add Mapper
-            builder.Services.AddAutoMapper(typeof(MapperConfig));
+            //builder.Services.AddAutoMapper(typeof(MapperConfig));
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            //Add CartService
             builder.Services.AddScoped<CartService>();
             //Add UnitOfWork
             builder.Services.AddScoped<UnitOfWork>();
