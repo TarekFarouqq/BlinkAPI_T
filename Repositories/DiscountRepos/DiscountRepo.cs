@@ -32,7 +32,7 @@ namespace Blink_API.Repositories.DiscountRepos
         }
         public async Task<ICollection<Discount>> GetAllDiscounts()
         {
-            return await db.Discounts
+            var result= await db.Discounts
                 .Include(pd=>pd.ProductDiscounts)
                     .ThenInclude(p=>p.Product)
                         .ThenInclude(b=>b.Brand)
@@ -46,10 +46,18 @@ namespace Blink_API.Repositories.DiscountRepos
                             .Where(spi=>!spi.IsDeleted)
                 .Where(d=>d.DiscountFromDate <= DateTime.UtcNow && d.DiscountEndDate >= DateTime.UtcNow && !d.IsDeleted)
                 .ToListAsync();
+
+            foreach (var discount in result)
+            {
+                discount.ProductDiscounts = discount.ProductDiscounts
+                    .Where(pd => !pd.Product.IsDeleted)
+                    .ToList();
+            }
+            return result;
         }
         public async Task<Discount?> GetDiscountById(int id)
         {
-            return await db.Discounts
+            var discount= await db.Discounts
                .Include(pd => pd.ProductDiscounts)
                    .ThenInclude(p => p.Product)
                        .ThenInclude(b => b.Brand)
@@ -63,6 +71,8 @@ namespace Blink_API.Repositories.DiscountRepos
                            .Where(spi => !spi.IsDeleted)
                .Where(d => d.DiscountFromDate <= DateTime.UtcNow && d.DiscountEndDate >= DateTime.UtcNow && !d.IsDeleted)
                .FirstOrDefaultAsync();
+            discount.ProductDiscounts= discount.ProductDiscounts.Where(pd=>!pd.Product.IsDeleted).ToList();
+            return discount;
         }
         public async Task CreateDiscount(Discount discount)
         {
