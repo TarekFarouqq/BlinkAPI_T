@@ -254,30 +254,25 @@ namespace Blink_API.Services.Product
         {
             await unitOfWork.ProductRepo.DeleteOldProductAttributes(productId);
         }
-        public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(
-    Dictionary<int, List<string>> filtersProduct,
-    int pgNumber,
-    decimal fromPrice,
-    decimal toPrice,
-    int rating,
-    int categoryId)
+        public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct,int pgNumber,decimal fromPrice,decimal toPrice,int rating,int categoryId)
         {
-            var products = await unitOfWork.ProductRepo.GetFillteredProducts(filtersProduct, pgNumber);
-            if (fromPrice > 0)
-                products = products
-                    .Where(p => p.StockProductInventories.Any() &&
-                                p.StockProductInventories.Average(ps => ps.StockUnitPrice) >= fromPrice)
-                    .ToList();
-
-            if (toPrice > 0)
-                products = products
-                    .Where(p => p.StockProductInventories.Any() &&
-                                p.StockProductInventories.Average(ps => ps.StockUnitPrice) <= toPrice)
-                    .ToList();
-            if (categoryId > 0)
-                products=products.Where(p=>p.Category.CategoryId==categoryId || p.Category.ParentCategoryId==categoryId).ToList();
+            var products = await unitOfWork.ProductRepo.GetFillteredProducts(categoryId);
+            foreach (var filter in filtersProduct)
+            {
+                foreach(var value in filter.Value)
+                {
+                    products = products.Where(p=>p.ProductAttributes.Any(pa=>pa.AttributeId==filter.Key && pa.AttributeValue==value)).ToList();
+                }
+            }
             var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
-            mappedProducts = mappedProducts.Where(r => r.AverageRate == rating).ToList();
+            if (fromPrice > 0)
+                mappedProducts = mappedProducts.Where(p => p.ProductPrice >= fromPrice).ToList();
+            if(toPrice > 0 )
+                mappedProducts=mappedProducts.Where(p=>p.ProductPrice <= toPrice).ToList();
+            if(rating > 0)
+                mappedProducts=mappedProducts.Where(p=>p.AverageRate >= rating).ToList();
+            mappedProducts=mappedProducts.Skip((pgNumber-1)*5)
+                .Take(5).ToList();
             return mappedProducts;
         }
         public async Task<ICollection<StockProductInventory>> GetProductStock(int ProductId)
