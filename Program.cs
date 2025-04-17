@@ -55,6 +55,8 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             builder.Services.AddScoped<ReviewSuppliedProductService>();
             //Add ProductService
             builder.Services.AddScoped<ProductService>();
+            //Add ProductTransferService
+            builder.Services.AddScoped<ProductTransferService>();
             //Add ProductReviewService
             builder.Services.AddScoped<ProductReviewService>();
             //Add ProductReviewRepo
