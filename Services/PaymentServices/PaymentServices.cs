@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Linq;
+using AutoMapper;
 using Blink_API.DTOs.CartDTOs;
 
 using Blink_API.DTOs.OrdersDTO;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Stripe;
+using Stripe.Issuing;
 
 
 namespace Blink_API.Services.PaymentServices
@@ -33,6 +35,80 @@ namespace Blink_API.Services.PaymentServices
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             ///_productService = productService;
+        }
+        public async Task<CartPaymentDTO?> CreateOrUpdatePayment2(int cartId,string userId)
+        {
+            // Set the Stripe API Key from configuration
+            StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
+            var UserCart = await _unitOfWork.CartRepo.GetByUserId(userId);
+            if (UserCart == null)
+                throw new BadHttpRequestException("Cart Not Found");
+            // Initialize the PaymentIntent service and payment intent variable
+            var paymentIntentService = new PaymentIntentService();
+            PaymentIntent? paymentIntent = null;
+            // Flag to check whether a new payment intent should be created
+            bool shouldCreateNewIntent = false;
+            // Check if the cart does not have an OrderHeader, then create one
+            if (UserCart.OrderHeader == null)
+            {
+                OrderHeader newOrder = new OrderHeader();
+                newOrder.OrderDate = DateTime.UtcNow; // ----------------- 1
+                var OrderSubTotal = UserCart.CartDetails.Sum(cd => cd.Product.StockProductInventories.Average(spi => spi.StockUnitPrice)); // ----------------- 2
+                var OrderTax = OrderSubTotal * 0.14m; // ----------------- 1
+                var ShippingCost = 0;
+                var OrderTotalAmount = OrderSubTotal + OrderTax + ShippingCost;
+                var OrderStatus = "shipped";
+                ICollection<OrderDetail> orderDetails = new HashSet<OrderDetail>();
+                foreach (var orderDetail in UserCart.CartDetails)
+                {
+                    orderDetails.Add(new OrderDetail
+                    {
+                        SellQuantity = orderDetail.Quantity,
+                        SellPrice = UserCart.CartDetails.FirstOrDefault(p => p.ProductId == orderDetail.ProductId).Product.StockProductInventories.Average(spi => spi.StockUnitPrice),
+                        ProductId = orderDetail.ProductId,
+                        OrderHeader = newOrder
+                    });
+                }
+                var listOfOrderDetails = orderDetails.ToList();
+                newOrder.OrderSubtotal = OrderSubTotal;
+                newOrder.OrderTax = OrderTax;
+                newOrder.OrderShippingCost = ShippingCost;
+                newOrder.OrderTotalAmount = OrderTotalAmount;
+                newOrder.OrderStatus = OrderStatus;
+                newOrder.OrderDetails = orderDetails.ToList();
+                // Create Payment Method
+                Payment newPayment = new Payment();
+                newPayment.Method = "Card";
+                newPayment.PaymentStatus = "Pending";
+                newPayment.PaymentDate = DateTime.UtcNow;
+                // Create a new PaymentIntent if necessary
+                var createOptions = new PaymentIntentCreateOptions()
+                {
+                    Amount = (long)OrderTotalAmount,
+                    Currency = "usd",
+                    PaymentMethodTypes = new List<string> { "card" }
+                };
+                paymentIntent = await paymentIntentService.CreateAsync(createOptions);
+                newPayment.PaymentIntentId = paymentIntent.Id;
+                newPayment.OrderHeader = newOrder;
+                newOrder.Payment = newPayment;
+                newOrder.PaymentIntentId = paymentIntent.Id;
+                newOrder.CartId = cartId;
+                newOrder.PaymentIntentId = paymentIntent.Id;
+                // Map the cart to CartPaymentDTO and add the ClientSecret to the response DTO
+                var mappedCart = _mapper.Map<CartPaymentDTO>(UserCart);
+                mappedCart.ClientSecret = paymentIntent.ClientSecret;
+                mappedCart.PaymentIntentId = paymentIntent.Id;
+                mappedCart.SubTotal = OrderSubTotal;
+                mappedCart.TotalAmount= OrderTotalAmount;
+                var mappedCartDetailsDTO = _mapper.Map<List<CartDetailsDTO>>(UserCart.CartDetails);
+                mappedCart.Items = mappedCartDetailsDTO;
+                // Update the cart in the database
+                await _unitOfWork.CartRepo.UpdateCart(UserCart);
+                // Return the mapped cart with payment information
+                return mappedCart;
+            }
+            return new CartPaymentDTO();
         }
         public async Task<CartPaymentDTO?> CreateOrUpdatePayment(int cartId, string userId)
         {
@@ -69,9 +145,12 @@ namespace Blink_API.Services.PaymentServices
                         // Get all available stock inventories for the product
                         var inventories = await _unitOfWork.StockProductInventoryRepo.GetAvailableInventoriesForProduct(detail.ProductId);
 
-                        int remaining = detail.Quantity;
-                        decimal totalPrice = 0;
+                        int remaining = detail.Quantity; //Sold Quantity
+                        decimal totalPrice = 0; // 
                         int totalTaken = 0;
+
+
+                        var averagePrice = inventories.Average(i => i.StockUnitPrice);
 
                         // Iterate through the inventories and calculate the total price based on the available stock
                         foreach (var inventory in inventories)

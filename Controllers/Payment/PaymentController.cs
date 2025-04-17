@@ -46,7 +46,7 @@ namespace Blink_API.Controllers.Payment
 
                 
                 // Now call the payment service to create or update the PaymentIntent
-                var basket = await _paymentServices.CreateOrUpdatePayment(cart.CartId, userId);
+                var basket = await _paymentServices.CreateOrUpdatePayment2(cart.CartId, userId);
 
                 if (basket is null)
                     return BadRequest(new ApiResponse(400, "An error occurred while processing your cart"));
