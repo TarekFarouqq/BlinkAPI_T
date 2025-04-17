@@ -5,6 +5,7 @@ using Blink_API.DTOs.OrdersDTO;
 
 using Blink_API.DTOs.PaymentCart;
 using Blink_API.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Stripe;
@@ -33,86 +34,143 @@ namespace Blink_API.Services.PaymentServices
             _mapper = mapper;
             ///_productService = productService;
         }
-
         public async Task<CartPaymentDTO?> CreateOrUpdatePayment(int cartId, string userId)
         {
-            StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
-
-            var cart = await _unitOfWork.CartRepo.GetByUserId(userId);
-            var mappedBasket = _mapper.Map<CartPaymentDTO>(cart);
-
-            mappedBasket.SubTotal = mappedBasket.Items.Sum(item => item.Quantity * item.ProductUnitPrice);
-            mappedBasket.ShippingPrice = 10;
-            var totalAmount = (long)((mappedBasket.SubTotal + mappedBasket.ShippingPrice) * 100);
-
-            var paymentIntentService = new PaymentIntentService();
-            var paymentIntentToDelete = mappedBasket.PaymentIntentId;
-            PaymentIntent? paymentIntent = null;
-
-            bool shouldCreateNewIntent = false;
-
-            if (!string.IsNullOrEmpty(mappedBasket.PaymentIntentId))
+            try
             {
-                try
-                {
-                    var existingIntent = await paymentIntentService.GetAsync(mappedBasket.PaymentIntentId);
+                // Set the Stripe API Key from configuration
+                StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
 
-                    if (existingIntent.Status != "requires_payment_method" && existingIntent.Status != "requires_confirmation")
+                // Retrieve the cart for the user
+                var cart = await _unitOfWork.CartRepo.GetByUserId(userId);
+
+                if (cart is null)
+                    throw new BadHttpRequestException("Cart Not Found");
+
+                // Initialize the PaymentIntent service and payment intent variable
+                var paymentIntentService = new PaymentIntentService();
+                PaymentIntent? paymentIntent = null;
+
+                // Flag to check whether a new payment intent should be created
+                bool shouldCreateNewIntent = false;
+
+                // Check if the cart does not have an OrderHeader, then create one
+                if (cart.OrderHeader == null)
+                {
+                    cart.OrderHeader = new OrderHeader();
+
+                    // Calculate the subtotal of the order by iterating through cart details
+                    decimal subtotal = 0;
+
+                    foreach (var detail in cart.CartDetails)
                     {
-                        shouldCreateNewIntent = true;
-                    }
-                    else
-                    {
-                        var updateOptions = new PaymentIntentUpdateOptions()
+                        if (detail.Product == null) continue;
+
+                        // Get all available stock inventories for the product
+                        var inventories = await _unitOfWork.StockProductInventoryRepo.GetAvailableInventoriesForProduct(detail.ProductId);
+
+                        int remaining = detail.Quantity;
+                        decimal totalPrice = 0;
+                        int totalTaken = 0;
+
+                        // Iterate through the inventories and calculate the total price based on the available stock
+                        foreach (var inventory in inventories)
                         {
-                            Amount = totalAmount
-                        };
-                        paymentIntent = await paymentIntentService.UpdateAsync(mappedBasket.PaymentIntentId, updateOptions);
+                            if (remaining <= 0) break;
+
+                            int takeQty = Math.Min(remaining, inventory.StockQuantity); // Take the available quantity
+                            totalPrice += takeQty * inventory.StockUnitPrice; // Add the price to the total
+                            totalTaken += takeQty; // Keep track of the total taken quantity
+                            remaining -= takeQty; // Subtract the taken quantity from remaining
+                        }
+
+                        // If not enough stock is available, throw an exception
+                        if (totalTaken < detail.Quantity)
+                            throw new Exception("Not enough stock for product.");
+
+                        // Calculate the average price for the taken quantity
+                        decimal avgPrice = totalPrice / totalTaken;
+
+                        // Add the product's total price to the subtotal
+                        subtotal += avgPrice * totalTaken;
                     }
+
+                    // Assign the calculated values to the OrderHeader
+                    cart.OrderHeader.OrderSubtotal = subtotal; // Save subtotal to OrderSubtotal
+                    cart.OrderHeader.OrderShippingCost = 10; // Shipping cost
+                    cart.OrderHeader.OrderTax = 14; // Tax amount
                 }
-                catch
-                {
-                    shouldCreateNewIntent = true;
-                }
-            }
-            else
-            {
-                shouldCreateNewIntent = true;
-            }
 
-            if (shouldCreateNewIntent)
-            {
-                var createOptions = new PaymentIntentCreateOptions()
-                {
-                    Amount = totalAmount,
-
-                    Currency = "usd",
-                    PaymentMethodTypes = new List<string> { "card" }
-                };
-                paymentIntent = await paymentIntentService.CreateAsync(createOptions);
-
-                if (!string.IsNullOrEmpty(paymentIntentToDelete))
+                // Check if the cart has a PaymentIntentId and try to reuse or update the existing payment intent
+                if (!string.IsNullOrEmpty(cart.OrderHeader?.PaymentIntentId))
                 {
                     try
                     {
-                        await paymentIntentService.CancelAsync(paymentIntentToDelete);
+                        // Retrieve the existing PaymentIntent
+                        var existingIntent = await paymentIntentService.GetAsync(cart.OrderHeader.PaymentIntentId);
+
+                        // Check if the PaymentIntent is not in a valid state for reuse
+                        if (existingIntent.Status != "requires_payment_method" && existingIntent.Status != "requires_confirmation")
+                        {
+                            shouldCreateNewIntent = true; // Create a new PaymentIntent if the current one is invalid
+                        }
+                        else
+                        {
+                            // Update the existing PaymentIntent with the new amount
+                            var updateOptions = new PaymentIntentUpdateOptions()
+                            {
+                                Amount = (long)((cart.OrderHeader.OrderSubtotal + cart.OrderHeader.OrderTax + cart.OrderHeader.OrderShippingCost) * 100),
+                            };
+                            paymentIntent = await paymentIntentService.UpdateAsync(cart.OrderHeader.PaymentIntentId, updateOptions);
+                        }
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        Console.WriteLine($"Could not delete old PaymentIntent {paymentIntentToDelete}: {ex.Message}");
+                        shouldCreateNewIntent = true; // If an error occurs, create a new PaymentIntent
                     }
                 }
-            }
+                else
+                {
+                    shouldCreateNewIntent = true; // If no PaymentIntent exists, create a new one
+                }
 
-            if (paymentIntent != null)
+                // Calculate the total amount (including subtotal, shipping, and tax)
+                decimal totalAmount = cart.OrderHeader.OrderTotalAmount;
+                var stripeAmount = (long)(totalAmount * 100); // Convert the total amount to cents for Stripe
+
+                // Create a new PaymentIntent if necessary
+                if (shouldCreateNewIntent)
+                {
+                    var createOptions = new PaymentIntentCreateOptions()
+                    {
+                        Amount = stripeAmount,
+                        Currency = "usd", // Currency for the payment
+                        PaymentMethodTypes = new List<string> { "card" } // Supported payment methods
+                    };
+                    paymentIntent = await paymentIntentService.CreateAsync(createOptions);
+                }
+
+                // If a payment intent was successfully created or updated, save the PaymentIntentId and ClientSecret
+                if (paymentIntent != null)
+                {
+                    cart.OrderHeader.PaymentIntentId = paymentIntent.Id;
+                    // cart.OrderHeader.ClientSecret = paymentIntent.ClientSecret; // Save the ClientSecret for front-end use
+                }
+
+                // Map the cart to CartPaymentDTO and add the ClientSecret to the response DTO
+                var mappedCart = _mapper.Map<CartPaymentDTO>(cart);
+                mappedCart.ClientSecret = paymentIntent.ClientSecret;
+
+                // Update the cart in the database
+                await _unitOfWork.CartRepo.UpdateCart(cart);
+
+                // Return the mapped cart with payment information
+                return mappedCart;
+            }
+            catch (Exception ex)
             {
-                mappedBasket.PaymentIntentId = paymentIntent.Id;
-                mappedBasket.ClientSecret = paymentIntent.ClientSecret;
+                throw new Exception($"Order creation failed: {ex.Message}", ex);
             }
-
-
-            await _unitOfWork.CartRepo.UpdateCart(cart);
-            return mappedBasket;
         }
 
 
@@ -131,12 +189,74 @@ namespace Blink_API.Services.PaymentServices
 
             var dto = _mapper.Map<orderDTO>(orderHeader);
             return dto;
-
-
-
-
         
 
+        }
+        public async Task<bool> PollPaymentStatus(string paymentIntentId)
+        {
+            StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
+
+            var paymentIntentService = new PaymentIntentService();
+
+            try
+            {
+                var paymentIntent = await paymentIntentService.GetAsync(paymentIntentId);
+
+               
+                if (paymentIntent.Status == "succeeded")
+                {
+                    return true;  
+                }
+               
+                else if (paymentIntent.Status == "failed")
+                {
+                    return false;  
+                }
+            }
+            catch (Exception ex)
+            {
+             
+                Console.WriteLine($"Error occurred: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        public async Task MonitorPaymentStatus(string paymentIntentId)
+        {
+            bool isPaid = false;
+
+            for (int i = 0; i < 3; i++)
+            {
+                isPaid = await PollPaymentStatus(paymentIntentId);
+
+                if (isPaid)
+                {
+                    break;
+                }
+
+                await Task.Delay(TimeSpan.FromMinutes(5));
+            }
+
+            if (isPaid)
+            {
+                await UpdatePaymentIntentToSucceededOrFailed(paymentIntentId, true);
+            }
+            else
+            {
+                await UpdatePaymentIntentToSucceededOrFailed(paymentIntentId, false);
+            }
+        }
+
+        public async Task<CartPaymentDTO> HandlePaymentAsync(int cartId, string userId)
+        {
+            var cart = await _unitOfWork.CartRepo.GetByUserId(userId);
+            var paymentIntentId = cart.OrderHeader.PaymentIntentId;
+
+            await MonitorPaymentStatus(paymentIntentId);
+
+            var cartPaymentDTO = _mapper.Map<CartPaymentDTO>(cart);
+            return cartPaymentDTO;
         }
 
 

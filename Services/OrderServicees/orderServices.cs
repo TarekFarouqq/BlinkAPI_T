@@ -10,17 +10,20 @@ using Blink_API.Services.InventoryService;
 using Blink_API.Errors;
 using System.Runtime.CompilerServices;
 using Blink_API.Services.Helpers;
+using Blink_API.Services.PaymentServices;
 public class orderService :IOrderServices
 {
     private readonly UnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly InventoryService _inventoryService;
+    private readonly PaymentServices _paymentServices;
 
-    public orderService(UnitOfWork unitOfWork, IMapper mapper,InventoryService inventoryService)
+    public orderService(UnitOfWork unitOfWork, IMapper mapper,InventoryService inventoryService,PaymentServices paymentServices)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
        _inventoryService = inventoryService;
+        _paymentServices = paymentServices;
     }
 
 
@@ -82,13 +85,22 @@ public class orderService :IOrderServices
 
             decimal avgPrice = totalPrice / totalTaken;
 
+            if (cart.OrderHeader == null || string.IsNullOrEmpty(cart.OrderHeader.PaymentIntentId))
+            {
+                await _paymentServices.CreateOrUpdatePayment(cart.CartId, cart.UserId);
+                cart = await _unitOfWork.CartRepo.GetByUserId(createOrderDTO.UserId); 
+            }
+
+
             orderDetails.Add(new OrderDetail
             {
                 ProductId = productId,
                 SellQuantity = totalTaken,
                 SellPrice = avgPrice
             });
+
         }
+
 
         var orderHeader = new OrderHeader
         {
@@ -101,9 +113,9 @@ public class orderService :IOrderServices
                 Method = createOrderDTO.PaymentMethod,
                 PaymentDate = DateTime.UtcNow,
                 PaymentStatus = "pending",
-                PaymentIntentId = "0"
+                PaymentIntentId = cart.OrderHeader.PaymentIntentId,
             },
-            PaymentIntentId = "0",
+            PaymentIntentId = cart.OrderHeader.PaymentIntentId,
             OrderShippingCost = 10,
             OrderTax = 14,
         };
