@@ -29,5 +29,12 @@ namespace Blink_API.Repositories.InventoryRepos
                 .Include(b => b.Branch)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<bool> IsInventoryHasProducts(int id)
+        {
+            return await db.StockProductInventories
+                .Where(p => p.InventoryId == id && p.Product.IsDeleted == false)
+                .AnyAsync(); // Fix: Use AnyAsync() instead of Any()
+        }
     }
 }

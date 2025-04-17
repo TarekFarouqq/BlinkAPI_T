@@ -61,5 +61,12 @@ namespace Blink_API.Controllers.Inventory
             }
             return Ok(response);
         }
+
+        [HttpGet("IsInventoryHasProducts/{inventoryId}")]
+        public async Task<bool> IsInventoryHasProducts( int inventoryId)
+        {
+            var result = await inventoryService.IsInventoryHasProducts(inventoryId);
+            return result;
+        }
     }
 }
