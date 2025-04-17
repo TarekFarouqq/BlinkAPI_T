@@ -158,6 +158,25 @@ namespace Blink_API.MapperConfigs
                     IsDeleted = dp.IsDeleted
                 }))).ReverseMap();
             // ------------------------------------------------------------------------
+            CreateMap<Discount, ReadDiscountDetailsDTO>()
+                .ForMember(dest=>dest.DiscountId,option=>option.MapFrom(src=>src.DiscountId))
+                .ForMember(dest=>dest.DiscountPercentage, option=>option.MapFrom(src=>src.DiscountPercentage))
+                .ForMember(dest=>dest.DiscountFromDate, option=>option.MapFrom(src=>src.DiscountFromDate))
+                .ForMember(dest=>dest.DiscountEndDate, option=>option.MapFrom(src=>src.DiscountEndDate))
+                .ForMember(dest=>dest.ReadProductsDiscountDTOs,option=>option.MapFrom(src=>src.ProductDiscounts))
+                .ReverseMap();
+            CreateMap<ProductDiscount, ReadProductsDiscountDTO>()
+                .ForMember(dest=>dest.ProductName,option=>option.MapFrom(src=>src.Product.ProductName))
+                .ForMember(dest=>dest.SubCategoryName,option=>option.MapFrom(src=>src.Product.Category.CategoryName))
+                .ForMember(dest=>dest.ParentCategoryName,option=>option.MapFrom(src=>src.Product.Category.ParentCategory.CategoryName))
+                .ForMember(dest=>dest.BrandName,option=>option.MapFrom(src=>src.Product.Brand.BrandName))
+                .ForMember(dest=>dest.ProductPrice,option=>option.MapFrom(src=>src.Product.StockProductInventories.Average(spi=>spi.StockUnitPrice)))
+                .ReverseMap();
+            CreateMap<Discount, InsertDiscountDetailsDTO>().ReverseMap();
+            CreateMap<ProductDiscount, InsertProductDiscountDetailsDTO>().ReverseMap();
+            CreateMap<Discount, UpdateDiscountDetailsDTO>().ReverseMap();
+            CreateMap<ProductDiscount, UpdateProductDiscountDetailsDTO>().ReverseMap();
+            // ------------------------------------------------------------------------
         }
     }
 }

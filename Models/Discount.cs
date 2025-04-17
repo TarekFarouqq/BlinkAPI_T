@@ -16,11 +16,7 @@ namespace Blink_API.Models
         [Required]
         public DateTime DiscountEndDate { get; set; }
         public bool IsDeleted { get; set; } = false;
-
         public virtual ICollection<ProductDiscount> ProductDiscounts { get; set; } = new HashSet<ProductDiscount>();
-        
-
-
     }
 }
 
