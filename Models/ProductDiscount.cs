@@ -16,8 +16,6 @@ namespace Blink_API.Models
         public virtual Product Product { get; set; }
         public decimal DiscountAmount { get; set; }
         public bool IsDeleted { get; set; } = false;
-
-        // fluent pk
     }
 }
 

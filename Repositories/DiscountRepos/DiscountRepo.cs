@@ -5,11 +5,7 @@ namespace Blink_API.Repositories.DiscountRepos
 {
     public class DiscountRepo:GenericRepo<Discount,int>
     {
-        private readonly BlinkDbContext db;
-        public DiscountRepo(BlinkDbContext _db):base(_db)
-        {
-            db=_db;
-        }
+        public DiscountRepo(BlinkDbContext db):base(db){}
         public async Task<ICollection<Discount>> GetRunningDiscounts()
         {
             return await db.Discounts
@@ -33,6 +29,75 @@ namespace Blink_API.Repositories.DiscountRepos
                  .OrderByDescending(d => d.DiscountFromDate)
                  .FirstOrDefaultAsync();
                  
+        }
+        public async Task<ICollection<Discount>> GetAllDiscounts()
+        {
+            return await db.Discounts
+                .Include(pd=>pd.ProductDiscounts)
+                    .ThenInclude(p=>p.Product)
+                        .ThenInclude(b=>b.Brand)
+                .Include(pd=>pd.ProductDiscounts)
+                    .ThenInclude(p=>p.Product)
+                        .ThenInclude(c=>c.Category)
+                            .ThenInclude(pc=>pc.ParentCategory)
+                .Include(pd=>pd.ProductDiscounts)
+                    .ThenInclude(p=>p.Product)
+                        .ThenInclude(spi=>spi.StockProductInventories)
+                            .Where(spi=>!spi.IsDeleted)
+                .Where(d=>d.DiscountFromDate <= DateTime.UtcNow && d.DiscountEndDate >= DateTime.UtcNow && !d.IsDeleted)
+                .ToListAsync();
+        }
+        public async Task<Discount?> GetDiscountById(int id)
+        {
+            return await db.Discounts
+               .Include(pd => pd.ProductDiscounts)
+                   .ThenInclude(p => p.Product)
+                       .ThenInclude(b => b.Brand)
+               .Include(pd => pd.ProductDiscounts)
+                   .ThenInclude(p => p.Product)
+                       .ThenInclude(c => c.Category)
+                           .ThenInclude(pc => pc.ParentCategory)
+               .Include(pd => pd.ProductDiscounts)
+                   .ThenInclude(p => p.Product)
+                       .ThenInclude(spi => spi.StockProductInventories)
+                           .Where(spi => !spi.IsDeleted)
+               .Where(d => d.DiscountFromDate <= DateTime.UtcNow && d.DiscountEndDate >= DateTime.UtcNow && !d.IsDeleted)
+               .FirstOrDefaultAsync();
+        }
+        public async Task CreateDiscount(Discount discount)
+        {
+            await db.Discounts.AddAsync(discount);
+            await SaveChanges();
+        }
+        public async Task UpdateDiscount(Discount discount)
+        {
+            var CurrentDiscount = await db.Discounts
+                .Include(pd=>pd.ProductDiscounts)
+                .FirstOrDefaultAsync(d=>d.DiscountId==discount.DiscountId);
+            if(CurrentDiscount != null)
+            {
+                var prdDiscounts = CurrentDiscount.ProductDiscounts;
+                db.ProductDiscounts.RemoveRange(prdDiscounts);
+                await SaveChanges();
+                CurrentDiscount.DiscountPercentage=discount.DiscountPercentage;
+                CurrentDiscount.DiscountFromDate = discount.DiscountFromDate;
+                CurrentDiscount.DiscountEndDate = discount.DiscountEndDate;
+                CurrentDiscount.ProductDiscounts = discount.ProductDiscounts;
+                await SaveChanges();
+            }
+        }
+        public async Task DeleteDiscount(int id)
+        {
+            var CurrentDiscount = await db.Discounts.Include(pd => pd.ProductDiscounts).FirstOrDefaultAsync(d => d.DiscountId == id);
+            if(CurrentDiscount != null)
+            {
+                foreach(ProductDiscount prdDiscount in CurrentDiscount.ProductDiscounts)
+                {
+                    prdDiscount.IsDeleted = true;
+                }
+                CurrentDiscount.IsDeleted = true;
+                await SaveChanges();
+            }
         }
     }
 }
