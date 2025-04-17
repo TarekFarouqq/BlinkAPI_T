@@ -105,7 +105,6 @@ namespace Blink_API.Services.PaymentServices
                 mappedCart.Items = mappedCartDetailsDTO;
                 // Update the cart in the database
                 await _unitOfWork.CartRepo.UpdateCart(UserCart);
-
                 // Return the mapped cart with payment information
                 return mappedCart;
             }
