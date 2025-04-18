@@ -10,6 +10,8 @@ namespace Blink_API.MapperConfigs
         public UserProfile()
         {
             CreateMap<RegisterDto, ApplicationUser>()
+                // .ForSourceMember(src => src.Role, opt => opt.DoNotValidate())
+               //  .ForMember(dest => dest.Role, opt => opt.Ignore())
                .ForMember(dest => dest.FirstName, option => option.MapFrom(src => src.FName))
                .ForMember(dest => dest.LastName, option => option.MapFrom(src => src.LName))
                .ForMember(dest => dest.Email, option => option.MapFrom(src => src.Email))
@@ -19,12 +21,19 @@ namespace Blink_API.MapperConfigs
                .ForMember(dest => dest.LastModification, option => option.MapFrom(src => DateTime.Now))
                .ReverseMap();
             // ------------------------------------------------------------------------
-            CreateMap<ApplicationUser, UserDto>().ForMember(dest => dest.Role, opt => opt.Ignore());
+       //    CreateMap<ApplicationUser, UserDto>().ForMember(dest => dest.Role, opt => opt.Ignore());
             // ------------------------------------------------------------------------
-            CreateMap<ApplicationUser, UserDto>().ForMember(dest => dest.Role, opt => opt.Ignore()).ReverseMap();
+       //    CreateMap<ApplicationUser, UserDto>().ForMember(dest => dest.Role, opt => opt.Ignore()).ReverseMap();
             // ------------------------------------------------------------------------
-            CreateMap<ApplicationUser, AddUserDto>().ForMember(dest => dest.Role, opt => opt.Ignore()).ReverseMap();
+       //     CreateMap<ApplicationUser, AddUserDto>().ForMember(dest => dest.Role, opt => opt.Ignore()).ReverseMap();
             // ------------------------------------------------------------------------
+            CreateMap<ApplicationUser, UserDto>();
+            CreateMap<ApplicationUser, UserDto>().ReverseMap();
+
+            CreateMap<AddUserDto, ApplicationUser>();
+
+
+
         }
     }
 }
