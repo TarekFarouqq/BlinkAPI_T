@@ -177,6 +177,10 @@ namespace Blink_API.MapperConfigs
             CreateMap<Discount, UpdateDiscountDetailsDTO>().ReverseMap();
             CreateMap<ProductDiscount, UpdateProductDiscountDetailsDTO>().ReverseMap();
             // ------------------------------------------------------------------------
+            CreateMap<Product, ReadProductInStockDTO>()
+                .ForMember(dest=>dest.StockQuantity,option=>option.MapFrom(src=>src.StockProductInventories.Sum(spi=>spi.StockQuantity)))
+                .ReverseMap();
+            // ------------------------------------------------------------------------
         }
     }
 }
