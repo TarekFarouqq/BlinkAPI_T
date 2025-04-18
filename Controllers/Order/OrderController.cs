@@ -4,6 +4,7 @@ using Blink_API.Services.PaymentServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Blink_API.Controllers.Order
 {
@@ -64,6 +65,34 @@ namespace Blink_API.Controllers.Order
                 return StatusCode(500, new ApiResponse(500, "Internal server error"));
             }
         }
+
+
+
+        [HttpGet("GetOrdersByUserId")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<orderDTO>>> GetOrdersByUserIdAsync()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User is not authenticated.");
+                }
+
+                var orders = await _orderService.GetOrdersByUserIdAsync(userId);
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+
 
         [HttpDelete("{orderId}")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]

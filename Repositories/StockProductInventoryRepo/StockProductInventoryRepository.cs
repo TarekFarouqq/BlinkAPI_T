@@ -19,7 +19,7 @@ namespace Blink_API.Repositories.StockProductInventoryRepo
             var inventories = await _blinkDbContext.StockProductInventories
                    .Where(i => i.ProductId == productId && i.StockQuantity > 0)
                    .OrderBy(i => i.Inventory.InventoryId)
-                   .AsNoTracking()  
+                    
                    .ToListAsync();
 
             return inventories;

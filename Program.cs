@@ -23,6 +23,9 @@ using Blink_API.Services.PaymentServices;
 using Blink_API.Services.ProductServices;
 using Blink_API.Services.UserService;
 using Blink_API.Repositories.ProductRepos;
+using Blink_API.Services.OrderServicees;
+
+
 namespace Blink_API
 {
     public class Program
@@ -79,11 +82,15 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             builder.Services.AddScoped<AuthServiceUpdated>();
             //Add Brand :
             builder.Services.AddScoped<BrandService>();
-            // Add Order
-            builder.Services.AddScoped<orderService>();
             builder.Services.AddScoped<OrderHeaderRepository>();
             // Add Payment
+            //builder.Services.AddScoped<IPaymentServices, PaymentServices>();
+
             builder.Services.AddScoped<PaymentServices>();
+            // Add Order
+            builder.Services.AddScoped<orderService>();
+
+            //builder.Services.AddScoped<Lazy<IOrderServices>>(provider => new Lazy<IOrderServices>(provider.GetRequiredService<IOrderServices>()));
             // Add users :
             builder.Services.AddScoped<UserService>();
             #region Redis services

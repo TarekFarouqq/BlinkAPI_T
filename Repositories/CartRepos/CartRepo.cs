@@ -41,7 +41,7 @@ namespace Blink_API.Repositories.CartRepos
                  .AsNoTracking()
                 .Include(c => c.CartDetails.Where(cd => !cd.IsDeleted))
                     .ThenInclude(c => c.Product)
-                        .ThenInclude(p => p.StockProductInventories)
+                        .ThenInclude(p => p.StockProductInventories).AsNoTracking()
                 .Include(c => c.CartDetails.Where(cd => !cd.IsDeleted))
                     .ThenInclude(c => c.Product)
                         .ThenInclude(p => p.ProductImages)

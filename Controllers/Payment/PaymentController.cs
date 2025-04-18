@@ -3,6 +3,7 @@
 using Blink_API.DTOs.PaymentCart;
 using Blink_API.Errors;
 using Blink_API.Models;
+using Blink_API.Services.Helpers;
 using Blink_API.Services.PaymentServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -44,10 +45,25 @@ namespace Blink_API.Controllers.Payment
                     return NotFound(new ApiResponse(404, "Cart not found for the current user"));
                 }
 
-                
-                // Now call the payment service to create or update the PaymentIntent
-                var basket = await _paymentServices.CreateOrUpdatePayment2(cart.CartId, userId);
+                #region Calc Price And Inventory
+                var OrderSubTotal = cart.CartDetails.Sum(cd => cd.Product.StockProductInventories.Average(spi => spi.StockUnitPrice)); // ----------------- 2
+                var OrderTax = OrderSubTotal * 0.14m; // ----------------- 1
+                var ShippingCost = 0;
+                var OrderTotalAmount = OrderSubTotal + OrderTax + ShippingCost;
 
+
+
+
+
+                // 3. Calculate tax, shipping, total
+
+
+                #endregion
+
+
+                // Now call the payment service to create or update the PaymentIntent
+                var basket = await _paymentServices.CreatePaymentIntent(userId,OrderTotalAmount);
+                
                 if (basket is null)
                     return BadRequest(new ApiResponse(400, "An error occurred while processing your cart"));
 
@@ -75,6 +91,24 @@ namespace Blink_API.Controllers.Payment
                 return StatusCode(500, new ApiResponse(500, "Internal Server Error: " + ex.Message));
             }
         }
+
+
+        //[HttpGet("status/{paymentIntentId}")]
+        //public async Task<IActionResult> GetPaymentStatus(string paymentIntentId)
+        //{
+        //    try
+        //    {
+        //        var createOrderDTO = new CreateOrderDTO(); 
+        //        await _paymentServices.MonitorPaymentStatus(paymentIntentId, createOrderDTO);
+
+        //        return Ok("Payment status updated successfully");
+        //    }
+
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
         #region create WebHook
 
         //[HttpPost("webhook")] //api/Payment/webhook
