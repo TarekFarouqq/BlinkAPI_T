@@ -1,8 +1,10 @@
 ﻿using Blink_API.DTOs.Category;
 using Blink_API.DTOs.CategoryDTOs;
+using Blink_API.Repositories.BiDataRepos;
 using Blink_API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Blink_API.Controllers
 {
@@ -57,27 +59,22 @@ namespace Blink_API.Controllers
             category.CategoryImage = baseUrl + category.CategoryImage.Replace("wwwroot", "");
             return Ok(category);
         }
-
-
-
         [HttpPost("AddCategory")]
-
         public async Task<ActionResult> AddCategory(CreateCategoryDTO dto)
         {
             if (!ModelState.IsValid)
-            
+
                 return BadRequest();
-            
+
 
             var result = await categoryService.AddedCategory(dto);
 
             if (result.Contains("not exist")) return NotFound(result);
             return Ok(result);
-            
 
-            
+
+
         }
-
         [HttpDelete("SoftDeleteCategory/{id}")]
         public async Task<ActionResult> SoftDeleteCategory(int id)
         {
@@ -85,10 +82,6 @@ namespace Blink_API.Controllers
             if (result.Contains("not found")) return NotFound(result);
             return Ok(result);
         }
-
-
-
-
         [HttpPut("UpdateCategory/{id}")]
         public async Task<ActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryDTO dto)
         {
@@ -105,9 +98,6 @@ namespace Blink_API.Controllers
 
             return Ok(result);
         }
-
-
-
         [HttpGet("GetChildCategoryByParentId")]
         public async Task<ActionResult> GetChildCategoryByParentId(int id)
         {
@@ -120,6 +110,95 @@ namespace Blink_API.Controllers
             }
             return Ok(categories);
         }
+        #region Sprint3
+        [HttpGet]
+        public async Task<ActionResult> GetAll()
+        {
+            var categories = await categoryService.GetAll();
+            if (categories == null) return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}";
+            foreach (var category in categories)
+            {
+                category.CategoryImage = baseUrl + category.CategoryImage.Replace("wwwroot", "");
+            }
+            return Ok(categories);
+        }
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetById(int id)
+        {
+            var category = await categoryService.GetById(id);
+            if (category == null) return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}";
+            category.CategoryImage = baseUrl + category.CategoryImage.Replace("wwwroot", "");
+            foreach (var subCategory in category.SubCategories)
+            {
+                subCategory.CategoryImage = baseUrl + subCategory.CategoryImage.Replace("wwwroot", "");
+            }
+            return Ok(category);
+        }
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteParentCategory(int id)
+        {
+            if (id <= 0)
+                return BadRequest(new { Message = "Category Id Should Be Morethan Zero" });
+            bool result = await categoryService.DeleteParentCategory(id);
+            if (result)
+            {
+                return Ok(new { Message = "Parent Category Successfully Deleted" });
+            }
+            else
+            {
+                return BadRequest(new { Message = "Not Deleted, Please Delete Child Categories First" });
+            }
+        }
+        [HttpDelete("DeleteChildCategory/{id}")]
+        public async Task<ActionResult> DeleteChildCategory(int id)
+        {
+            if (id <= 0)
+                return BadRequest(new { Message = "Category Id Should Be Morethan Zero" });
+            bool result = await categoryService.DeleteChildCategory(id);
+            if (result)
+            {
+                return Ok(new { Message = "Child Category Successfully Deleted" });
+            }
+            else
+            {
+                return BadRequest(new { Message = "Not Deleted, Please Delete Products Related First" });
+            }
+        }
+        [HttpPost]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> AddCategory([FromForm] InsertCategoryDTO insertCategoryDTO)
+        {
+            if (!ModelState.IsValid || insertCategoryDTO == null)
+                return BadRequest();
 
+            bool isInserted = await categoryService.AddCategory(insertCategoryDTO);
+            if (isInserted)
+            {
+                return Ok(new { Message = "Category Inserted Successfully" });
+            }
+            else
+            {
+                return BadRequest(new { Message = "Failed To Insert New Category" });
+            }
+        }
+        [HttpPost("UpdateCategory")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> UpdateCategory([FromForm] UpdateParentCategoryDTO updateCategoryDTO)
+        {
+            if (!ModelState.IsValid || updateCategoryDTO == null)
+                return BadRequest();
+            bool isUpdated = await categoryService.UpdateCategory(updateCategoryDTO);
+            if (isUpdated)
+            {
+                return Ok(new { Message = "Category Updated Successfully" });
+            }
+            else
+            {
+                return BadRequest(new { Message = "Failed To Update Category" });
+            }
+        }
+        #endregion
     }
 }

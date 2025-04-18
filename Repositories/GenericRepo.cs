@@ -4,7 +4,7 @@ namespace Blink_API.Repositories
 {
     public class GenericRepo<TEntity, Tkey> where TEntity : class
     {
-        private readonly BlinkDbContext db;
+        protected readonly BlinkDbContext db;
         public GenericRepo(BlinkDbContext _db)
         {
             db = _db;
@@ -44,5 +44,12 @@ namespace Blink_API.Repositories
         {
             await db.SaveChangesAsync();
         }
+
+        // for testttt
+        public virtual IAsyncEnumerable<TEntity> GetAllAsStream()
+        {
+            return db.Set<TEntity>().AsAsyncEnumerable();
+        }
+
     }
 }

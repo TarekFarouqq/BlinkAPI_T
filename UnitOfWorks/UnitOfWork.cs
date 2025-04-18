@@ -1,14 +1,21 @@
 ﻿using Blink_API.Models;
 using Blink_API.Repositories;
-
 using Blink_API.Repositories.BrandRepository;
-
 using Blink_API.Repositories.BranchRepos;
- 
 using Blink_API.Repositories.CartRepos;
 using Blink_API.Repositories.DiscountRepos;
 using Blink_API.Repositories.InventoryRepos;
+using Microsoft.EntityFrameworkCore;
+using Blink_API.Repositories.Order;
+using AutoMapper;
 using Blink_API.Repositories.BiDataRepos;
+using Blink_API.Repositories.ProductRepos;
+using Blink_API.Repositories.UserRepos;
+
+using Blink_API.Repositories.StockProductInventoryRepo;
+
+
+
 
 namespace Blink_API
 {
@@ -16,15 +23,21 @@ namespace Blink_API
     {
         private readonly BlinkDbContext db;
         internal object cart_DiminsionRepos;
+        public DbContext Context => db;
         BrandRepos brandRepo;
         ProductRepo productRepo;
+        ProductReviewRepo productReviewRepo;
+        ProductSupplierRepo productSupplierRepo;
         CategoryRepo categoryRepo;
         DiscountRepo discountRepo;
         CartRepo cartRepo;
         CartDetailsRepo cartDetailsRepo;
         BranchRepos branchRepos;
         InventoryRepo inventoryRepo;
-
+        StockProductInventoryRepository stockProductInventoryRepo;
+        OrderHeaderRepository orderRepo;
+        OrderDetailsRepository orderDetailsRepo;
+        UserRepos UserRepos;
         // **** for bi ***
         BiDataRepos biDataRepos;
         Review_DimensionRepos reviewDiminsionRepo;
@@ -40,9 +53,47 @@ namespace Blink_API
         Branch_InventoryRepos branchInventoryRepos;
         InventoryTransaction_factRepos inventoryTransactionfactRepo;
         Product_DiminsionRepos _productDiminsionRepos;
+
         public UnitOfWork(BlinkDbContext _db)
         {
             db = _db;
+        }
+       
+        // user :
+        public UserRepos UserRepo
+        {
+            get
+            {
+                if (UserRepos == null)
+                {
+                    UserRepos = new UserRepos(db);
+                }
+                return UserRepos;
+            }
+        }
+        public OrderHeaderRepository OrderRepo
+        {
+            get
+            {
+                if (orderRepo == null)
+                {
+                    orderRepo = new OrderHeaderRepository(db);
+                }
+                return orderRepo;
+            }
+        }
+
+
+        public OrderDetailsRepository OrderDetailRepo
+        {
+            get
+            {
+                if (orderDetailsRepo == null)
+                {
+                    orderDetailsRepo = new OrderDetailsRepository(db);
+                }
+                return orderDetailsRepo;
+            }
         }
 
         public ProductRepo ProductRepo
@@ -56,7 +107,28 @@ namespace Blink_API
                 return productRepo;
             }
         }
-
+        public ProductReviewRepo ProductReviewRepo
+        {
+            get
+            {
+                if (productReviewRepo == null)
+                {
+                    productReviewRepo = new ProductReviewRepo(db);
+                }
+                return productReviewRepo;
+            }
+        }
+        public ProductSupplierRepo ProductSupplierRepo
+        {
+            get
+            {
+                if (productSupplierRepo == null)
+                {
+                    productSupplierRepo = new ProductSupplierRepo(db);
+                }
+                return productSupplierRepo;
+            }
+        }
         public InventoryRepo InventoryRepo
         {
             get
@@ -66,6 +138,18 @@ namespace Blink_API
                     inventoryRepo = new InventoryRepo(db);
                 }
                 return inventoryRepo;
+            }
+        }
+
+        public StockProductInventoryRepository  StockProductInventoryRepo
+        {
+            get
+            {
+                if (stockProductInventoryRepo == null)
+                {
+                    stockProductInventoryRepo = new StockProductInventoryRepository(db);
+                }
+                return stockProductInventoryRepo;
             }
         }
 
@@ -80,7 +164,6 @@ namespace Blink_API
                 return categoryRepo;
             }
         }
-
         public DiscountRepo DiscountRepo
         {
             get
@@ -92,8 +175,6 @@ namespace Blink_API
                 return discountRepo;
             }
         }
-
-
         public CartRepo CartRepo
         {
             get
@@ -105,7 +186,6 @@ namespace Blink_API
                 return cartRepo;
             }
         }
-
         public CartDetailsRepo CartDetailsRepo
         {
             get
@@ -117,8 +197,6 @@ namespace Blink_API
                 return cartDetailsRepo;
             }
         }
-
-
         public BrandRepos BrandRepos
         {
             get
@@ -130,9 +208,6 @@ namespace Blink_API
                 return brandRepo;
             }
         }
-
-
-
         public BranchRepos BranchRepos
         {
             get
@@ -144,6 +219,7 @@ namespace Blink_API
                 return branchRepos;
             }
         }
+
         // *************************************  for bidatarepos ************************************:
         public BiDataRepos BiDataRepos
         {
@@ -233,8 +309,6 @@ namespace Blink_API
                 return productDiscountRepo;
             }
         }
-
-        
         public Inventory_transactionRepo InventoryTransactionRepo
         {
             get
@@ -250,9 +324,7 @@ namespace Blink_API
                 inventoryTransactionRepo = value;
             }
         }
-
         // cart diminsion:
-
         public cart_DiminsionRepos CartDiminsionRepos
         {
             get
@@ -292,7 +364,6 @@ namespace Blink_API
             }
         }
 
-        
         public Branch_InventoryRepos BranchInventoryRepos
         {
             get
@@ -318,10 +389,7 @@ namespace Blink_API
             }
         }
 
-
         // product dimintion :
-
-
         public Product_DiminsionRepos ProductDiminsionRepos
         {
             get
@@ -334,6 +402,8 @@ namespace Blink_API
             }
         }
 
+        public async Task<int> CompleteAsync()
+         => await db.SaveChangesAsync();
+
     }
-    
 }

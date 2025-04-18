@@ -1,4 +1,5 @@
-﻿using Blink_API.Services.BiDataService;
+﻿using Blink_API.DTOs.BiDataDtos;
+using Blink_API.Services.BiDataService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,25 +15,61 @@ namespace Blink_API.Controllers.BiDataController
         {
             _biStockService = biStockService;
         }
+       
 
         // Stock_Fact
         [HttpGet]
-        [Route("GetAllStockFacts")]
-        public  async Task<ActionResult> GetAllStockFacts()
+        [Route("GetAllStockFactsInChunks")]
+        public async IAsyncEnumerable<List<stock_factDto>> GetAllStockFactsInChunks()
         {
-            var stockFacts = await _biStockService.GetAllStockFacts();
-            return Ok(stockFacts);
-        }
-        // review_diminsion
-        [HttpGet]
-        [Route("GetAllReviewDimensions")]
-        public async Task<ActionResult> GetAllReviewDimensions()
-        {
-            var reviewDimensions = await _biStockService.GetAllReviewDimensions();
-            return Ok(reviewDimensions);
+            await foreach (var chunk in _biStockService.GetAllStockFactsInChunks())
+            {
+                yield return chunk;
+            }
         }
 
+        #region old
+        //[HttpGet]
+        //[Route("GetAllStockFacts")]
+        //public  async Task<ActionResult> GetAllStockFacts()
+        //{
+        //    var stockFacts = await _biStockService.GetAllStockFacts();
+        //    return Ok(stockFacts);
+        //}
+
+        #endregion
+        // review_diminsion
+        [HttpGet]
+        [Route("GetAllReviewDimensionsInChunks")]
+        public async IAsyncEnumerable<List<Review_DimensionDto>> GetAllReviewDimensionsInChunks()
+        {
+            await foreach (var chunk in _biStockService.GetAllReviewDimensionsInChunks())
+            {
+                yield return chunk;
+            }
+        }
+
+        #region old
+        //[HttpGet]
+        //[Route("GetAllReviewDimensions")]
+        //public async Task<ActionResult> GetAllReviewDimensions()
+        //{
+        //    var reviewDimensions = await _biStockService.GetAllReviewDimensions();
+        //    return Ok(reviewDimensions);
+        //}
+        #endregion
         // payment_diminsion
+        //[HttpGet]
+        //[Route("GetAllPaymentsInChunks")]
+        //public async IAsyncEnumerable<List<Payment_DimensionDto>> GetAllPaymentsInChunks()
+        //{
+        //    await foreach (var chunk in _biStockService.GetAllPaymentsInChunks())
+        //    {
+        //        yield return chunk;
+        //    }
+        //}
+
+        #region old
         [HttpGet]
         [Route("GetAllPayments")]
         public async Task<ActionResult> GetAllPayments()
@@ -40,102 +77,234 @@ namespace Blink_API.Controllers.BiDataController
             var payments = await _biStockService.GetAllPayments();
             return Ok(payments);
         }
-
+        #endregion
         // user_roles_diminsion
         [HttpGet]
-        [Route("GetAllUserRoles")]
-        public async Task<ActionResult> GetAllUserRoles()
+        [Route("GetAllUserRolesInChunks")]
+        public async IAsyncEnumerable<List<UserRoles_DimensionDto>> GetAllUserRolesInChunks()
         {
-            var userRoles = await _biStockService.GetAllUserRoles();
-            return Ok(userRoles);
+            await foreach (var chunk in _biStockService.GetAllUserRolesInChunks())
+            {
+                yield return chunk;
+            }
         }
 
+        #region old
+        //[HttpGet]
+        //[Route("GetAllUserRoles")]
+        //public async Task<ActionResult> GetAllUserRoles()
+        //{
+        //    var userRoles = await _biStockService.GetAllUserRoles();
+        //    return Ok(userRoles);
+        //}
+        #endregion
         // all roles :
+
         [HttpGet]
-        [Route("GetAllRoles")]
-        public async Task<ActionResult> GetAllRoles()
+        [Route("GetAllRolesInChunks")]
+        public async IAsyncEnumerable<List<Role_DiminsionDto>> GetAllRolesInChunks()
         {
-            var roles = await _biStockService.GetAllRoles();
-            return Ok(roles);
+            await foreach (var chunk in _biStockService.GetAllRolesInChunks())
+            {
+                yield return chunk;
+            }
         }
 
+        #region old
+        //[HttpGet]
+        //[Route("GetAllRoles")]
+        //public async Task<ActionResult> GetAllRoles()
+        //{
+        //    var roles = await _biStockService.GetAllRoles();
+        //    return Ok(roles);
+        //}
+        #endregion
         // all users :
+        //[HttpGet]
+        //[Route("GetAllUsers")]
+        //public async Task<ActionResult> GetAllUsers()
+        //{
+        //    var users = await _biStockService.GetAllUsers();
+        //    return Ok(users);
+        //}
+        //  get all users in chunks :
         [HttpGet]
-        [Route("GetAllUsers")]
-        public async Task<ActionResult> GetAllUsers()
+        [Route("GetAllUsersInChunks")]
+        public async IAsyncEnumerable<List<User_DimensionDto>> GetAllUsersInChunks()
         {
-            var users = await _biStockService.GetAllUsers();
-            return Ok(users);
+            await foreach (var chunk in _biStockService.GetAllUsersInChunks())
+            {
+                yield return chunk;
+            }
         }
+
+
+        /// /////////////////////////////////////////////////
+
 
         // all product discont :
         [HttpGet]
-        [Route("GetAllProductDiscounts")]
-        public async Task<ActionResult> GetAllProductDiscounts()
+        [Route("GetAllProductDiscountsInChunks")]
+        public async IAsyncEnumerable<List<Product_DiscountDto>> GetAllProductDiscountsInChunks()
         {
-            var productDiscounts = await _biStockService.GetAllProductDiscounts();
-            return Ok(productDiscounts);
+            await foreach (var chunk in _biStockService.GetAllProductDiscountsInChunks())
+            {
+                yield return chunk;
+            }
         }
+
+        #region old
+        //[HttpGet]
+        //[Route("GetAllProductDiscounts")]
+        //public async Task<ActionResult> GetAllProductDiscounts()
+        //{
+        //    var productDiscounts = await _biStockService.GetAllProductDiscounts();
+        //    return Ok(productDiscounts);
+        //}
+        #endregion
 
         // get all inventory transaction :
         [HttpGet]
-        [Route("GetAllInventoryTransaction")]
-        public async Task<ActionResult> GetAllInventoryTransaction()
+        [Route("GetAllInventoryTransactionInChunks")]
+        public async IAsyncEnumerable<List<Inventory_Transaction_Dto>> GetAllInventoryTransactionInChunks()
         {
-            var inventoryTransactions = await _biStockService.GetAllInventoryTransactions();
-            return Ok(inventoryTransactions);
+            await foreach (var chunk in _biStockService.GetAllInventoryTransactionsInChunks())
+            {
+                yield return chunk;
+            }
         }
 
+        #region old
+        //[HttpGet]
+        //[Route("GetAllInventoryTransaction")]
+        //public async Task<ActionResult> GetAllInventoryTransaction()
+        //{
+        //    var inventoryTransactions = await _biStockService.GetAllInventoryTransactions();
+        //    return Ok(inventoryTransactions);
+        //}
+        #endregion
         // get all carts :
         [HttpGet]
-        [Route("GetAllCarts")]
-        public async Task<ActionResult> GetAllCarts()
+        [Route("GetAllCartsInChunks")]
+        public async IAsyncEnumerable<List<cart_DiminsionDto>> GetAllCartsInChunks()
         {
-            var carts = await _biStockService.GetAllCarts();
-            return Ok(carts);
+            await foreach (var chunk in _biStockService.GetAllCartsInChunks())
+            {
+                yield return chunk;
+            }
         }
 
+        #region old
+        //[HttpGet]
+        //[Route("GetAllCarts")]
+        //public async Task<ActionResult> GetAllCarts()
+        //{
+        //    var carts = await _biStockService.GetAllCarts();
+        //    return Ok(carts);
+        //}
+        #endregion
         // get all order details :
         [HttpGet]
-        [Route("GetAllOrderDetails")]
-        public async Task<ActionResult> GetAllOrderDetails()
+        [Route("GetAllOrderDetailsInChunks")]
+        public async IAsyncEnumerable<List<order_FactDto>> GetAllOrderFactsInChunks()
         {
-            var orderDetails = await _biStockService.GetAllOrderFacts();
-            return Ok(orderDetails);
-        }
-        // get all discountes:
-        [HttpGet]
-        [Route("GetAllDiscounts")]
-        public async Task<ActionResult> GetAllDiscounts()
-        {
-            var discounts = await _biStockService.GetAllDiscounts();
-            return Ok(discounts);
+            await foreach (var chunk in _biStockService.GetAllOrderFactsInChunks())
+            {
+                yield return chunk;
+            }
         }
 
+        #region old
+        //[HttpGet]
+        //[Route("GetAllOrderDetails")]
+        //public async Task<ActionResult> GetAllOrderDetails()
+        //{
+        //    var orderDetails = await _biStockService.GetAllOrderFacts();
+        //    return Ok(orderDetails);
+        //}
+        #endregion
+        // get all discountes:
+
+        [HttpGet]
+        [Route("GetAllDiscountsInChunks")]
+        public async IAsyncEnumerable<List<Discount_DimensionDto>> GetAllDiscountsInChunks()
+        {
+            await foreach (var chunk in _biStockService.GetAllDiscountsInChunks())
+            {
+                yield return chunk;
+            }
+        }
+
+
+        #region old 
+        //[HttpGet]
+        //[Route("GetAllDiscounts")]
+        //public async Task<ActionResult> GetAllDiscounts()
+        //{
+        //    var discounts = await _biStockService.GetAllDiscounts();
+        //    return Ok(discounts);
+        //}
+        #endregion
         // get all branch inventory :
         [HttpGet]
-        [Route("GetAllBranchInventory")]
-        public async Task<ActionResult> GetAllBranchInventory()
+        [Route("GetAllBranchInventoryInChunks")]
+        public async IAsyncEnumerable<List<Branch_inventoryDto>> GetAllBranchInventoryInChunks()
         {
-            var branchInventory = await _biStockService.GetAllInventoryBranches();
-            return Ok(branchInventory);
+            await foreach (var chunk in _biStockService.GetAllInventoryBranchesInChunks())
+            {
+                yield return chunk;
+            }
         }
+
+        #region old
+        //[HttpGet]
+        //[Route("GetAllBranchInventory")]
+        //public async Task<ActionResult> GetAllBranchInventory()
+        //{
+        //    var branchInventory = await _biStockService.GetAllInventoryBranches();
+        //    return Ok(branchInventory);
+        //}
+        #endregion
         // get all inventory transactionfact  :
         [HttpGet]
-        [Route("GetAllInventoryTransactionFact")]
-        public async Task<ActionResult> GetAllInventoryTransactionFact()
+        [Route("GetAllInventoryTransactionFactInChunks")]
+        public async IAsyncEnumerable<List<InventoryTransaction_FactDto>> GetAllInventoryTransactionFactInChunks()
         {
-            var inventoryTransactionFact = await _biStockService.GetAllInventoryTransactionFacts();
-            return Ok(inventoryTransactionFact);
+            await foreach (var chunk in _biStockService.GetAllInventoryTransactionFactsInChunks())
+            {
+                yield return chunk;
+            }
         }
+
+        #region old
+        //[HttpGet]
+        //[Route("GetAllInventoryTransactionFact")]
+        //public async Task<ActionResult> GetAllInventoryTransactionFact()
+        //{
+        //    var inventoryTransactionFact = await _biStockService.GetAllInventoryTransactionFacts();
+        //    return Ok(inventoryTransactionFact);
+        //}
+        #endregion
 
         // get all product diminsion :
         [HttpGet]
         [Route("GetAllProducts")]
-        public async Task<ActionResult> GetAllProducts()
+        public async IAsyncEnumerable<List<Product_DiminsionDto>> GetAllProducts()
         {
-            var productDiminsion = await _biStockService.GetAllProductDimensions();
-            return Ok(productDiminsion);
+            await foreach (var chunk in _biStockService.GetAllProductDimensionsInChunks())
+            {
+                yield return chunk;
+            }
         }
+
+        #region old
+        //[HttpGet]
+        //[Route("GetAllProducts")]
+        //public async Task<ActionResult> GetAllProducts()
+        //{
+        //    var productDiminsion = await _biStockService.GetAllProductDimensions();
+        //    return Ok(productDiminsion);
+        //}
+        #endregion
     }
 }

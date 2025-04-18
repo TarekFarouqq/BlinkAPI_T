@@ -114,16 +114,12 @@ namespace Blink_API.Services.AuthServices
                 {
                     await userManager.AddToRoleAsync(mappedSupplier, "Supplier");
                     var token = await CreateTokenAsync(mappedSupplier);
-                    return new
-                    {
-                        token = token,
-                        username=mappedSupplier.UserName,
-                        email=mappedSupplier.Email
-                    };
+                    return token;
                 }
             }
             return "";
         }
+
         public async Task<object> RegisterClient(RegisterDto registerClient)
         {
             var existingUsername = await userManager.FindByNameAsync(registerClient.UserName);
@@ -152,6 +148,8 @@ namespace Blink_API.Services.AuthServices
             }
             return "";
         }
+
+
         public async Task<object> LoginAccount(LoginDto loginAccount)
         {
             var user = await userManager.FindByEmailAsync(loginAccount.Email)

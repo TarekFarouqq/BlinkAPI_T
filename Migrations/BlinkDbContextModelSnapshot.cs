@@ -22,6 +22,29 @@ namespace Blink_API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Blink_API.Models.Advertisment", b =>
+                {
+                    b.Property<int>("AdvertismentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AdvertismentId"));
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("isDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("AdvertismentId");
+
+                    b.ToTable("Advertisments");
+                });
+
             modelBuilder.Entity("Blink_API.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -197,8 +220,7 @@ namespace Blink_API.Migrations
 
                     b.HasKey("CartId");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Carts");
                 });
@@ -472,6 +494,10 @@ namespace Blink_API.Migrations
                     b.Property<int>("PaymentId")
                         .HasColumnType("int");
 
+                    b.Property<string>("PaymentIntentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("OrderHeaderId");
 
                     b.HasIndex("CartId")
@@ -501,6 +527,10 @@ namespace Blink_API.Migrations
 
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentIntentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
@@ -680,6 +710,73 @@ namespace Blink_API.Migrations
                     b.HasIndex("ReviewId");
 
                     b.ToTable("ReviewComments");
+                });
+
+            modelBuilder.Entity("Blink_API.Models.ReviewSuppliedProduct", b =>
+                {
+                    b.Property<int>("RequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RequestId"));
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InventoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("ProductPrice")
+                        .HasColumnType("float");
+
+                    b.Property<int>("ProductQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("RequestStatus")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SupplierId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("RequestId");
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("InventoryId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("ReviewSuppliedProducts");
+                });
+
+            modelBuilder.Entity("Blink_API.Models.ReviewSuppliedProductImages", b =>
+                {
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("RequestId", "ImagePath");
+
+                    b.ToTable("ReviewSuppliedProductImages");
                 });
 
             modelBuilder.Entity("Blink_API.Models.StockProductInventory", b =>
@@ -991,7 +1088,7 @@ namespace Blink_API.Migrations
             modelBuilder.Entity("Blink_API.Models.DefaultAttributes", b =>
                 {
                     b.HasOne("Blink_API.Models.FilterAttributes", "FilterAttribute")
-                        .WithMany()
+                        .WithMany("DefaultAttributes")
                         .HasForeignKey("AttributeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1152,6 +1249,52 @@ namespace Blink_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Review");
+                });
+
+            modelBuilder.Entity("Blink_API.Models.ReviewSuppliedProduct", b =>
+                {
+                    b.HasOne("Blink_API.Models.Brand", "Brand")
+                        .WithMany("ReviewsSuppliedProducts")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Blink_API.Models.Category", "Category")
+                        .WithMany("ReviewsSuppliedProducts")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Blink_API.Models.Inventory", "Inventory")
+                        .WithMany("ReviewsSuppliedProducts")
+                        .HasForeignKey("InventoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Blink_API.Models.ApplicationUser", "Supplier")
+                        .WithMany("ReviewsSuppliedProducts")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Inventory");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("Blink_API.Models.ReviewSuppliedProductImages", b =>
+                {
+                    b.HasOne("Blink_API.Models.ReviewSuppliedProduct", "ReviewSuppliedProduct")
+                        .WithMany("ReviewSuppliedProductImages")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReviewSuppliedProduct");
                 });
 
             modelBuilder.Entity("Blink_API.Models.StockProductInventory", b =>
@@ -1332,6 +1475,8 @@ namespace Blink_API.Migrations
 
                     b.Navigation("Reviews");
 
+                    b.Navigation("ReviewsSuppliedProducts");
+
                     b.Navigation("TransactionDetails");
 
                     b.Navigation("WishList")
@@ -1346,6 +1491,8 @@ namespace Blink_API.Migrations
             modelBuilder.Entity("Blink_API.Models.Brand", b =>
                 {
                     b.Navigation("Products");
+
+                    b.Navigation("ReviewsSuppliedProducts");
                 });
 
             modelBuilder.Entity("Blink_API.Models.Cart", b =>
@@ -1360,6 +1507,8 @@ namespace Blink_API.Migrations
                 {
                     b.Navigation("Products");
 
+                    b.Navigation("ReviewsSuppliedProducts");
+
                     b.Navigation("SubCategories");
                 });
 
@@ -1368,9 +1517,16 @@ namespace Blink_API.Migrations
                     b.Navigation("ProductDiscounts");
                 });
 
+            modelBuilder.Entity("Blink_API.Models.FilterAttributes", b =>
+                {
+                    b.Navigation("DefaultAttributes");
+                });
+
             modelBuilder.Entity("Blink_API.Models.Inventory", b =>
                 {
                     b.Navigation("ReceivedTransactions");
+
+                    b.Navigation("ReviewsSuppliedProducts");
 
                     b.Navigation("SentTransactions");
 
@@ -1420,6 +1576,11 @@ namespace Blink_API.Migrations
             modelBuilder.Entity("Blink_API.Models.Review", b =>
                 {
                     b.Navigation("ReviewComments");
+                });
+
+            modelBuilder.Entity("Blink_API.Models.ReviewSuppliedProduct", b =>
+                {
+                    b.Navigation("ReviewSuppliedProductImages");
                 });
 
             modelBuilder.Entity("Blink_API.Models.WishList", b =>

@@ -1,15 +1,15 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.DTOs.ProductDTOs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace Blink_API.Repositories
 {
     public class ProductRepo : GenericRepo<Product, int>
     {
-        private readonly BlinkDbContext db;
-        public ProductRepo(BlinkDbContext _db) : base(_db)
-        {
-            db = _db;
-        }
+        public ProductRepo(BlinkDbContext db) : base(db){}
         public override async Task<List<Product>> GetAll()
         {
             return await db.Products
@@ -21,6 +21,8 @@ namespace Blink_API.Repositories
                 .Include(i => i.ProductImages.Where(pi => !pi.IsDeleted))
                 .Include(r => r.Reviews)
                 .ThenInclude(rc => rc.ReviewComments)
+                .Include(r=>r.Reviews)
+                .ThenInclude(ru=>ru.User)
                 .Include(sip => sip.StockProductInventories)
                 .Include(pd => pd.ProductDiscounts)
                 .ThenInclude(d => d.Discount)
@@ -75,11 +77,14 @@ namespace Blink_API.Repositories
         {
             return await db.Products
                .Include(u => u.User)
+                .Include(u => u.User)
                 .Include(b => b.Brand)
                 .Include(c => c.Category)
                 .Include(i => i.ProductImages.Where(pi => !pi.IsDeleted))
                 .Include(r => r.Reviews)
                 .ThenInclude(rc => rc.ReviewComments)
+                .Include(r => r.Reviews)
+                .ThenInclude(ru => ru.User)
                 .Include(sip => sip.StockProductInventories)
                 .Include(pd => pd.ProductDiscounts)
                 .ThenInclude(d => d.Discount)
@@ -150,6 +155,23 @@ namespace Blink_API.Repositories
                 product.IsDeleted = true;
                 product.ProductModificationDate = DateTime.Now;
                 await UpdateProduct(id, product);
+                var cartDetailsContainProducts = await db.CartDetails.Where(cp => cp.ProductId == id && !cp.IsDeleted).ToListAsync();
+                if(cartDetailsContainProducts.Count> 0)
+                {
+                    foreach(var cartDetail in cartDetailsContainProducts)
+                    {
+                        cartDetail.IsDeleted = true;
+                    }
+                }
+                var productReviews = await db.Reviews.Where(rp=>rp.ProductId == id && !rp.IsDeleted).ToListAsync();
+                if(productReviews.Count > 0)
+                {
+                    foreach(var review in productReviews)
+                    {
+                        review.IsDeleted = true;
+                    }
+                }
+                await SaveChanges();
             }
         }
         private async Task RemoveOldImages(int prdId)
@@ -169,6 +191,8 @@ namespace Blink_API.Repositories
         }
         public async Task AddProductImage(List<ProductImage> prdImages)
         {
+            if (prdImages.Count == 0)
+                return;
             var product = await GetById(prdImages[0].ProductId);
             if (product != null)
             {
@@ -235,12 +259,77 @@ namespace Blink_API.Repositories
                 .Where(pa => pa.ProductId == productId)
                 .ToListAsync();
         }
-        public async Task<ICollection<ProductImage>> GetProductImages(int ProductId)
+        public async Task<List<ProductImage>> GetProductImages(int ProductId)
         {
             return await db.ProductImages
                 .AsNoTracking()
                 .Where(p => p.ProductId == ProductId && !p.IsDeleted)
                 .ToListAsync();
+        }
+        public async Task DeleteOldProductImages(int productId)
+        {
+            var oldImages = await db.ProductImages
+                .Where(pi => pi.ProductId == productId)
+                .ToListAsync();
+            db.ProductImages.RemoveRange(oldImages);
+            await SaveChanges();
+        }
+        public async Task<ICollection<Product>> GetFillteredProducts(int categoryID)
+        {
+            var query = await db.Products
+                .Include(au => au.User)
+                .Include(b => b.Brand)
+                .Include(c => c.Category)
+                .ThenInclude(pc=>pc.ParentCategory)
+                .Include(spi=>spi.StockProductInventories)
+                .Include(r=>r.Reviews)
+                .ThenInclude(rc=>rc.ReviewComments)
+                .Include(pd=>pd.ProductDiscounts)
+                .ThenInclude(d=>d.Discount)
+                .Include(pa=>pa.ProductAttributes)
+                .ThenInclude(fa=>fa.FilterAttribute)
+                .Where(p=>!p.IsDeleted)
+                .ToListAsync();
+
+            if(categoryID > 0)
+            {
+                query = query.Where(p=>p.CategoryId== categoryID || (p.Category.ParentCategory.ParentCategoryId==null && p.Category.ParentCategory.CategoryId==categoryID)
+                ).ToList();
+            }
+
+            return query;
+        }
+        public async Task<ICollection<StockProductInventory>> GetProductStock(int productId)
+        {
+            return await db.StockProductInventories
+                .AsNoTracking()
+                .Where(sp => sp.ProductId == productId && !sp.IsDeleted)
+                .ToListAsync();
+        }
+        public async Task AddStockProducts(ICollection<StockProductInventory> stockProductInventories)
+        {
+            if (stockProductInventories == null || stockProductInventories.Count == 0)
+                return;
+            await db.StockProductInventories.AddRangeAsync(stockProductInventories);
+            await SaveChanges();
+        }
+        public async Task UpdateStockProducts(ICollection<StockProductInventory> newStockProductInventories)
+        {
+            if (!newStockProductInventories.Any()) return;
+            int productId = newStockProductInventories.First().ProductId;
+            var existingStockProducts = await db.StockProductInventories
+                .Where(sp => sp.ProductId == productId)
+                .ToListAsync();
+            db.StockProductInventories.RemoveRange(existingStockProducts);
+            await SaveChanges();
+            await AddStockProducts(newStockProductInventories);
+        }
+        public async Task<bool> CheckUserAvailableToReview(string userId, int productId)
+        {
+            return await db.OrderDetails
+                         .AsNoTracking()
+                         .AnyAsync(od => od.ProductId == productId
+                                      && od.OrderHeader.Cart.UserId == userId);
         }
     }
 }

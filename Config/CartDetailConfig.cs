@@ -21,5 +21,11 @@ namespace Blink_API.Config
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
-
+    public class CartConfig : IEntityTypeConfiguration<Cart>
+    {
+        public void Configure(EntityTypeBuilder<Cart> builder)
+        {
+            builder.HasIndex(c => c.UserId).IsUnique(false);
+        }
+    }
 }

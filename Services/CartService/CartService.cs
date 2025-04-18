@@ -29,14 +29,16 @@ namespace Blink_API.Services.CartService
             return resultedMapping;
         }
 
+        public async Task DeleteCart(int id)
+        {
+            await unitOfWork.CartRepo.DeleteCart(id);
+        }
+
         public async Task<ReadCartDTO> AddCart(string Userid, AddCartDetailsDTO cartDetail)
         {
             // Create or get the user's cart id by his user id 
             var cartId = await unitOfWork.CartRepo.AddCart(Userid);
 
-
-        
-                
                 var exsistCartDetail = await unitOfWork.CartDetailsRepo.GetById(cartId.Value, cartDetail.ProductId);
                 if (exsistCartDetail == null)
                 {
@@ -66,7 +68,7 @@ namespace Blink_API.Services.CartService
                 }
             
 
-            await unitOfWork.CartDetailsRepo.SaveChanges();
+            await unitOfWork.CompleteAsync();
 
             // Fetch the updated cart after adding items
             var updatedCart = await unitOfWork.CartRepo.GetByUserId(Userid);

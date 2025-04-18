@@ -17,12 +17,14 @@ namespace Blink_API.Repositories.BrandRepository
             return await db.Brands
                 .AsNoTracking()
                 .Where(b => !b.IsDeleted)
+                .Include(b=>b.Products)
                 .ToListAsync();
         }
         public async override Task<Brand?> GetById(int id)
         {
             return await db.Brands
                 .Where(b => b.BrandId == id && !b.IsDeleted)
+                  .Include(b => b.Products)
                 .FirstOrDefaultAsync();
         }
         public async Task<List<Brand>> GetByName(string name)
@@ -31,18 +33,25 @@ namespace Blink_API.Repositories.BrandRepository
                 .Where(b => b.BrandName.Contains(name) && b.IsDeleted == false)
                 .ToListAsync();
         }
+
+ 
+
+        // insert brand
+
+ 
+
         public async Task<Brand> InsertBrand(Brand brand)
         {
             db.Brands.Add(brand);
             await SaveChanges();
             return brand;
         }
-        public async Task<Brand> UpdateBrand(int id,Brand brand)
+        public async Task<Brand> UpdateBrand(int id, Brand brand)
         {
             var oldBrand = await GetById(id);
-            if(oldBrand != null)
+            if (oldBrand != null)
             {
-                oldBrand.BrandName=brand.BrandName;
+                oldBrand.BrandName = brand.BrandName;
                 oldBrand.BrandImage = brand.BrandImage;
                 oldBrand.BrandDescription = brand.BrandDescription;
                 oldBrand.BrandWebSiteURL = brand.BrandWebSiteURL;
@@ -50,14 +59,61 @@ namespace Blink_API.Repositories.BrandRepository
             }
             return brand;
         }
-        public async Task SoftDeleteBrand(int id)
+        public async Task<bool> SoftDeleteBrand(int id)
         {
-            var brand = await GetById(id);
+            bool canDelete = true;
+            var brand = await db.Brands
+                .Include(b => b.Products)
+                .FirstOrDefaultAsync(b => b.BrandId == id);
             if (brand != null)
             {
-                brand.IsDeleted = true;
+                var products = brand.Products.ToList();
+                foreach (var product in products)
+                {
+                    if (product.IsDeleted == false)
+                    {
+                        canDelete = false;
+                    }
+                }
+                if (canDelete)
+                {
+                    brand.IsDeleted = true;
+                    await SaveChanges();
+                }
             }
-            await SaveChanges();
+            return canDelete;
+        
+            
+            //var brand = await GetById(id);
+            //if (brand != null)
+            //{
+            //    brand.IsDeleted = true;
+            //}
+            //await SaveChanges();
         }
+        //public async Task<bool> SoftDeleteBrand(int id)
+        //{
+        //    bool canDelete = true;
+        //    var brand = await db.Brands
+        //        .Include(b => b.Products)
+        //        .FirstOrDefaultAsync(b => b.BrandId == id);
+        //    if (brand != null)
+        //    {
+        //        var products = brand.Products.ToList();
+        //        foreach (var product in products)
+        //        {
+        //            if (product.IsDeleted == false)
+        //            {
+        //                canDelete = false;
+        //            }
+        //        }
+        //        if (canDelete)
+        //        {
+        //            brand.IsDeleted = true;
+        //            await SaveChanges();
+        //        }
+        //    }
+        //    return canDelete;
+        //}
     }
 }
