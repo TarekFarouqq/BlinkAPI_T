@@ -155,11 +155,13 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             });
             var app = builder.Build();
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-                app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
-            }
+            //if (app.Environment.IsDevelopment())
+            //{
+            //    app.MapOpenApi();
+            //    app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
+            //}
+            app.MapOpenApi();
+            app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
             app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseCors("AllowAll");
