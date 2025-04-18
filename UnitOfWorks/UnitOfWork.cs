@@ -13,6 +13,7 @@ using Blink_API.Repositories.ProductRepos;
 using Blink_API.Repositories.UserRepos;
 
 using Blink_API.Repositories.StockProductInventoryRepo;
+using Blink_API.Repositories.Payment;
 
 
 
@@ -38,6 +39,7 @@ namespace Blink_API
         OrderHeaderRepository orderRepo;
         OrderDetailsRepository orderDetailsRepo;
         UserRepos UserRepos;
+        PaymentRepository paymentRepository;
         // **** for bi ***
         BiDataRepos biDataRepos;
         Review_DimensionRepos reviewDiminsionRepo;
@@ -217,6 +219,17 @@ namespace Blink_API
                     branchRepos = new BranchRepos(db);
                 }
                 return branchRepos;
+            }
+        }
+        public PaymentRepository  PaymentRepository
+        {
+            get
+            {
+                if (paymentRepository == null)
+                {
+                    paymentRepository = new PaymentRepository(db);
+                }
+                return paymentRepository;
             }
         }
 

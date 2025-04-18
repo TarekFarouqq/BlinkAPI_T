@@ -47,6 +47,21 @@ namespace Blink_API.MapperConfigs
             // ------------------------------------------------------------------------
             CreateMap<CartPaymentDTO, ReadCartDTO>().ReverseMap();
             // ------------------------------------------------------------------------
+            CreateMap<OrderHeader, orderDTO>()
+               .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.OrderHeaderId))
+               .ForMember(dest => dest.Total, opt => opt.MapFrom(src => src.OrderTotalAmount))
+               .ForMember(dest => dest.Shipping, opt => opt.MapFrom(src => src.OrderShippingCost))
+               .ForMember(dest => dest.Tax, opt => opt.MapFrom(src => src.OrderTax))
+               .ForMember(dest => dest.Subtotal, opt => opt.MapFrom(src => src.OrderTotalAmount - src.OrderShippingCost - src.OrderTax))
+               .ForMember(dest => dest.PaymentIntentId, opt => opt.MapFrom(src => src.Payment.PaymentIntentId))
+               .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.OrderDetails));
+
+            CreateMap<OrderDetail, ConfirmedOrderItemDTO>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.product.ProductName))
+                .ForMember(dest => dest.ProductImageUrl, opt => opt.MapFrom(src =>
+                    src.product.ProductImages.Any() ? src.product.ProductImages.First().ProductImagePath : string.Empty
+                )).ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.SellQuantity))
+                .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.SellPrice));
 
             // ------------------------------------------------------------------------
         }

@@ -10,9 +10,10 @@ namespace Blink_API.Services.OrderServicees
         Task<OrderToReturnDto> CreateOrderAsync(CreateOrderDTO createOrderDTO);
 
 
-        Task<OrderToReturnDto> GetOrderByIdAsync(int orderId);
+        Task<orderDTO> GetOrderByIdAsync(int orderId);
 
-      
+        Task<List<orderDTO>> GetOrdersByUserIdAsync(string userId);
+
 
         Task<bool> DeleteOrderAsync(int orderId);
 
