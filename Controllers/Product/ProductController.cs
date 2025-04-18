@@ -232,6 +232,22 @@ namespace Blink_API.Controllers.Product
                 return NotFound();
             return Ok(productStock);
         }
+        [HttpGet("GetProductStockInInventory/{SourceId}/{ProductId}")]
+        public async Task<ActionResult> GetProductStockInInventory(int SourceId,int ProductId)
+        {
+            if (SourceId == 0)
+                return BadRequest(new { Message = "Inventory Source Id Should Be More Than Zero" });
+            var product=  await productService.GetProductStockInInventory(SourceId, ProductId);
+            if(product != null)
+            {
+                return Ok(product);
+            }
+            else
+            {
+                return Ok(0);
+            }
+
+        }
         #endregion
         #region ReviewSuppliedProduct
         [HttpGet("GetSuppliedProducts")]

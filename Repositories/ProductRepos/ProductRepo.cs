@@ -331,5 +331,21 @@ namespace Blink_API.Repositories
                          .AnyAsync(od => od.ProductId == productId
                                       && od.OrderHeader.Cart.UserId == userId);
         }
+        //public async Task<Product?> GetProductStockInInventory(int SourceId,int ProductId)
+        //{
+        //    var product = await db.Products
+        //        .Include(spi => spi.StockProductInventories)
+        //        .Where(sp => sp.StockProductInventories.Any(spi => spi.ProductId==ProductId && spi.InventoryId==SourceId)).FirstOrDefaultAsync();
+        //    return product;
+        //}
+        public async Task<int?> GetProductStockInInventory(int sourceInventoryId, int productId)
+        {
+            var stock = await db.StockProductInventories
+                .Where(s => s.ProductId == productId && s.InventoryId == sourceInventoryId && !s.IsDeleted)
+                .Select(s => (int?)s.StockQuantity)
+                .FirstOrDefaultAsync();
+
+            return stock; 
+        }
     }
 }

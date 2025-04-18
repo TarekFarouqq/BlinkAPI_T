@@ -29,6 +29,7 @@ namespace Blink_API
         ProductRepo productRepo;
         ProductReviewRepo productReviewRepo;
         ProductSupplierRepo productSupplierRepo;
+        ProductTransferRepo productTransferRepo;
         CategoryRepo categoryRepo;
         DiscountRepo discountRepo;
         CartRepo cartRepo;
@@ -129,6 +130,17 @@ namespace Blink_API
                     productSupplierRepo = new ProductSupplierRepo(db);
                 }
                 return productSupplierRepo;
+            }
+        }
+        public ProductTransferRepo ProductTransferRepo
+        {
+            get
+            {
+                if (productTransferRepo == null)
+                {
+                    productTransferRepo = new ProductTransferRepo(db);
+                }
+                return productTransferRepo;
             }
         }
         public InventoryRepo InventoryRepo

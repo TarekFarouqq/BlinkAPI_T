@@ -60,6 +60,8 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             builder.Services.AddScoped<ProductService>();
             //Add ProductTransferService
             builder.Services.AddScoped<ProductTransferService>();
+            // Add ProductTransferRepo
+            builder.Services.AddScoped<ProductTransferRepo>();
             //Add ProductReviewService
             builder.Services.AddScoped<ProductReviewService>();
             //Add ProductReviewRepo
