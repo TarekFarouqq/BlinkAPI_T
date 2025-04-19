@@ -104,9 +104,9 @@ namespace Blink_API.Services
             return resultMapping;
         }
         #region Sprint 3
-        public async Task<List<ReadCategoryDTO>> GetAll()
+        public async Task<List<ReadCategoryDTO>> GetAll(int pgNumber, int pgSize)
         {
-            var categories = await unitOfWork.CategoryRepo.GetAll();
+            var categories = await unitOfWork.CategoryRepo.GetAll(pgNumber,pgSize);
             var resultMapping = mapper.Map<List<ReadCategoryDTO>>(categories);
             return resultMapping;
         }
@@ -157,7 +157,9 @@ namespace Blink_API.Services
             }
             else if (!string.IsNullOrEmpty(dto.OldImage))
             {
-                category.CategoryImage = dto.OldImage.StartsWith("/images") ? dto.OldImage : "/images/" + dto.OldImage;
+                int indexOfLink = dto.OldImage.IndexOf("/images/");
+                string imagePath = dto.OldImage.Substring(indexOfLink + 1);
+                category.CategoryImage = "wwwroot/" + imagePath;
             }
             category.SubCategories = new List<Category>();
             if (dto.SubCategories != null && dto.SubCategories.Any())
@@ -169,18 +171,23 @@ namespace Blink_API.Services
 
                     if (subDto.NewImage != null && subDto.NewImage.Length > 0)
                     {
-                        subCategory.CategoryImage = await SaveImageAsync(subDto.NewImage);
+                        string newPath = await SaveImageAsync(subDto.NewImage);
+                        if(newPath != null || newPath != string.Empty)
+                        {
+                            subCategory.CategoryImage = newPath;
+                        }
                     }
                     else if (!string.IsNullOrEmpty(subDto.OldImage))
                     {
-                        subCategory.CategoryImage = subDto.OldImage.StartsWith("/images") ? subDto.OldImage : "/images/" + subDto.OldImage;
+                        int indexOfLink = subDto.OldImage.IndexOf("/images/");
+                        string imagePath = subDto.OldImage.Substring(indexOfLink + 1);
+                        subCategory.CategoryImage = "wwwroot/" + imagePath;
                     }
                     category.SubCategories.Add(subCategory);
                 }
             }
             return await unitOfWork.CategoryRepo.UpdateCategoryWithChildren(category);
         }
-
         public async Task<string> SaveImageAsync(IFormFile imageFile)
         {
             if (imageFile == null || imageFile.Length == 0)
@@ -194,7 +201,11 @@ namespace Blink_API.Services
             {
                 await imageFile.CopyToAsync(stream);
             }
-            return "/" + Path.Combine("images", "category", uniqueFileName).Replace("\\", "/");
+            return  Path.Combine("wwwroot","images", "category", uniqueFileName).Replace("\\", "/");
+        }
+        public async Task<int> GetTotalPages(int pgSize)
+        {
+            return await unitOfWork.CategoryRepo.GetTotalPages(pgSize);
         }
         #endregion
     }
