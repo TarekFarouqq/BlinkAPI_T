@@ -13,9 +13,14 @@ namespace Blink_API.Repositories.BranchRepos
             _blinkDbContext = blinkDbContext;
         }
 
-        public async override Task<List<Branch>> GetAll()
+        public async Task<List<Branch>> GetAll(int pgNumber,int pgSize)
         {
-            return await _blinkDbContext.Branches.Where(b => b.IsDeleted==false).Include(b => b.Inventories).ToListAsync();
+            return await _blinkDbContext.Branches
+                .Where(b => b.IsDeleted==false)
+                .Skip((pgNumber - 1) * pgSize)  
+                .Take(pgSize)
+                .Include(b => b.Inventories)
+                .ToListAsync();
         }
 
         public async override Task<Branch?> GetById(int id)

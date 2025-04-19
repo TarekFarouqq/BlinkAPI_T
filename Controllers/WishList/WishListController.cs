@@ -18,10 +18,10 @@ namespace Blink_API.Controllers.WishList
             wishListService = _wishListService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult> GetAllWishLists()
+        [HttpGet("{pgNumber}/{pgSize}")]
+        public async Task<ActionResult> GetAllWishLists(int pgNumber,int pgSize)
         {
-            var wishLists = await wishListService.GetAllWishLists();
+            var wishLists = await wishListService.GetAllWishLists(pgNumber,pgSize);
             if (wishLists == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";

@@ -14,10 +14,12 @@ namespace Blink_API.Repositories.WishlistRepos
         }
 
 
-        public override async Task<List<WishList>> GetAll()
+        public async Task<List<WishList>> GetAll(int pgNumber, int pgSize)
         {
             return await db.WishLists
                         .AsNoTracking()
+                        .Skip((pgNumber - 1) * pgSize)
+                        .Take(pgSize)
                 .Include(c => c.WishListDetails.Where(cd => !cd.IsDeleted))
                     .ThenInclude(c => c.Product)
                     .ThenInclude(p=>p.ProductImages)

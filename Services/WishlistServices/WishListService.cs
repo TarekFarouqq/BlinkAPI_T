@@ -16,9 +16,9 @@ namespace Blink_API.Services.WishlistServices
             mapper = _mapper;
         }
 
-        public async Task<List<ReadWishListDTO>> GetAllWishLists()
+        public async Task<List<ReadWishListDTO>> GetAllWishLists(int pgNumber, int pgSize)
         {
-            var wishLists = await unitOfWork.WishListRepo.GetAll();
+            var wishLists = await unitOfWork.WishListRepo.GetAll(pgNumber,pgSize);
             var resultedMapping = mapper.Map<List<ReadWishListDTO>>(wishLists);
             return resultedMapping;
         }
