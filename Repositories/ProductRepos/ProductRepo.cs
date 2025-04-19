@@ -38,9 +38,18 @@ namespace Blink_API.Repositories
         }
         public async Task<List<Product>> GetAllPagginated(int pgNumber, int pgSize)
         {
+            var ids = await db.Products
+        .AsNoTracking()
+        .Where(p => !p.IsDeleted)
+        .OrderBy(p => p.ProductId)
+        .Skip((pgNumber - 1) * pgSize)
+        .Take(pgSize)
+        .Select(p => p.ProductId)
+        .ToListAsync();
+
             return await db.Products
                 .AsNoTracking()
-                .Where(p => !p.IsDeleted)
+                .Where(p => ids.Contains(p.ProductId))
                 .Include(u => u.User)
                 .Include(b => b.Brand)
                 .Include(c => c.Category)
@@ -50,8 +59,6 @@ namespace Blink_API.Repositories
                 .Include(sip => sip.StockProductInventories)
                 .Include(pd => pd.ProductDiscounts)
                 .ThenInclude(d => d.Discount)
-                .Skip((pgNumber - 1) * pgSize)
-                .Take(pgSize)
                 .ToListAsync();
         }
         public async Task<ICollection<Product>> GetFilteredProducts(string filter, int pgNumber, int pgSize)
@@ -274,30 +281,49 @@ namespace Blink_API.Repositories
             db.ProductImages.RemoveRange(oldImages);
             await SaveChanges();
         }
-        public async Task<ICollection<Product>> GetFillteredProducts(int categoryID)
+        public async Task<ICollection<Product>> GetFillteredProducts(
+    Dictionary<int, List<string>> filtersProduct,
+    int pgNumber,
+    decimal fromPrice,
+    decimal toPrice,
+    int rating,
+    int categoryId)
         {
-            var query = await db.Products
+            var query = db.Products
+                .Include(spi => spi.StockProductInventories)
                 .Include(au => au.User)
                 .Include(b => b.Brand)
                 .Include(c => c.Category)
-                .ThenInclude(pc=>pc.ParentCategory)
-                .Include(spi=>spi.StockProductInventories)
-                .Include(r=>r.Reviews)
-                .ThenInclude(rc=>rc.ReviewComments)
-                .Include(pd=>pd.ProductDiscounts)
-                .ThenInclude(d=>d.Discount)
-                .Include(pa=>pa.ProductAttributes)
-                .ThenInclude(fa=>fa.FilterAttribute)
-                .Where(p=>!p.IsDeleted)
-                .ToListAsync();
-
-            if(categoryID > 0)
+                .ThenInclude(pc => pc.ParentCategory)
+                .Include(r => r.Reviews)
+                .ThenInclude(rc => rc.ReviewComments)
+                .Include(pd => pd.ProductDiscounts)
+                .ThenInclude(d => d.Discount)
+                .Include(pa => pa.ProductAttributes)
+                .ThenInclude(fa => fa.FilterAttribute)
+                .Include(pi => pi.ProductImages)
+                .Where(p =>
+                    !p.IsDeleted &&
+                    (fromPrice <= 0 || p.StockProductInventories.Average(spi => spi.StockUnitPrice) >= fromPrice) &&
+                    (toPrice <= 0 || p.StockProductInventories.Average(spi => spi.StockUnitPrice) <= toPrice) &&
+                    (rating <= 0 || p.Reviews.Average(r => r.Rate) >= rating) &&
+                    (categoryId <= 0 || p.CategoryId == categoryId || p.Category.ParentCategory.CategoryId == categoryId)
+                );
+            foreach (var filter in filtersProduct)
             {
-                query = query.Where(p=>p.CategoryId== categoryID || (p.Category.ParentCategory.ParentCategoryId==null && p.Category.ParentCategory.CategoryId==categoryID)
-                ).ToList();
+                var attributeId = filter.Key;
+                var values = filter.Value;
+                query = query.Where(p =>
+                    p.ProductAttributes.Any(pa =>
+                        pa.AttributeId == attributeId && values.Contains(pa.AttributeValue)
+                    )
+                );
             }
-
-            return query;
+            var result = await query
+                .Skip((pgNumber - 1) * 16)
+                .Take(16)
+                .ToListAsync();
+            return result;
         }
         public async Task<ICollection<StockProductInventory>> GetProductStock(int productId)
         {
@@ -330,6 +356,15 @@ namespace Blink_API.Repositories
                          .AsNoTracking()
                          .AnyAsync(od => od.ProductId == productId
                                       && od.OrderHeader.Cart.UserId == userId);
+        }
+        public async Task<int?> GetProductStockInInventory(int sourceInventoryId, int productId)
+        {
+            var stock = await db.StockProductInventories
+                .Where(s => s.ProductId == productId && s.InventoryId == sourceInventoryId && !s.IsDeleted)
+                .Select(s => (int?)s.StockQuantity)
+                .FirstOrDefaultAsync();
+
+            return stock; 
         }
     }
 }

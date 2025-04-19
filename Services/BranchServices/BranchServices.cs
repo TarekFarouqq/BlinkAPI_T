@@ -18,9 +18,9 @@ namespace Blink_API.Services.BranchServices
         }
 
 
-        public async Task<List<ReadBranchDTO>> GetAllBranches()
+        public async Task<List<ReadBranchDTO>> GetAllBranches(int pgNumber, int pgSize)
         {
-            var branches = await _unitOfWork.BranchRepos.GetAll();
+            var branches = await _unitOfWork.BranchRepos.GetAll(pgNumber, pgSize);
             var branchesDto = _mapper.Map<List<ReadBranchDTO>>(branches);
             return branchesDto;
 

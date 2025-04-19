@@ -12,7 +12,7 @@ namespace Blink_API.Repositories.Payment
             _context = context;
         }
 
-        public async Task<Blink_API.Models.Payment?> GetByPaymentIntentId(string paymentIntentId)
+        public async Task<Blink_API.Models.Payment?> GetPaymentByIntentId(string paymentIntentId)
         {
             return await _context.Payments
                 .FirstOrDefaultAsync(p => p.PaymentIntentId == paymentIntentId && !p.IsDeleted);

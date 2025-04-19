@@ -1,14 +1,9 @@
-﻿using System.Collections.Generic;
-using AutoMapper;
+﻿using AutoMapper;
 using Blink_API.DTOs.ProductDTOs;
+using Blink_API.DTOs.TransferProductsDTOs;
 using Blink_API.Errors;
 using Blink_API.Models;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.OpenApi.Any;
-using static System.Net.Mime.MediaTypeNames;
-
+using Blink_API.Services.ProductServices;
 namespace Blink_API.Services.Product
 {
     public class ProductService
@@ -16,11 +11,13 @@ namespace Blink_API.Services.Product
         private readonly UnitOfWork unitOfWork;
         private readonly IMapper mapper;
         private readonly IWebHostEnvironment _IWebHostEnvironment;
-        public ProductService(UnitOfWork _unitOfWork,IMapper _mapper, IWebHostEnvironment iWebHostEnvironment)
+        private readonly ProductTransferService productTransferService;
+        public ProductService(UnitOfWork _unitOfWork,IMapper _mapper, IWebHostEnvironment iWebHostEnvironment, ProductTransferService _productTransferService)
         {
             unitOfWork = _unitOfWork;
             mapper = _mapper;
             _IWebHostEnvironment = iWebHostEnvironment;
+            productTransferService = _productTransferService;
         }
         public async Task<ICollection<ProductDiscountsDTO>> GetAll()
         {
@@ -67,17 +64,25 @@ namespace Blink_API.Services.Product
         {
             if (productDTO == null)
                 return 0;
-            var product = mapper.Map<Models.Product>(productDTO);
-            int ProductId = await unitOfWork.ProductRepo.AddProduct(product);
-            List<InsertProductImagesDTO> ProductImageList = await CheckImagesToSaveInInsert(ProductId, productDTO.ProductImages);
-            await AddProductImage(ProductImageList);
+            var mappedProduct = mapper.Map<Models.Product>(productDTO);
+            ICollection<ProductImage> ProductImagesList = await CheckImagesToSaveInInsert(mappedProduct, productDTO.ProductImages);
+            mappedProduct.ProductImages = ProductImagesList;
             var mappedStockProducts = mapper.Map<ICollection<StockProductInventory>>(productDTO.ProductStocks);
-            foreach (var stockProduct in mappedStockProducts)
+            mappedProduct.StockProductInventories = mappedStockProducts;
+            var productId = await unitOfWork.ProductRepo.AddProduct(mappedProduct);
+            #region Add Product To Inventory Transaction Header
+            List<InsertInputTrasactionProductDTO> newListProducts = new List<InsertInputTrasactionProductDTO>();
+            newListProducts.Add(new InsertInputTrasactionProductDTO { TransactionQuantity = mappedStockProducts.Sum(s => s.StockQuantity), ProductId = productId });
+            InsertInputTransferProductDTO newTransaction = new InsertInputTransferProductDTO()
             {
-                stockProduct.ProductId = ProductId;
-            }
-            await unitOfWork.ProductRepo.AddStockProducts(mappedStockProducts);
-            return ProductId;
+                InventoryTransactionDate = DateTime.UtcNow,
+                InventoryTransactionType = 1,
+                TransactionProducts = newListProducts
+            };
+            await productTransferService.AddInputInventory(newTransaction);
+            #endregion
+
+            return productId;
         }
         public async Task Update(int id, UpdateProductDTO productDTO)
         {
@@ -119,15 +124,15 @@ namespace Blink_API.Services.Product
             }
             return $"/images/products/{uniqueFileName}";
         }
-        private async Task<List<InsertProductImagesDTO>> CheckImagesToSaveInInsert(int id, List<IFormFile> images)
+        private async Task<List<ProductImage>> CheckImagesToSaveInInsert(Models.Product product, List<IFormFile> images)
         {
-            var result = new List<InsertProductImagesDTO>();
+            var result = new List<ProductImage>();
             foreach(var img in images)
             {
                 if(img is IFormFile file)
                 {
                     string path = await SaveFileAsync(file);
-                    result.Add(new InsertProductImagesDTO { ProductId = id, ProductImagePath = path });
+                    result.Add(new ProductImage { ProductImagePath = path,Product= product });
                 }
             }
             return result;
@@ -254,27 +259,36 @@ namespace Blink_API.Services.Product
         {
             await unitOfWork.ProductRepo.DeleteOldProductAttributes(productId);
         }
-        public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct,int pgNumber,decimal fromPrice,decimal toPrice,int rating,int categoryId)
+        //public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct, int pgNumber, decimal fromPrice, decimal toPrice, int rating, int categoryId)
+        //{
+        //    var products = await unitOfWork.ProductRepo.GetFillteredProducts(categoryId);
+        //    foreach (var filter in filtersProduct)
+        //    {
+        //        foreach (var value in filter.Value)
+        //        {
+        //            products = products.Where(p => p.ProductAttributes.Any(pa => pa.AttributeId == filter.Key && pa.AttributeValue == value)).ToList();
+        //        }
+        //    }
+        //    var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
+        //    if (fromPrice > 0)
+        //        mappedProducts = mappedProducts.Where(p => (p.ProductPrice - p.DiscountAmount) >= fromPrice).ToList();
+        //    if (toPrice > 0)
+        //        mappedProducts = mappedProducts.Where(p => (p.ProductPrice - p.DiscountAmount) <= toPrice).ToList();
+        //    if (rating > 0)
+        //        mappedProducts = mappedProducts.Where(p => p.AverageRate >= rating).ToList();
+        //    mappedProducts = mappedProducts.Skip((pgNumber - 1) * 16)
+        //        .Take(16).ToList();
+        //    return mappedProducts;
+        //}
+
+
+        public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct, int pgNumber, decimal fromPrice, decimal toPrice, int rating, int categoryId)
         {
-            var products = await unitOfWork.ProductRepo.GetFillteredProducts(categoryId);
-            foreach (var filter in filtersProduct)
-            {
-                foreach(var value in filter.Value)
-                {
-                    products = products.Where(p=>p.ProductAttributes.Any(pa=>pa.AttributeId==filter.Key && pa.AttributeValue==value)).ToList();
-                }
-            }
+            var products = await unitOfWork.ProductRepo.GetFillteredProducts(filtersProduct,pgNumber,fromPrice,toPrice,rating,categoryId);
             var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
-            if (fromPrice > 0)
-                mappedProducts = mappedProducts.Where(p => p.ProductPrice >= fromPrice).ToList();
-            if(toPrice > 0 )
-                mappedProducts=mappedProducts.Where(p=>p.ProductPrice <= toPrice).ToList();
-            if(rating > 0)
-                mappedProducts=mappedProducts.Where(p=>p.AverageRate >= rating).ToList();
-            mappedProducts=mappedProducts.Skip((pgNumber-1)*5)
-                .Take(5).ToList();
             return mappedProducts;
         }
+
         public async Task<ICollection<StockProductInventory>> GetProductStock(int ProductId)
         {
             var productStock = await unitOfWork.ProductRepo.GetProductStock(ProductId);
@@ -286,6 +300,16 @@ namespace Blink_API.Services.Product
             if (userId == null & productId <= 0)
                 return false;
             return await unitOfWork.ProductRepo.CheckUserAvailableToReview(userId,productId);
+        }
+        public async Task<int?> GetProductStockInInventory(int SourceId,int productId)
+        {
+            //var product = await unitOfWork.ProductRepo.GetProductStockInInventory(SourceId, productId);
+            //var mappedProduct= mapper.Map<ReadProductInStockDTO>(product);
+            //return mappedProduct;
+
+            var result = await unitOfWork.ProductRepo.GetProductStockInInventory(SourceId, productId);
+            return result;
+
         }
         #endregion
     }

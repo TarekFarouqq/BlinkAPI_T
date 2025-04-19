@@ -9,7 +9,7 @@ namespace Blink_API.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int InventoryTransactionHeaderId { get; set; }
         [Required]
-        public DateTime InventoryTransactionDate { get; set; }
+        public DateTime InventoryTransactionDate { get; set; } = DateTime.UtcNow;
         [Required]
         [Range(1, 4)]
         public int InventoryTransactionType { get; set; }
@@ -17,8 +17,6 @@ namespace Blink_API.Models
         public virtual ICollection<TransactionProduct> TransactionProducts { get; set; } = new HashSet<TransactionProduct>();
         public virtual ICollection<Inventory> Inventories { get; set; } = new HashSet<Inventory>();
         public bool IsDeleted { get; set; } = false;
-
-
     }
 }
 

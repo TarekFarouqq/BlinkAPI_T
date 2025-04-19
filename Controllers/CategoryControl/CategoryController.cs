@@ -111,10 +111,10 @@ namespace Blink_API.Controllers
             return Ok(categories);
         }
         #region Sprint3
-        [HttpGet]
-        public async Task<ActionResult> GetAll()
+        [HttpGet("{pgNumber}/{pgSize}")]
+        public async Task<ActionResult> GetAll(int pgNumber,int pgSize)
         {
-            var categories = await categoryService.GetAll();
+            var categories = await categoryService.GetAll(pgNumber,pgSize);
             if (categories == null) return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}";
             foreach (var category in categories)
@@ -197,6 +197,21 @@ namespace Blink_API.Controllers
             else
             {
                 return BadRequest(new { Message = "Failed To Update Category" });
+            }
+        }
+        [HttpGet("GetCategoryTotalPages/{pgSize}")]
+        public async Task<ActionResult> GetCategoryTotalPages(int pgSize)
+        {
+            if(pgSize <= 0 )
+                return BadRequest(new {Message = "Page Size should be morethan Zero"});
+            int result = await categoryService.GetTotalPages(pgSize);
+            if(result > 0)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return Ok(0);
             }
         }
         #endregion

@@ -8,13 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="wwwroot\images\products\**" />
-    <Content Remove="wwwroot\images\products\**" />
-    <EmbeddedResource Remove="wwwroot\images\products\**" />
-    <None Remove="wwwroot\images\products\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
@@ -32,7 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\images\brands\" />
+    <Folder Include="DTOs\UserReviewDTOs\" />
+    <Folder Include="wwwroot\images\products\" />
   </ItemGroup>
 
 </Project>

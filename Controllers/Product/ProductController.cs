@@ -5,6 +5,7 @@ using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Models;
 using Blink_API.Services.Product;
 using Blink_API.Services.ProductServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blink_API.Controllers.Product
@@ -220,6 +221,11 @@ namespace Blink_API.Controllers.Product
                 }
             }
             var products = await productService.GetFillteredProducts(filtersProduct, pgNumber,fromPrice,toPrice,rating,categoryId);
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var product in products)
+            {
+                product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
+            }
             return Ok(products);
         }
         #endregion
@@ -231,6 +237,22 @@ namespace Blink_API.Controllers.Product
             if (productStock == null)
                 return NotFound();
             return Ok(productStock);
+        }
+        [HttpGet("GetProductStockInInventory/{SourceId}/{ProductId}")]
+        public async Task<ActionResult> GetProductStockInInventory(int SourceId,int ProductId)
+        {
+            if (SourceId == 0)
+                return BadRequest(new { Message = "Inventory Source Id Should Be More Than Zero" });
+            var product=  await productService.GetProductStockInInventory(SourceId, ProductId);
+            if(product != null)
+            {
+                return Ok(product);
+            }
+            else
+            {
+                return Ok(0);
+            }
+
         }
         #endregion
         #region ReviewSuppliedProduct

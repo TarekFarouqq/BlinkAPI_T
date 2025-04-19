@@ -19,10 +19,10 @@ namespace Blink_API.Controllers.BranchController
         }
 
         // GET: api/Branch
-        [HttpGet]
-        public async Task<ActionResult> GetAll()
+        [HttpGet("{pgNumber}/{pgSize}")]
+        public async Task<ActionResult> GetAll(int pgNumber, int pgSize)
         {
-            var branches = await _branchService.GetAllBranches();
+            var branches = await _branchService.GetAllBranches(pgNumber,pgSize);
             return Ok(branches);
         }
 

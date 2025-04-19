@@ -41,12 +41,14 @@ namespace Blink_API.Repositories
                 .Where(pc => pc.ParentCategoryId != null && !pc.IsDeleted && pc.ParentCategoryId == id)
                 .ToListAsync();
         }
-        public override async Task<List<Category>> GetAll()
+        public async Task<List<Category>> GetAll(int pgNumber, int pgSize)
         {
             return await db.Categories
-                .Where(c => !c.IsDeleted && c.ParentCategoryId == null)
-                .Include(c => c.SubCategories).
-                ToListAsync();
+                .Where(c => !c.IsDeleted && c.ParentCategoryId == null) 
+                .Skip((pgNumber - 1) * pgSize) 
+                .Take(pgSize)  
+                .Include(c => c.SubCategories) 
+                .ToListAsync();
         }
         public override async Task<Category?> GetById(int id)
         {
@@ -123,6 +125,15 @@ namespace Blink_API.Repositories
             await SaveChanges();
             return true;
         }
-
+        public async Task<int> GetTotalPages(int pgSize)
+        {
+            int totalItems = await db.Categories.Where(c => !c.IsDeleted && c.ParentCategoryId == null).CountAsync();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pgSize);
+            return totalPages;
+        }
+        public async Task<Category?> GetUpdatedCategoryById(int id)
+        {
+            return await db.Categories.FirstOrDefaultAsync(c => c.CategoryId == id && !c.IsDeleted);
+        }
     }
 }

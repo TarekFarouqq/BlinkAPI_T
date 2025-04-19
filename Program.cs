@@ -23,6 +23,10 @@ using Blink_API.Services.PaymentServices;
 using Blink_API.Services.ProductServices;
 using Blink_API.Services.UserService;
 using Blink_API.Repositories.ProductRepos;
+using Blink_API.Services.OrderServicees;
+using Blink_API.Services.WishlistServices;
+
+
 namespace Blink_API
 {
     public class Program
@@ -57,6 +61,8 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             builder.Services.AddScoped<ProductService>();
             //Add ProductTransferService
             builder.Services.AddScoped<ProductTransferService>();
+            // Add ProductTransferRepo
+            builder.Services.AddScoped<ProductTransferRepo>();
             //Add ProductReviewService
             builder.Services.AddScoped<ProductReviewService>();
             //Add ProductReviewRepo
@@ -77,13 +83,23 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             builder.Services.AddScoped<BiStockService>();
             //Add New AuthService
             builder.Services.AddScoped<AuthServiceUpdated>();
+            //Add WishListService
+            builder.Services.AddScoped<WishListService>();
+
             //Add Brand :
             builder.Services.AddScoped<BrandService>();
-            // Add Order
-            builder.Services.AddScoped<orderService>();
             builder.Services.AddScoped<OrderHeaderRepository>();
             // Add Payment
+            //builder.Services.AddScoped<IPaymentServices, PaymentServices>();
+
             builder.Services.AddScoped<PaymentServices>();
+            // Add Order
+            builder.Services.AddScoped<orderService>();
+            // Add Stripe
+            builder.Services.AddScoped<StripeServices>();
+
+
+            //builder.Services.AddScoped<Lazy<IOrderServices>>(provider => new Lazy<IOrderServices>(provider.GetRequiredService<IOrderServices>()));
             // Add users :
             builder.Services.AddScoped<UserService>();
             #region Redis services
@@ -146,11 +162,13 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             });
             var app = builder.Build();
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-                app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
-            }
+            //if (app.Environment.IsDevelopment())
+            //{
+            //    app.MapOpenApi();
+            //    app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
+            //}
+            app.MapOpenApi();
+            app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
             app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseCors("AllowAll");

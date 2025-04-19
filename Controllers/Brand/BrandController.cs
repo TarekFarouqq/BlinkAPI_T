@@ -96,5 +96,25 @@ namespace Blink_API.Controllers.Brand
 
             return Ok(result);
         }
+
+        [HttpGet("paginated")]
+        public async Task<IActionResult> GetPaginatedBrands(int pageNumber, int pageSize)
+        {
+            var brands = await brandService.GetAllBrandsPaginated(pageNumber, pageSize);
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var brand in brands)
+            {
+                brand.BrandImage = $"{baseUrl}{brand.BrandImage}";
+            }
+            return Ok(brands);
+        }
+
+        [HttpGet("pages-count")]
+        public async Task<IActionResult> GetPagesCount(int pageSize)
+        {
+            var pagesCount = await brandService.GetPagesCount(pageSize);
+            return Ok(pagesCount);
+        }
+
     }
 }

@@ -1,9 +1,12 @@
 ﻿using Blink_API.DTOs.OrdersDTO;
 using Blink_API.Errors;
+using Blink_API.Models;
+using Blink_API.Services.Helpers;
 using Blink_API.Services.PaymentServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Blink_API.Controllers.Order
 {
@@ -20,6 +23,7 @@ namespace Blink_API.Controllers.Order
             _orderService = orderService;
             _unitOfWork = unitOfWork;
         }
+
         [HttpPost("create")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
@@ -36,14 +40,13 @@ namespace Blink_API.Controllers.Order
                 if (order == null)
                     return BadRequest(new ApiResponse(400, "Failed to create order"));
 
-                return Ok(new ApiResponse<OrderToReturnDto>(200, "Order created successfully",order));
+                return Ok(order);
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse(500));
+                return StatusCode(500, new ApiResponse(500, "Internal Server Error: " + ex.Message));
             }
         }
-
 
         [HttpGet("{orderId}")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
@@ -55,13 +58,37 @@ namespace Blink_API.Controllers.Order
             {
                 var order = await _orderService.GetOrderByIdAsync(orderId);
                 if (order == null)
-                    return NotFound(new ApiResponse(404,"Order Not Found"));
+                    return NotFound(new ApiResponse(404, "Order Not Found"));
 
                 return Ok(order);
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponse(500, "Internal server error"));
+                return StatusCode(500, new ApiResponse(500, "Internal Server Error: " + ex.Message));
+            }
+        }
+
+        [HttpGet("GetOrdersByUserId")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<orderDTO>>> GetOrdersByUserIdAsync()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new ApiResponse(401, "User is not authenticated"));
+                }
+
+                var orders = await _orderService.GetOrdersByUserIdAsync(userId);
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(400, "Error: " + ex.Message));
             }
         }
 
@@ -74,10 +101,9 @@ namespace Blink_API.Controllers.Order
             var success = await _orderService.DeleteOrderAsync(orderId);
 
             if (!success)
-                return NotFound(new ApiResponse(404, "Order not found or could not be deleted."));
+                return NotFound(new ApiResponse(404, "Order not found or could not be deleted"));
 
-            return Ok(new ApiResponse(200, "Order deleted and inventory quantities restored."));
+            return Ok(new ApiResponse(200, "Order deleted and inventory quantities restored"));
         }
-
     }
 }

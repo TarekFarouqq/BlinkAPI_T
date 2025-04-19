@@ -16,6 +16,8 @@ namespace Blink_API.DTOs.OrdersDTO
     public class OrderDetailDto
     {
         public int ProductId { get; set; }
+        public string ProductName { get; set; }
+
         public int SellQuantity { get; set; }
         public decimal SellPrice { get; set; }
     }
@@ -24,5 +26,6 @@ namespace Blink_API.DTOs.OrdersDTO
         public string Method { get; set; }
         public string PaymentStatus { get; set; }
         public DateTime PaymentDate { get; set; }
+        public string  PaymentIntentId { get; set; }
     }
 }
