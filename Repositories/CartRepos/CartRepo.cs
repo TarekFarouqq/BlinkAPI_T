@@ -91,6 +91,26 @@ namespace Blink_API.Repositories.CartRepos
             return true;
         }
 
+
+
+        public async Task<Cart?> GetCartByUserId(string userId)
+        {
+            var cart = await db.Carts.FirstOrDefaultAsync(u => u.UserId == userId && !u.IsDeleted);
+            if(cart == null)
+            {
+                return new Cart()
+                {
+                    UserId=userId,
+                };
+
+            }
+            else
+            {
+                return cart;
+            }
+        }
+
+
         #region Handle cart
         ///public async Task<bool> DeleteCartAsync(string basketId)
         ///{
