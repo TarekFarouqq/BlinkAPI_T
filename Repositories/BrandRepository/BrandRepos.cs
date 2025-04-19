@@ -115,5 +115,26 @@ namespace Blink_API.Repositories.BrandRepository
         //    }
         //    return canDelete;
         //}
+
+
+        public async Task<List<Brand>> GetAllPaginated(int pageNumber, int pageSize)
+        {
+            return await db.Brands
+                .Where(b => !b.IsDeleted)
+                .OrderBy(b => b.BrandName)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .AsNoTracking()
+                .Include(b => b.Products)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetPagesCount(int pageSize)
+        {
+            var count = await db.Brands.CountAsync(b => !b.IsDeleted);
+            return (int)Math.Ceiling(count / (double)pageSize);
+        }
+
+
     }
 }

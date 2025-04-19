@@ -117,5 +117,24 @@ namespace Blink_API.Services.BrandServices
                 }
             }
         }
+
+        public async Task<ICollection<BrandDTO>> GetAllBrandsPaginated(int pageNumber, int pageSize)
+        {
+            var brands = await unitOfWork.BrandRepos.GetAllPaginated(pageNumber, pageSize);
+            var brandsDto = mapper.Map<ICollection<BrandDTO>>(brands);
+            foreach (var brand in brandsDto)
+            {
+                string fullPath = brand.BrandImage;
+                int startIndex = fullPath.IndexOf("/images/");
+                brand.BrandImage = fullPath.Substring(startIndex + 1);
+            }
+            return brandsDto;
+        }
+
+        public async Task<int> GetPagesCount(int pageSize)
+        {
+            return await unitOfWork.BrandRepos.GetPagesCount(pageSize);
+        }
+
     }
 }
