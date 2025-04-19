@@ -73,5 +73,18 @@ namespace Blink_API.Controllers.WishList
             return NoContent();
         }
 
+
+        [HttpDelete("DeleteWishListDetail/{productId}/{wishListId}")]
+        public async Task<ActionResult> DeleteWishListDetail(int productId, int wishListId)
+        {
+            if (productId <= 0) 
+            {
+                return BadRequest("Invalid wishlist product Id.");
+            }
+
+            await wishListService.DeleteWishListDetail(productId, wishListId);
+            return NoContent();
+        }
+
     }
 }

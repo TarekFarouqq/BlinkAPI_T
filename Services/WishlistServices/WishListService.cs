@@ -35,6 +35,11 @@ namespace Blink_API.Services.WishlistServices
             await unitOfWork.WishListRepo.ClearWishList(id);
         }
 
+        public async Task DeleteWishListDetail(int productId, int wishListId)
+        {
+            await unitOfWork.WishListDetailsRepo.DeleteWishListDetail(productId, wishListId);
+        }
+
         public async Task<ReadWishListDTO> AddWishList(string Userid, AddWishListDetailDTO wishListDetail)
         {
             // Create or get the user's wishlist id by his user id 
@@ -53,6 +58,7 @@ namespace Blink_API.Services.WishlistServices
             else if (exsistWishListDetail.IsDeleted)
             {
                 exsistWishListDetail.IsDeleted = false;
+                unitOfWork.WishListDetailsRepo.Update(exsistWishListDetail);
             }
            
 
