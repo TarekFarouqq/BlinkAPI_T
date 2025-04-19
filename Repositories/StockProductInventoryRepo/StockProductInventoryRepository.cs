@@ -18,6 +18,8 @@ namespace Blink_API.Repositories.StockProductInventoryRepo
         {
             var inventories = await _blinkDbContext.StockProductInventories
                    .Where(i => i.ProductId == productId && i.StockQuantity > 0)
+                   .Include(i=>i.Inventory)
+                   .Include(p=>p.Product)
                    .OrderBy(i => i.Inventory.InventoryId)
                     
                    .ToListAsync();

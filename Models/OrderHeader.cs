@@ -31,7 +31,7 @@ namespace Blink_API.Models
 
         public virtual Payment Payment { get; set; }
         // ضروري عشان نتبع الاوردر 
-        public string PaymentIntentId { get; set; }
+        public string? PaymentIntentId { get; set; }
 
         public int CartId { get; set; }
 
