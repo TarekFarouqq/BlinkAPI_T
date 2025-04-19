@@ -84,6 +84,17 @@ namespace Blink_API.Controllers.Order
                 }
 
                 var orders = await _orderService.GetOrdersByUserIdAsync(userId);
+                string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+                foreach (var order in orders)
+                {
+                    foreach (var item in order.Items)
+                    {
+                        int startIndex = item.ProductImageUrl.IndexOf("/images/");
+                        item.ProductImageUrl = baseUrl + item.ProductImageUrl.Substring(startIndex);
+                        //item.ProductImageUrl = item.ProductImageUrl.Select(img => $"{baseUrl}{item.ProductImageUrl.Replace("wwwroot/", "")}").ToList();
+
+                    }
+                }
                 return Ok(orders);
             }
             catch (Exception ex)
