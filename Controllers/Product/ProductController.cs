@@ -50,12 +50,11 @@ namespace Blink_API.Controllers.Product
             var products = await productService.GetAllPagginated(pgNumber,pgSize);
             if (products == null)
                 return NotFound();
-            //string baseUrl = $"{Request.Scheme}://{Request.Host}/";
-            //foreach (var product in products)
-            //{
-            //    if(!product.ProductImages.ToString().ToLower().StartsWith("https://"))
-            //        product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
-            //}
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var product in products)
+            {
+                product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
+            }
             return Ok(products);
         }
         [HttpGet("GetFilteredProducts/{filter}/{pgNumber}/{pgSize}")]
