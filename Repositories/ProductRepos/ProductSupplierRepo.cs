@@ -36,9 +36,21 @@ namespace Blink_API.Repositories.ProductRepos
         }
         public async Task<int> AddRequestProduct(ReviewSuppliedProduct product)
         {
-            await db.ReviewSuppliedProducts.AddAsync(product);
-            await db.SaveChangesAsync();
-            return product.RequestId;
+            if (product != null)
+            {
+                await db.ReviewSuppliedProducts.AddAsync(product);
+                await db.SaveChangesAsync();
+                return product.RequestId;
+            }
+            return 0;
+        }
+        public async Task AddRequestImages(List<ReviewSuppliedProductImages> images)
+        {
+            if(images.Count > 0)
+            {
+                await db.ReviewSuppliedProductImages.AddRangeAsync(images);
+                await db.SaveChangesAsync();
+            }
         }
         public async Task AddRequestedProductImages(List<ReviewSuppliedProductImages> productImages)
         {

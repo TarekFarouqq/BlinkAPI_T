@@ -3,6 +3,7 @@ using Blink_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using Microsoft.VisualBasic;
 
 namespace Blink_API.Repositories
@@ -281,13 +282,7 @@ namespace Blink_API.Repositories
             db.ProductImages.RemoveRange(oldImages);
             await SaveChanges();
         }
-        public async Task<ICollection<Product>> GetFillteredProducts(
-    Dictionary<int, List<string>> filtersProduct,
-    int pgNumber,
-    decimal fromPrice,
-    decimal toPrice,
-    int rating,
-    int categoryId)
+        public async Task<ICollection<Product>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct,int pgNumber,decimal fromPrice,decimal toPrice,int rating,int categoryId)
         {
             var query = db.Products
                 .Include(spi => spi.StockProductInventories)
@@ -365,6 +360,35 @@ namespace Blink_API.Repositories
                 .FirstOrDefaultAsync();
 
             return stock; 
+        }
+        public async Task<List<Brand>> GetListOfBrands()
+        {
+            return await db.Brands
+                .Where(b=>!b.IsDeleted)
+                .ToListAsync();
+        }
+        public async Task<List<Category>> GetSubCategories()
+        {
+            return await db.Categories
+                .Where(c=>c.ParentCategoryId != null && !c.IsDeleted)
+                .ToListAsync();
+        }
+        public async Task<List<Inventory>> GetListOfInventory()
+        {
+            return await db.Inventories
+                .Where(i => !i.IsDeleted)
+                .ToListAsync();
+        }
+        public async Task<bool> DeleteProductImage(int productId,string imagePath)
+        {
+            var productImage = await db.ProductImages.FirstOrDefaultAsync(p=>p.ProductId==productId && p.ProductImagePath==imagePath);
+            if(productImage != null)
+            {
+                db.ProductImages.Remove(productImage);
+                await SaveChanges();
+                return true;
+            }
+            return false;
         }
     }
 }
