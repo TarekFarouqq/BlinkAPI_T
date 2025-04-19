@@ -27,7 +27,7 @@ namespace Blink_API.Controllers.WishList
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var wish in wishLists)
             {
-                foreach (var detail in wish.WishLishDetails)
+                foreach (var detail in wish.WishListDetails)
                 {
                     detail.ProductImageUrl = $"{baseUrl}{detail.ProductImageUrl.Replace("wwwroot/", "")}";
                 }
@@ -42,7 +42,7 @@ namespace Blink_API.Controllers.WishList
             if (wishList == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
-            foreach (var detail in wishList.WishLishDetails)
+            foreach (var detail in wishList.WishListDetails)
             {
                 detail.ProductImageUrl = $"{baseUrl}{detail.ProductImageUrl.Replace("wwwroot/", "")}";
             }
