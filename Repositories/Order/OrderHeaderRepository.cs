@@ -17,7 +17,7 @@ namespace Blink_API.Repositories.Order
             var order = await _db.OrderHeaders.Include(o => o.OrderDetails.Where(od => !od.IsDeleted))
                     .ThenInclude(od => od.product)
                     .ThenInclude(od => od.ProductImages)
-                .Include(o => o.Payment)
+                //.Include(o => o.Payment)
                 .Include(o => o.Cart)
                 .Where(o => !o.IsDeleted && o.Cart.UserId == userId)
                  .ToListAsync();
@@ -40,7 +40,7 @@ namespace Blink_API.Repositories.Order
             var order = await _db.OrderHeaders.Include(o => o.OrderDetails.Where(od => !od.IsDeleted))
                     .ThenInclude(od => od.product) 
                     .ThenInclude(od=>od.ProductImages)
-                .Include(o => o.Payment) 
+                //.Include(o => o.Payment) 
                 .Include(o => o.Cart)
                 .Where(o => !o.IsDeleted && o.OrderHeaderId == orderId)
                  .FirstOrDefaultAsync();
@@ -56,7 +56,8 @@ namespace Blink_API.Repositories.Order
                         .ThenInclude(p => p.ProductImages)
                 .Include(o => o.Payment)
                 .Include(o => o.Cart)
-                .FirstOrDefaultAsync(o=> o.Payment.PaymentIntentId == paymentIntentId);
+                .Where(o=>o.Payment.PaymentIntentId==paymentIntentId)
+                .FirstOrDefaultAsync();
         }
 
 

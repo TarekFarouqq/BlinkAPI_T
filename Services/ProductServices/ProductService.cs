@@ -113,7 +113,7 @@ namespace Blink_API.Services.Product
         }
         private async Task<string> SaveFileAsync(IFormFile file)
         {
-            var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
+            var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "/images/products");
             if(!Directory.Exists(uploadFolder))
                 Directory.CreateDirectory(uploadFolder);
             var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);

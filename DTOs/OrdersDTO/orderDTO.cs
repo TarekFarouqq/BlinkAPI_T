@@ -11,14 +11,15 @@
             public decimal Shipping { get; set; }
             public decimal Total { get; set; }
 
-            public string PaymentIntentId { get; set; }
+            public string? PaymentIntentId { get; set; }
 
-            public List<ConfirmedOrderItemDTO> Items { get; set; } = new();
+        public List<ConfirmedOrderItemDTO> Items { get; set; } = new();
         
     }
 
     public class ConfirmedOrderItemDTO
     {
+        public int ProductId { get; set; }
         public string ProductName { get; set; }
         public string ProductImageUrl { get; set; }
         public int Quantity { get; set; }
