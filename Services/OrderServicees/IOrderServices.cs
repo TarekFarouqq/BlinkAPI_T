@@ -7,7 +7,7 @@ namespace Blink_API.Services.OrderServicees
     public interface IOrderServices
     {
         
-        Task<OrderToReturnDto> CreateOrderAsync(CreateOrderDTO createOrderDTO);
+        Task<ApiResponse<OrderToReturnDto>> CreateOrderAsync(CreateOrderDTO createOrderDTO);
 
 
         Task<orderDTO> GetOrderByIdAsync(int orderId);

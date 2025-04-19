@@ -95,6 +95,9 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             builder.Services.AddScoped<PaymentServices>();
             // Add Order
             builder.Services.AddScoped<orderService>();
+            // Add Stripe
+            builder.Services.AddScoped<StripeServices>();
+
 
             //builder.Services.AddScoped<Lazy<IOrderServices>>(provider => new Lazy<IOrderServices>(provider.GetRequiredService<IOrderServices>()));
             // Add users :
