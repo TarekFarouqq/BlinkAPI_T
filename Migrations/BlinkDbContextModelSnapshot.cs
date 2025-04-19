@@ -42,7 +42,7 @@ namespace Blink_API.Migrations
 
                     b.HasKey("AdvertismentId");
 
-                    b.ToTable("Advertisments");
+                    b.ToTable("Advertisments", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.ApplicationUser", b =>
@@ -166,7 +166,7 @@ namespace Blink_API.Migrations
 
                     b.HasKey("BranchId");
 
-                    b.ToTable("Branches");
+                    b.ToTable("Branches", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.Brand", b =>
@@ -200,7 +200,7 @@ namespace Blink_API.Migrations
 
                     b.HasKey("BrandId");
 
-                    b.ToTable("Brands");
+                    b.ToTable("Brands", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.Cart", b =>
@@ -222,7 +222,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.CartDetail", b =>
@@ -246,7 +246,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("CartId");
 
-                    b.ToTable("CartDetails");
+                    b.ToTable("CartDetails", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.Category", b =>
@@ -281,7 +281,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("ParentCategoryId");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.DefaultAttributes", b =>
@@ -303,7 +303,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("AttributeId");
 
-                    b.ToTable("DefaultAttributes");
+                    b.ToTable("DefaultAttributes", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.Discount", b =>
@@ -328,7 +328,7 @@ namespace Blink_API.Migrations
 
                     b.HasKey("DiscountId");
 
-                    b.ToTable("Discounts");
+                    b.ToTable("Discounts", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.FilterAttributes", b =>
@@ -352,7 +352,7 @@ namespace Blink_API.Migrations
 
                     b.HasKey("AttributeId");
 
-                    b.ToTable("FilterAttributes");
+                    b.ToTable("FilterAttributes", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.Inventory", b =>
@@ -395,7 +395,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("BranchId");
 
-                    b.ToTable("Inventories");
+                    b.ToTable("Inventories", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.InventoryTransactionHeader", b =>
@@ -417,7 +417,7 @@ namespace Blink_API.Migrations
 
                     b.HasKey("InventoryTransactionHeaderId");
 
-                    b.ToTable("InventoryTransactionHeaders");
+                    b.ToTable("InventoryTransactionHeaders", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.OrderDetail", b =>
@@ -450,7 +450,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderDetails");
+                    b.ToTable("OrderDetails", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.OrderHeader", b =>
@@ -506,7 +506,7 @@ namespace Blink_API.Migrations
                     b.HasIndex("PaymentId")
                         .IsUnique();
 
-                    b.ToTable("OrderHeaders");
+                    b.ToTable("OrderHeaders", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.Payment", b =>
@@ -539,7 +539,7 @@ namespace Blink_API.Migrations
 
                     b.HasKey("PaymentId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.Product", b =>
@@ -590,7 +590,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.ProductAttributes", b =>
@@ -608,7 +608,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("AttributeId");
 
-                    b.ToTable("ProductAttributes");
+                    b.ToTable("ProductAttributes", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.ProductDiscount", b =>
@@ -630,7 +630,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("DiscountId");
 
-                    b.ToTable("ProductDiscounts");
+                    b.ToTable("ProductDiscounts", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.ProductImage", b =>
@@ -653,7 +653,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ProductImages", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.Review", b =>
@@ -686,7 +686,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.ReviewComment", b =>
@@ -709,7 +709,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("ReviewId");
 
-                    b.ToTable("ReviewComments");
+                    b.ToTable("ReviewComments", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.ReviewSuppliedProduct", b =>
@@ -763,7 +763,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("ReviewSuppliedProducts");
+                    b.ToTable("ReviewSuppliedProducts", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.ReviewSuppliedProductImages", b =>
@@ -776,7 +776,7 @@ namespace Blink_API.Migrations
 
                     b.HasKey("RequestId", "ImagePath");
 
-                    b.ToTable("ReviewSuppliedProductImages");
+                    b.ToTable("ReviewSuppliedProductImages", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.StockProductInventory", b =>
@@ -801,7 +801,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("InventoryId");
 
-                    b.ToTable("StockProductInventories");
+                    b.ToTable("StockProductInventories", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.TransactionDetail", b =>
@@ -830,7 +830,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("SrcInventoryId");
 
-                    b.ToTable("TransactionDetails");
+                    b.ToTable("TransactionDetails", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.TransactionProduct", b =>
@@ -851,7 +851,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("InventoryTransactionId");
 
-                    b.ToTable("TransactionProducts");
+                    b.ToTable("TransactionProducts", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.WishList", b =>
@@ -874,7 +874,7 @@ namespace Blink_API.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("WishLists");
+                    b.ToTable("WishLists", (string)null);
                 });
 
             modelBuilder.Entity("Blink_API.Models.WishListDetail", b =>
@@ -895,7 +895,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("WishListId");
 
-                    b.ToTable("WishListDetail");
+                    b.ToTable("WishListDetail", (string)null);
                 });
 
             modelBuilder.Entity("InventoryInventoryTransactionHeader", b =>
@@ -910,7 +910,7 @@ namespace Blink_API.Migrations
 
                     b.HasIndex("InventoryTransactionHeadersInventoryTransactionHeaderId");
 
-                    b.ToTable("InventoryInventoryTransactionHeader");
+                    b.ToTable("InventoryInventoryTransactionHeader", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

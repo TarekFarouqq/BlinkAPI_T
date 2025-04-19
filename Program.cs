@@ -24,6 +24,7 @@ using Blink_API.Services.ProductServices;
 using Blink_API.Services.UserService;
 using Blink_API.Repositories.ProductRepos;
 using Blink_API.Services.OrderServicees;
+using Blink_API.Services.WishlistServices;
 
 
 namespace Blink_API
@@ -82,6 +83,9 @@ s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=
             builder.Services.AddScoped<BiStockService>();
             //Add New AuthService
             builder.Services.AddScoped<AuthServiceUpdated>();
+            //Add WishListService
+            builder.Services.AddScoped<WishListService>();
+
             //Add Brand :
             builder.Services.AddScoped<BrandService>();
             builder.Services.AddScoped<OrderHeaderRepository>();

@@ -14,6 +14,7 @@ using Blink_API.Repositories.UserRepos;
 
 using Blink_API.Repositories.StockProductInventoryRepo;
 using Blink_API.Repositories.Payment;
+using Blink_API.Repositories.WishlistRepos;
 
 
 
@@ -34,6 +35,8 @@ namespace Blink_API
         DiscountRepo discountRepo;
         CartRepo cartRepo;
         CartDetailsRepo cartDetailsRepo;
+        WishlistRepo wishListRepo;
+        WishListDetailsRepo wishListDetailsRepo;
         BranchRepos branchRepos;
         InventoryRepo inventoryRepo;
         StockProductInventoryRepository stockProductInventoryRepo;
@@ -189,6 +192,32 @@ namespace Blink_API
                 return discountRepo;
             }
         }
+
+        public WishlistRepo WishListRepo
+        {
+            get
+            {
+                if (wishListRepo == null)
+                {
+                    wishListRepo = new WishlistRepo(db);
+                }
+                return wishListRepo;
+            }
+        }
+        public WishListDetailsRepo WishListDetailsRepo
+        {
+            get
+            {
+                if (wishListDetailsRepo == null)
+                {
+                    wishListDetailsRepo = new WishListDetailsRepo(db);
+                }
+                return wishListDetailsRepo;
+            }
+        }
+
+
+
         public CartRepo CartRepo
         {
             get
