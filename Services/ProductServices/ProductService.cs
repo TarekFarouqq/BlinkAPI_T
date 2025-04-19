@@ -259,27 +259,36 @@ namespace Blink_API.Services.Product
         {
             await unitOfWork.ProductRepo.DeleteOldProductAttributes(productId);
         }
+        //public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct, int pgNumber, decimal fromPrice, decimal toPrice, int rating, int categoryId)
+        //{
+        //    var products = await unitOfWork.ProductRepo.GetFillteredProducts(categoryId);
+        //    foreach (var filter in filtersProduct)
+        //    {
+        //        foreach (var value in filter.Value)
+        //        {
+        //            products = products.Where(p => p.ProductAttributes.Any(pa => pa.AttributeId == filter.Key && pa.AttributeValue == value)).ToList();
+        //        }
+        //    }
+        //    var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
+        //    if (fromPrice > 0)
+        //        mappedProducts = mappedProducts.Where(p => (p.ProductPrice - p.DiscountAmount) >= fromPrice).ToList();
+        //    if (toPrice > 0)
+        //        mappedProducts = mappedProducts.Where(p => (p.ProductPrice - p.DiscountAmount) <= toPrice).ToList();
+        //    if (rating > 0)
+        //        mappedProducts = mappedProducts.Where(p => p.AverageRate >= rating).ToList();
+        //    mappedProducts = mappedProducts.Skip((pgNumber - 1) * 16)
+        //        .Take(16).ToList();
+        //    return mappedProducts;
+        //}
+
+
         public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct, int pgNumber, decimal fromPrice, decimal toPrice, int rating, int categoryId)
         {
-            var products = await unitOfWork.ProductRepo.GetFillteredProducts(categoryId);
-            foreach (var filter in filtersProduct)
-            {
-                foreach (var value in filter.Value)
-                {
-                    products = products.Where(p => p.ProductAttributes.Any(pa => pa.AttributeId == filter.Key && pa.AttributeValue == value)).ToList();
-                }
-            }
+            var products = await unitOfWork.ProductRepo.GetFillteredProducts(filtersProduct,pgNumber,fromPrice,toPrice,rating,categoryId);
             var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
-            if (fromPrice > 0)
-                mappedProducts = mappedProducts.Where(p => (p.ProductPrice - p.DiscountAmount) >= fromPrice).ToList();
-            if (toPrice > 0)
-                mappedProducts = mappedProducts.Where(p => (p.ProductPrice - p.DiscountAmount) <= toPrice).ToList();
-            if (rating > 0)
-                mappedProducts = mappedProducts.Where(p => p.AverageRate >= rating).ToList();
-            mappedProducts = mappedProducts.Skip((pgNumber - 1) * 16)
-                .Take(16).ToList();
             return mappedProducts;
         }
+
         public async Task<ICollection<StockProductInventory>> GetProductStock(int ProductId)
         {
             var productStock = await unitOfWork.ProductRepo.GetProductStock(ProductId);
