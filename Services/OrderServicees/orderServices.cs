@@ -154,12 +154,11 @@ public class orderService :IOrderServices
             _unitOfWork.OrderDetailRepo.Add(detail);
         }
 
+        cart.IsDeleted = true;
+
         await _unitOfWork.CompleteAsync();
 
-        // 8. Delete cart
-        cart.IsDeleted = true;
-        _unitOfWork.CartRepo.Update(cart);
-
+      
         // 9. Update user info
         await _unitOfWork.UserRepo.UpdateUserAddress(createOrderDTO.UserId, createOrderDTO.Address);
         await _unitOfWork.UserRepo.UpdateUserPhoneNumber(createOrderDTO.UserId, createOrderDTO.PhoneNumber);
@@ -167,6 +166,9 @@ public class orderService :IOrderServices
 
         // 10. Return the created order
         var orderToReturn = _mapper.Map<OrderToReturnDto>(orderHeader);
+        // 8. Delete cart
+        //_unitOfWork.CartRepo.Update(cart);
+
         return orderToReturn;
     }
 

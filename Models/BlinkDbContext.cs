@@ -49,7 +49,9 @@ namespace Blink_API.Models
 
             base.OnModelCreating(builder);
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
+            //builder.Ignore<FilterAttributes>();
+            //builder.Ignore<DefaultAttributes>();
+            //builder.Ignore<ProductAttributes>();
 
         }
 

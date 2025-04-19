@@ -75,9 +75,17 @@ namespace Blink_API.Services.UserService
             }
             var user = mapper.Map<ApplicationUser>(insertedUser);
             var result = await userManager.CreateAsync(user, insertedUser.UserPassword);
-            unitOfWork.UserRepo.Add(user);
+//            unitOfWork.UserRepo.Add(user);
+
             if (result.Succeeded)
             {
+                if (!string.IsNullOrEmpty(insertedUser.Role))
+                {
+                    await userManager.AddToRoleAsync(user, insertedUser.Role);
+                }
+                //unitOfWork.UserRepo.Add(user);
+                //await unitOfWork.UserRepo.SaveChanges();
+
                 return new ApiResponse(201, "User created successfully.");
             }
             else
