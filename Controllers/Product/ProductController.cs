@@ -107,7 +107,7 @@ namespace Blink_API.Controllers.Product
             return Ok(products);
         }
         [HttpPost]
-        [Consumes("multipart/form-data")]
+        //[Consumes("multipart/form-data")]
         public async Task<ActionResult> Add([FromForm] InsertProductDTO productDTO)
         {
             if (!ModelState.IsValid)
@@ -123,7 +123,7 @@ namespace Blink_API.Controllers.Product
             return Ok(result);
         }
         [HttpPut("{id}")]
-        [Consumes("multipart/form-data")]
+        //[Consumes("multipart/form-data")]
         public async Task<ActionResult> Update(int id, [FromForm] UpdateProductDTO productDTO)
         {
             if (!ModelState.IsValid)
@@ -284,7 +284,7 @@ namespace Blink_API.Controllers.Product
             return Ok(reviewSuppliedProduct);
         }
         [HttpPost("AddRequestSuppliedProduct")]
-        [Consumes("multipart/form-data")]
+        //[Consumes("multipart/form-data")]
         public async Task<ActionResult> AddRequestProduct([FromForm]InsertReviewSuppliedProductDTO insertReviewSuppliedProductDTO)
         {
             if (!ModelState.IsValid)
@@ -327,6 +327,39 @@ namespace Blink_API.Controllers.Product
             else
             {
                 return BadRequest(new { Message = "There is an error happened" });
+            }
+        }
+        [HttpGet("GetListOfBrands")]
+        public async Task<ActionResult> GetListOfBrands()
+        {
+            var result = await productService.GetListOfBrands();
+            return Ok(result);
+        }
+        [HttpGet("GetSubCategories")]
+        public async Task<ActionResult> GetSubCategories()
+        {
+            var result = await productService.GetSubCategories();
+            return Ok(result);
+        }
+        [HttpGet("GetListOfInventory")]
+        public async Task<ActionResult> GetListOfInventory()
+        {
+            var result = await productService.GetListOfInventory();
+            return Ok(result);
+        }
+        [HttpDelete("{ProductId}/{ImagePath}")]
+        public async Task<ActionResult> DeleteProductImage(int ProductId,string ImagePath)
+        {
+            if (ProductId == 0 || ImagePath == null || ImagePath == string.Empty)
+                return BadRequest(new { Message = "Product Id And Image path Are Required" });
+            bool result = await productService.DeleteProductImage(ProductId,ImagePath);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
             }
         }
         #endregion

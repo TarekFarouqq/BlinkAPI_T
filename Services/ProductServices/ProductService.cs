@@ -259,36 +259,12 @@ namespace Blink_API.Services.Product
         {
             await unitOfWork.ProductRepo.DeleteOldProductAttributes(productId);
         }
-        //public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct, int pgNumber, decimal fromPrice, decimal toPrice, int rating, int categoryId)
-        //{
-        //    var products = await unitOfWork.ProductRepo.GetFillteredProducts(categoryId);
-        //    foreach (var filter in filtersProduct)
-        //    {
-        //        foreach (var value in filter.Value)
-        //        {
-        //            products = products.Where(p => p.ProductAttributes.Any(pa => pa.AttributeId == filter.Key && pa.AttributeValue == value)).ToList();
-        //        }
-        //    }
-        //    var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
-        //    if (fromPrice > 0)
-        //        mappedProducts = mappedProducts.Where(p => (p.ProductPrice - p.DiscountAmount) >= fromPrice).ToList();
-        //    if (toPrice > 0)
-        //        mappedProducts = mappedProducts.Where(p => (p.ProductPrice - p.DiscountAmount) <= toPrice).ToList();
-        //    if (rating > 0)
-        //        mappedProducts = mappedProducts.Where(p => p.AverageRate >= rating).ToList();
-        //    mappedProducts = mappedProducts.Skip((pgNumber - 1) * 16)
-        //        .Take(16).ToList();
-        //    return mappedProducts;
-        //}
-
-
         public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct, int pgNumber, decimal fromPrice, decimal toPrice, int rating, int categoryId)
         {
             var products = await unitOfWork.ProductRepo.GetFillteredProducts(filtersProduct,pgNumber,fromPrice,toPrice,rating,categoryId);
             var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
             return mappedProducts;
         }
-
         public async Task<ICollection<StockProductInventory>> GetProductStock(int ProductId)
         {
             var productStock = await unitOfWork.ProductRepo.GetProductStock(ProductId);
@@ -310,6 +286,38 @@ namespace Blink_API.Services.Product
             var result = await unitOfWork.ProductRepo.GetProductStockInInventory(SourceId, productId);
             return result;
 
+        }
+        public async Task<List<Brand>> GetListOfBrands()
+        {
+            return await unitOfWork.ProductRepo.GetListOfBrands();
+        }
+        public async Task<List<Category>> GetSubCategories()
+        {
+            return await unitOfWork.ProductRepo.GetSubCategories();
+        }
+        public async Task<List<Inventory>> GetListOfInventory()
+        {
+            return await unitOfWork.ProductRepo.GetListOfInventory();
+        }
+        public async Task<bool> DeleteProductImage(int ProductId,string imagePath)
+        {
+            string decodedUrl = Uri.UnescapeDataString(imagePath);
+            int startIndex = decodedUrl.IndexOf("/images/", StringComparison.OrdinalIgnoreCase);
+            if (startIndex == -1)
+                return false;
+            string relativePath = decodedUrl.Substring(startIndex).TrimStart('/');
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+            bool isDeleted = false;
+            if (File.Exists(fullPath))
+            {
+                relativePath = "/" + relativePath;
+                isDeleted = await unitOfWork.ProductRepo.DeleteProductImage(ProductId, relativePath.Replace("\\", "/"));
+                if (isDeleted)
+                {
+                    File.Delete(fullPath);
+                }
+            }
+            return isDeleted;
         }
         #endregion
     }

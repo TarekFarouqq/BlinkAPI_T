@@ -43,7 +43,8 @@ namespace Blink_API.MapperConfigs
                .FirstOrDefault())).ReverseMap();
             // ------------------------------------------------------------------------
             CreateMap<Product, InsertProductDTO>()
-                .ForMember(dest => dest.ProductImages, opt => opt.Ignore());
+                .ForMember(dest => dest.ProductImages, opt => opt.Ignore())
+                .ForMember(dest => dest.OldImages, opt => opt.Ignore());
             // ------------------------------------------------------------------------
             CreateMap<InsertProductDTO, Product>()
                 .ForMember(dest => dest.ProductImages, opt => opt.Ignore());
