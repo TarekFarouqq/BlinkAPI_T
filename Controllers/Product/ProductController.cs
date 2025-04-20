@@ -1,19 +1,13 @@
-﻿using System.IO;
-using System.Reflection.Metadata.Ecma335;
-using Blink_API.DTOs.Product;
-using Blink_API.DTOs.ProductDTOs;
-using Blink_API.Models;
+﻿using Blink_API.DTOs.ProductDTOs;
 using Blink_API.Services.Product;
 using Blink_API.Services.ProductServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 
 namespace Blink_API.Controllers.Product
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] 
     public class ProductController : ControllerBase
     {
         private readonly ProductService productService;
