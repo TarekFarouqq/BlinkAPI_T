@@ -1,15 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Blink_API.DTOs.IdentityDTOs
+public class SetNewPasswordDto
 {
-    public class SetNewPasswordDto
-    {
-        [Required(ErrorMessage = "Password is required.")]
-        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long.")]
-        public string NewPassword { get; set; }
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } 
 
-        [Required(ErrorMessage = "Confirm Password is required.")]
-        [Compare("NewPassword", ErrorMessage = "Password and Confirm Password do not match.")]
-        public string ConfirmPassword { get; set; }
-    }
+    [Required]
+    [MinLength(6)]
+    public string NewPassword { get; set; } 
+
+    [Required]
+    [Compare("NewPassword", ErrorMessage = "Passwords do not match")]
+    public string ConfirmPassword { get; set; } 
 }
