@@ -352,6 +352,24 @@ namespace Blink_API.Services.Product
         {
             return unitOfWork.ProductRepo.GetTotalPageForReviewProducts(UserId);
         }
+        public async Task<List<ProductDiscountsDTO>> SearchProducts(string searchText)
+        {
+            var result = await unitOfWork.ProductRepo.SearchProducts(searchText);
+            var mappedResult = mapper.Map<List<ProductDiscountsDTO>>(result);
+            return mappedResult;    
+        }
+        public async Task<List<ProductDiscountsDTO>> GetProductsByBrandId(int id)
+        {
+            var result = await unitOfWork.ProductRepo.GetProductsByBrandId(id);
+            var mappedResult = mapper.Map<List<ProductDiscountsDTO>>(result);
+            return mappedResult;
+        }
+        public async Task<List<ProductDiscountsDTO>> GetProductsByCategoryId(int id)
+        {
+            var result = await unitOfWork.ProductRepo.GetProductsByCategoryId(id);
+            var mappedResult = mapper.Map<List<ProductDiscountsDTO>>(result);
+            return mappedResult;
+        }
         #endregion
     }
 }
