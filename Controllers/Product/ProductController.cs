@@ -393,7 +393,30 @@ namespace Blink_API.Controllers.Product
             var result = await productService.GetSuppliedProductsByUserID(pgNumber,UserId);
             return Ok(result);
         }
-        //[HttpGet("Get")]
+        [HttpGet("SearchProducts/{searchText}")]
+        public async Task<ActionResult> SearchProducts(string searchText)
+        {
+            if (searchText == string.Empty)
+                return BadRequest(new { Message = "Can't Search Products with Null Search Filed" });
+            var result = await productService.SearchProducts(searchText);
+            return Ok(result);
+        }
+        [HttpGet("FilterByBrand/{brandId}")]
+        public async Task<ActionResult> FilterByBrand(int brandId)
+        {
+            if (brandId <= 0)
+                return BadRequest(new { Message = "Filter Id Should Be Morethan Zero" });
+            var result = await productService.GetProductsByBrandId(brandId);
+            return Ok(result);
+        }
+        [HttpGet("FilterByCategory/{categoryId}")]
+        public async Task<ActionResult> FilterByCategory(int categoryId)
+        {
+            if (categoryId <= 0)
+                return BadRequest(new { Message = "Filter Id Should Be Morethan Zero" });
+            var result = await productService.GetProductsByCategoryId(categoryId);
+            return Ok(result);
+        }
         #endregion
     }
 }

@@ -39,7 +39,7 @@ namespace Blink_API.Controllers.Discounts
             return Ok(await discountService.GetDiscountById(id));
         }
         [HttpPost]
-        public async Task<ActionResult> CreateDiscount(InsertDiscountDetailsDTO insertDiscountDetailsDTO)
+        public async Task<ActionResult> CreateDiscount([FromForm]InsertDiscountDetailsDTO insertDiscountDetailsDTO)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -49,7 +49,7 @@ namespace Blink_API.Controllers.Discounts
             return Ok();
         }
         [HttpPut]
-        public async Task<ActionResult> UpdateDiscount(UpdateDiscountDetailsDTO updateDiscountDetailsDTO)
+        public async Task<ActionResult> UpdateDiscount([FromForm] UpdateDiscountDetailsDTO updateDiscountDetailsDTO)
         {
             if(!ModelState.IsValid)
                 return BadRequest();
@@ -65,6 +65,12 @@ namespace Blink_API.Controllers.Discounts
                 return BadRequest();
             await discountService.DeleteDiscount(id);
             return Ok();
+        }
+        [HttpGet("{startDate}/{endDate}")]
+        public async Task<ActionResult> GetDiscountsBetweenDates(DateTime startDate,DateTime endDate)
+        {
+            var result = await discountService.GetDiscountsBetween2Dates(startDate, endDate);
+            return Ok(result);
         }
     }
 }
