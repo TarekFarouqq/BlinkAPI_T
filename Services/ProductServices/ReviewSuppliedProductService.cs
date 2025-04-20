@@ -160,6 +160,6 @@ namespace Blink_API.Services.ProductServices
                 ContentType = contentType
             };
         }
-
+        
     }
 }
