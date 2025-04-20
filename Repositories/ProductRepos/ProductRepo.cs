@@ -45,28 +45,50 @@ namespace Blink_API.Repositories
         }
         public async Task<List<Product>> GetAllPagginated(int pgNumber, int pgSize)
         {
-            var ids = await db.Products
-        .AsNoTracking()
-        .Where(p => !p.IsDeleted)
-        .OrderBy(p => p.ProductId)
-        .Skip((pgNumber - 1) * pgSize)
-        .Take(pgSize)
-        .Select(p => p.ProductId)
-        .ToListAsync();
+            //    var ids = await db.Products
+            //.AsNoTracking()
+            //        .Include(u=>u.User)
+            //.Where(p => !p.IsDeleted)
+            //.OrderBy(p => p.ProductId)
+            //.Skip((pgNumber - 1) * pgSize)
+            //.Take(pgSize)
+            //.Select(p => p.ProductId)
+            //.ToListAsync();
+
+            //    return await db.Products
+            //        .AsNoTracking()
+            //        .Where(p => ids.Contains(p.ProductId))
+            //        .Include(u => u.User)
+            //        .Include(b => b.Brand)
+            //        .Include(c => c.Category)
+            //        .Include(i => i.ProductImages.Where(pi => !pi.IsDeleted))
+            //        .Include(r => r.Reviews)
+            //        .ThenInclude(rc => rc.ReviewComments)
+            //        .Include(sip => sip.StockProductInventories)
+            //        .Include(pd => pd.ProductDiscounts)
+            //        .ThenInclude(d => d.Discount)
+            //        .ToListAsync();
 
             return await db.Products
                 .AsNoTracking()
-                .Where(p => ids.Contains(p.ProductId))
-                .Include(u => u.User)
-                .Include(b => b.Brand)
-                .Include(c => c.Category)
-                .Include(i => i.ProductImages.Where(pi => !pi.IsDeleted))
-                .Include(r => r.Reviews)
-                .ThenInclude(rc => rc.ReviewComments)
-                .Include(sip => sip.StockProductInventories)
-                .Include(pd => pd.ProductDiscounts)
-                .ThenInclude(d => d.Discount)
+                .Include(u=>u.User)
+                .Include(b=>b.Brand)
+                .Include(c=>c.Category)
+                .Include(i => i.ProductImages.Where(pi=>!pi.IsDeleted))
+                .Include(r=>r.Reviews)
+                .ThenInclude(rc=>rc.ReviewComments)
+                .Include(r=>r.Reviews)
+                .ThenInclude(ru=>ru.User)
+                .Include(spi=>spi.StockProductInventories)
+                .Include(pd=>pd.ProductDiscounts)
+                .ThenInclude(dp=>dp.Discount)
+                .Where(p=>!p.IsDeleted && p.ProductDiscounts.Any(pd=>!pd.Discount.IsDeleted && !pd.IsDeleted))
+                .Skip((pgNumber - 1) * pgSize)
+                .Take(pgSize)
                 .ToListAsync();
+
+
+
         }
         public async Task<List<Product>> GetAllPagginatedWithUser(int pgNumber, int pgSize, string UserId)
         {

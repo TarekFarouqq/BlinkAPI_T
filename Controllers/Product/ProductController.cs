@@ -13,6 +13,7 @@ namespace Blink_API.Controllers.Product
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] 
     public class ProductController : ControllerBase
     {
         private readonly ProductService productService;

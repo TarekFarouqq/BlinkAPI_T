@@ -21,7 +21,7 @@ namespace Blink_API.MapperConfigs
                .ForMember(dest => dest.ProductReviews, option =>
                option.MapFrom(src => src.Reviews != null ? src.Reviews.Select(r => new ReviewCommentDTO
                {
-                   Username = r.User != null ? r.User.UserName : "Unknown User",
+                   Username = r.User.UserName,
                    Rate = r.Rate,
                    ReviewComment = r.ReviewComments != null
                            ? r.ReviewComments.Select(rc => rc.Content).ToList()
@@ -35,8 +35,10 @@ namespace Blink_API.MapperConfigs
                option.MapFrom(src => src.StockProductInventories.Any() == true ? src.StockProductInventories.Sum(s => s.StockQuantity) : 0))
                .ForMember(dest => dest.DiscountPercentage, option => option.MapFrom(src => src.ProductDiscounts
                .Where(pd => !pd.IsDeleted && pd.Discount.DiscountFromDate <= DateTime.UtcNow && pd.Discount.DiscountEndDate >= DateTime.UtcNow)
-               .Select(pd => pd.Discount.DiscountPercentage)
-               .FirstOrDefault()))
+               //.Select(pd => pd.Discount.DiscountPercentage)
+               .Where(pd=>!pd.IsDeleted && !pd.Discount.IsDeleted)
+               .Sum(pd => pd.Discount.DiscountPercentage)))
+               //.FirstOrDefault()))
                .ForMember(dest => dest.DiscountAmount, option => option.MapFrom(src => src.ProductDiscounts
                .Where(pd => !pd.IsDeleted && pd.Discount.DiscountFromDate <= DateTime.UtcNow && pd.Discount.DiscountEndDate >= DateTime.UtcNow)
                .Select(pd => pd.DiscountAmount)
