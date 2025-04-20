@@ -30,9 +30,20 @@ namespace Blink_API.Services.Product
             var count = await unitOfWork.ProductRepo.GetPagesCount(pgSize);
             return count;
         }
+        public async Task<int> GetPagesCountWithUser(int pgSize,string UserId)
+        {
+            var count = await unitOfWork.ProductRepo.GetPagesCountWithUser(pgSize,UserId);
+            return count;
+        }
         public async Task<ICollection<ProductDiscountsDTO>> GetAllPagginated(int pgNumber,int pgSize)
         {
             var products = await unitOfWork.ProductRepo.GetAllPagginated(pgNumber, pgSize);
+            var result = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
+            return result;
+        }
+        public async Task<ICollection<ProductDiscountsDTO>> GetAllPagginatedWithUser(int pgNumber, int pgSize,string UserId)
+        {
+            var products = await unitOfWork.ProductRepo.GetAllPagginatedWithUser(pgNumber, pgSize,UserId);
             var result = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
             return result;
         }
@@ -113,15 +124,27 @@ namespace Blink_API.Services.Product
         }
         private async Task<string> SaveFileAsync(IFormFile file)
         {
-            var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "/images/products");
-            if(!Directory.Exists(uploadFolder))
+            // 1. Correct path construction
+            var uploadFolder = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "images",
+                "products"
+            );
+
+            // 2. Create directory if needed
+            if (!Directory.Exists(uploadFolder))
                 Directory.CreateDirectory(uploadFolder);
-            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(uploadFolder, uniqueFileName);  
-            using(var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(fileStream);
-            }
+
+            // 3. Generate unique filename
+            var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var filePath = Path.Combine(uploadFolder, uniqueFileName);
+
+            // 4. Save file
+            using var fileStream = new FileStream(filePath, FileMode.Create);
+            await file.CopyToAsync(fileStream);
+
+            // 5. Return web-accessible path
             return $"/images/products/{uniqueFileName}";
         }
         private async Task<List<ProductImage>> CheckImagesToSaveInInsert(Models.Product product, List<IFormFile> images)
@@ -318,6 +341,16 @@ namespace Blink_API.Services.Product
                 }
             }
             return isDeleted;
+        }
+        public async Task<List<ReadReviewSuppliedProductDTO>> GetSuppliedProductsByUserID(int pgNumber, string UserId)
+        {
+            var result = await unitOfWork.ProductRepo.GetSuppliedProductsByUserID(pgNumber, UserId);
+            var mappedReviewSuppliedProducts = mapper.Map<List<ReadReviewSuppliedProductDTO>>(result);
+            return mappedReviewSuppliedProducts;
+        }
+        public int GetTotalPageForReviewProducts(string UserId)
+        {
+            return unitOfWork.ProductRepo.GetTotalPageForReviewProducts(UserId);
         }
         #endregion
     }
