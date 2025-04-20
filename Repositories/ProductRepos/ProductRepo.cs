@@ -37,11 +37,48 @@ namespace Blink_API.Repositories
                 .CountAsync();
             return (int)Math.Ceiling((double)count / pgSize);
         }
+        public async Task<int> GetPagesCountWithUser(int pgSize, string UserId)
+        {
+            if (pgSize <= 0)
+                throw new ArgumentException("Page size must be greater than 0.");
+
+            var count = await db.Products
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted && p.SupplierId == UserId)
+                .CountAsync();
+
+            return (int)Math.Ceiling((double)count / pgSize);
+        }
         public async Task<List<Product>> GetAllPagginated(int pgNumber, int pgSize)
         {
             var ids = await db.Products
         .AsNoTracking()
         .Where(p => !p.IsDeleted)
+        .OrderBy(p => p.ProductId)
+        .Skip((pgNumber - 1) * pgSize)
+        .Take(pgSize)
+        .Select(p => p.ProductId)
+        .ToListAsync();
+
+            return await db.Products
+                .AsNoTracking()
+                .Where(p => ids.Contains(p.ProductId))
+                .Include(u => u.User)
+                .Include(b => b.Brand)
+                .Include(c => c.Category)
+                .Include(i => i.ProductImages.Where(pi => !pi.IsDeleted))
+                .Include(r => r.Reviews)
+                .ThenInclude(rc => rc.ReviewComments)
+                .Include(sip => sip.StockProductInventories)
+                .Include(pd => pd.ProductDiscounts)
+                .ThenInclude(d => d.Discount)
+                .ToListAsync();
+        }
+        public async Task<List<Product>> GetAllPagginatedWithUser(int pgNumber, int pgSize, string UserId)
+        {
+            var ids = await db.Products
+        .AsNoTracking()
+        .Where(p => !p.IsDeleted && p.SupplierId==UserId)
         .OrderBy(p => p.ProductId)
         .Skip((pgNumber - 1) * pgSize)
         .Take(pgSize)
@@ -389,6 +426,48 @@ namespace Blink_API.Repositories
                 return true;
             }
             return false;
+        }
+        public async Task<List<ReviewSuppliedProduct>> GetSuppliedProductsByUserID(int pgNumber, string UserId)
+        {
+            if (UserId != null)
+            {
+                return await db.ReviewSuppliedProducts
+               .Where(rsp => rsp.SupplierId == UserId)
+               .Include(p => p.Brand)
+               .Include(p => p.Category)
+               .Include(p => p.Inventory)
+               .Include(p => p.Supplier)
+               .Include(p => p.ReviewSuppliedProductImages)
+               .Skip((pgNumber - 1) * 16)
+               .Take(16)
+               .ToListAsync();
+            }
+            else
+            {
+                return await db.ReviewSuppliedProducts
+               .Include(p => p.Brand)
+               .Include(p => p.Category)
+               .Include(p => p.Inventory)
+               .Include(p => p.Supplier)
+               .Include(p => p.ReviewSuppliedProductImages)
+               .Skip((pgNumber - 1) * 16)
+               .Take(16)
+               .ToListAsync();
+            }
+        }
+        public int GetTotalPageForReviewProducts(string UserId)
+        {
+            int totalRows = 0;
+            if (!string.IsNullOrWhiteSpace(UserId))
+            {
+                totalRows = db.ReviewSuppliedProducts.Count(r => r.SupplierId == UserId);
+            }
+            else
+            {
+                totalRows = db.ReviewSuppliedProducts.Count();
+            }
+            int countItems = 16;
+            return (int)Math.Ceiling((double)totalRows / countItems);
         }
     }
 }

@@ -7,6 +7,7 @@ using Blink_API.Services.Product;
 using Blink_API.Services.ProductServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 
 namespace Blink_API.Controllers.Product
 {
@@ -44,10 +45,31 @@ namespace Blink_API.Controllers.Product
                 return NotFound();
             return Ok(count);
         }
+        [HttpGet("GetPagesCountWithUser/{pgSize}/{UserId}")]
+        public async Task<ActionResult> GetPagesCount(int pgSize,string UserId)
+        {
+            var count = await productService.GetPagesCountWithUser(pgSize,UserId);
+            if (count == 0)
+                return NotFound();
+            return Ok(count);
+        }
         [HttpGet("GetAllWithPaging/{pgNumber}/{pgSize}")]
         public async Task<ActionResult> GetAllPagginated(int pgNumber,int pgSize)
         {
             var products = await productService.GetAllPagginated(pgNumber,pgSize);
+            if (products == null)
+                return NotFound();
+            string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+            foreach (var product in products)
+            {
+                product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
+            }
+            return Ok(products);
+        }
+        [HttpGet("GetAllWithPagingWithUser/{pgNumber}/{pgSize}/{UserId}")]
+        public async Task<ActionResult> GetAllPagginatedWithUser(int pgNumber, int pgSize,string UserId)
+        {
+            var products = await productService.GetAllPagginatedWithUser(pgNumber, pgSize,UserId);
             if (products == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
@@ -107,7 +129,6 @@ namespace Blink_API.Controllers.Product
             return Ok(products);
         }
         [HttpPost]
-        //[Consumes("multipart/form-data")]
         public async Task<ActionResult> Add([FromForm] InsertProductDTO productDTO)
         {
             if (!ModelState.IsValid)
@@ -123,7 +144,6 @@ namespace Blink_API.Controllers.Product
             return Ok(result);
         }
         [HttpPut("{id}")]
-        //[Consumes("multipart/form-data")]
         public async Task<ActionResult> Update(int id, [FromForm] UpdateProductDTO productDTO)
         {
             if (!ModelState.IsValid)
@@ -284,7 +304,6 @@ namespace Blink_API.Controllers.Product
             return Ok(reviewSuppliedProduct);
         }
         [HttpPost("AddRequestSuppliedProduct")]
-        //[Consumes("multipart/form-data")]
         public async Task<ActionResult> AddRequestProduct([FromForm]InsertReviewSuppliedProductDTO insertReviewSuppliedProductDTO)
         {
             if (!ModelState.IsValid)
@@ -362,6 +381,19 @@ namespace Blink_API.Controllers.Product
                 return NotFound();
             }
         }
+        [HttpGet("GetTotalPageForReviewProducts/{UserId}")]
+        public ActionResult GetTotalPageForReviewProducts(string UserId)
+        {
+            var result = productService.GetTotalPageForReviewProducts(UserId);
+            return Ok(result);
+        }
+        [HttpGet("GetSuppliedProductsByUserIDWithPaggination/{pgNumber}/{UserId}")]
+        public async Task<ActionResult> GetSuppliedProductsByUserID(int pgNumber, string UserId)
+        {
+            var result = await productService.GetSuppliedProductsByUserID(pgNumber,UserId);
+            return Ok(result);
+        }
+        //[HttpGet("Get")]
         #endregion
     }
 }
