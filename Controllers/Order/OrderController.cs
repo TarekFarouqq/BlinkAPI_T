@@ -57,8 +57,19 @@ namespace Blink_API.Controllers.Order
             try
             {
                 var order = await _orderService.GetOrderByIdAsync(orderId);
+
                 if (order == null)
                     return NotFound(new ApiResponse(404, "Order Not Found"));
+
+                string baseUrl = $"{Request.Scheme}://{Request.Host}/";
+               
+                    foreach (var item in order.Items)
+                    {
+                        int startIndex = item.ProductImageUrl.IndexOf("/images/");
+                        item.ProductImageUrl = baseUrl + item.ProductImageUrl.Substring(startIndex);
+
+                    }
+                
 
                 return Ok(order);
             }
@@ -84,6 +95,7 @@ namespace Blink_API.Controllers.Order
                 }
 
                 var orders = await _orderService.GetOrdersByUserIdAsync(userId);
+
                 string baseUrl = $"{Request.Scheme}://{Request.Host}/";
                 foreach (var order in orders)
                 {
@@ -91,7 +103,6 @@ namespace Blink_API.Controllers.Order
                     {
                         int startIndex = item.ProductImageUrl.IndexOf("/images/");
                         item.ProductImageUrl = baseUrl + item.ProductImageUrl.Substring(startIndex);
-                        //item.ProductImageUrl = item.ProductImageUrl.Select(img => $"{baseUrl}{item.ProductImageUrl.Replace("wwwroot/", "")}").ToList();
 
                     }
                 }
