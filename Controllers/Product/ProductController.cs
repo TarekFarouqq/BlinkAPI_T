@@ -1,4 +1,5 @@
 ﻿using Blink_API.DTOs.ProductDTOs;
+using Blink_API.Models;
 using Blink_API.Services.Product;
 using Blink_API.Services.ProductServices;
 using Microsoft.AspNetCore.Authorization;
@@ -135,7 +136,7 @@ namespace Blink_API.Controllers.Product
                 return BadRequest();
             var result = await productService.Add(productDTO);
             if (result == 0)
-                return BadRequest();
+                return BadRequest(new {Message="Product Name Are Found Or Failed To Create Product"});
             return Ok(result);
         }
         [HttpPut("{id}")]
@@ -148,8 +149,15 @@ namespace Blink_API.Controllers.Product
             }
             if (productDTO == null)
                 return BadRequest();
-            await productService.Update(id, productDTO);
-            return Ok();
+            bool result = await productService.Update(id, productDTO);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(new { Message = "ProductName are found before" });
+            }
         }
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
@@ -396,6 +404,14 @@ namespace Blink_API.Controllers.Product
             var result = await productService.SearchProducts(searchText);
             return Ok(result);
         }
+        [HttpGet("SearchProductsById/{searchText}/{inventoryId}")]
+        public async Task<ActionResult> SearchProducts(string searchText,int inventoryId)
+        {
+            if (searchText == string.Empty)
+                return BadRequest(new { Message = "Can't Search Products with Null Search Filed" });
+            var result = await productService.SearchProducts(searchText, inventoryId);
+            return Ok(result);
+        }
         [HttpGet("FilterByBrand/{brandId}")]
         public async Task<ActionResult> FilterByBrand(int brandId)
         {
@@ -410,6 +426,14 @@ namespace Blink_API.Controllers.Product
             if (categoryId <= 0)
                 return BadRequest(new { Message = "Filter Id Should Be Morethan Zero" });
             var result = await productService.GetProductsByCategoryId(categoryId);
+            return Ok(result);
+        }
+        [HttpGet("FilterByInventoryId/{inventoryId}")]
+        public async Task<ActionResult> FilterByInventory(int inventoryId)
+        {
+            if (inventoryId <= 0)
+                return BadRequest(new { Message = "Filter Id Should Be Morethan Zero" });
+            var result = await productService.GetProductsByInventoryId(inventoryId);
             return Ok(result);
         }
         #endregion

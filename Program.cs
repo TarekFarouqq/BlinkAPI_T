@@ -1,5 +1,4 @@
-using Blink_API.MapperConfigs;
-using Blink_API.Models;
+﻿using Blink_API.Models;
 using Blink_API.Repositories;
 using Blink_API.Repositories.BranchRepos;
 using Blink_API.Repositories.DiscountRepos;
@@ -23,10 +22,7 @@ using Blink_API.Services.PaymentServices;
 using Blink_API.Services.ProductServices;
 using Blink_API.Services.UserService;
 using Blink_API.Repositories.ProductRepos;
-using Blink_API.Services.OrderServicees;
 using Blink_API.Services.WishlistServices;
-
-
 namespace Blink_API
 {
     public class Program
@@ -36,8 +32,16 @@ namespace Blink_API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddDbContext<BlinkDbContext>(s =>
-s.UseSqlServer(builder.Configuration.GetConnectionString("conString"),sqlOption=>sqlOption.CommandTimeout(300)));
+            builder.Services.AddDbContext<BlinkDbContext>(options =>
+            {
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("conString"),
+                    sqlOptions => sqlOptions.CommandTimeout(300)
+                );
+
+            });
+
+
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<BlinkDbContext>()
                 .AddDefaultTokenProviders()

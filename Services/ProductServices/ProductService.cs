@@ -81,35 +81,41 @@ namespace Blink_API.Services.Product
             var mappedStockProducts = mapper.Map<ICollection<StockProductInventory>>(productDTO.ProductStocks);
             mappedProduct.StockProductInventories = mappedStockProducts;
             var productId = await unitOfWork.ProductRepo.AddProduct(mappedProduct);
-            #region Add Product To Inventory Transaction Header
-            List<InsertInputTrasactionProductDTO> newListProducts = new List<InsertInputTrasactionProductDTO>();
-            newListProducts.Add(new InsertInputTrasactionProductDTO { TransactionQuantity = mappedStockProducts.Sum(s => s.StockQuantity), ProductId = productId });
-            InsertInputTransferProductDTO newTransaction = new InsertInputTransferProductDTO()
+            if(productId > 0)
             {
-                InventoryTransactionDate = DateTime.UtcNow,
-                InventoryTransactionType = 1,
-                TransactionProducts = newListProducts
-            };
-            await productTransferService.AddInputInventory(newTransaction);
-            #endregion
-
+                #region Add Product To Inventory Transaction Header
+                List<InsertInputTrasactionProductDTO> newListProducts = new List<InsertInputTrasactionProductDTO>();
+                newListProducts.Add(new InsertInputTrasactionProductDTO { TransactionQuantity = mappedStockProducts.Sum(s => s.StockQuantity), ProductId = productId });
+                InsertInputTransferProductDTO newTransaction = new InsertInputTransferProductDTO()
+                {
+                    InventoryTransactionDate = DateTime.UtcNow,
+                    InventoryTransactionType = 1,
+                    TransactionProducts = newListProducts
+                };
+                await productTransferService.AddInputInventory(newTransaction);
+                #endregion
+            }
             return productId;
         }
-        public async Task Update(int id, UpdateProductDTO productDTO)
+        public async Task<bool> Update(int id, UpdateProductDTO productDTO)
         {
-            if(productDTO == null)
-                return;
+            if (productDTO == null)
+                return false;
             var product = mapper.Map<Models.Product>(productDTO);
             int ProductId = id;
             List<InsertProductImagesDTO> ProductImageList = await CheckImagesToSaveInUpdate(id,productDTO.NewProductImages,productDTO.OldProductImages);
-            await unitOfWork.ProductRepo.UpdateProduct(id, product);
-            var mappedStockProducts = mapper.Map<ICollection<StockProductInventory>>(productDTO.ProductStocks);
-            foreach (var stockProduct in mappedStockProducts)
+            bool result = await unitOfWork.ProductRepo.UpdateProduct(id, product);
+            if (result)
             {
-                stockProduct.ProductId = ProductId;
+                var mappedStockProducts = mapper.Map<ICollection<StockProductInventory>>(productDTO.ProductStocks);
+                foreach (var stockProduct in mappedStockProducts)
+                {
+                    stockProduct.ProductId = ProductId;
+                }
+                await unitOfWork.ProductRepo.UpdateStockProducts(mappedStockProducts);
+                await AddProductImage(ProductImageList);
             }
-            await unitOfWork.ProductRepo.UpdateStockProducts(mappedStockProducts);
-            await AddProductImage(ProductImageList);
+            return result;
         }
         public async Task Delete(int id)
         {
@@ -358,6 +364,12 @@ namespace Blink_API.Services.Product
             var mappedResult = mapper.Map<List<ProductDiscountsDTO>>(result);
             return mappedResult;    
         }
+        public async Task<List<ProductDiscountsDTO>> SearchProducts(string searchText,int inventoryId)
+        {
+            var result = await unitOfWork.ProductRepo.SearchProducts(searchText, inventoryId);
+            var mappedResult = mapper.Map<List<ProductDiscountsDTO>>(result);
+            return mappedResult;
+        }
         public async Task<List<ProductDiscountsDTO>> GetProductsByBrandId(int id)
         {
             var result = await unitOfWork.ProductRepo.GetProductsByBrandId(id);
@@ -368,6 +380,12 @@ namespace Blink_API.Services.Product
         {
             var result = await unitOfWork.ProductRepo.GetProductsByCategoryId(id);
             var mappedResult = mapper.Map<List<ProductDiscountsDTO>>(result);
+            return mappedResult;
+        }
+        public async Task <List<ReadProductsDataDTO>> GetProductsByInventoryId(int id)
+        {
+            var result = await unitOfWork.ProductRepo.GetProductsByInventoryId(id);
+            var mappedResult = mapper.Map<List<ReadProductsDataDTO>>(result);
             return mappedResult;
         }
         #endregion

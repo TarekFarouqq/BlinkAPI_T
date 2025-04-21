@@ -94,5 +94,15 @@ namespace Blink_API.Services.ProductServices
             }
             await unitOfWork.ProductTransferRepo.UpdateTransaction(mappedTransactionHeader);
         }
+        public async Task<int> GetTotalPages(int pgSize)
+        {
+            return await unitOfWork.ProductTransferRepo.GetTotalPages(pgSize);
+        }  
+        public async Task<List<ReadInventoryTransactions>> GetDataWithPagination(int pgNumber,int pgSize)
+        {
+            var result = await unitOfWork.ProductTransferRepo.GetAllTransactionHeader(pgNumber,pgSize);
+            var mappedResult = mapper.Map<List<ReadInventoryTransactions>>(result);
+            return mappedResult;
+        }
     }
 }
