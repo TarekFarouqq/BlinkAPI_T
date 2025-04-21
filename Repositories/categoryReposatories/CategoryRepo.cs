@@ -112,13 +112,23 @@ namespace Blink_API.Repositories
             existingCategory.CategoryImage = updatedCategory.CategoryImage;
             foreach (var updatedSub in updatedCategory.SubCategories)
             {
-                var existingSub = existingCategory.SubCategories
-                    .FirstOrDefault(sc => sc.CategoryId == updatedSub.CategoryId);
-                if (existingSub != null)
+                if(updatedSub.CategoryId > 0)
                 {
-                    existingSub.CategoryName = updatedSub.CategoryName;
-                    existingSub.CategoryDescription = updatedSub.CategoryDescription;
-                    existingSub.CategoryImage = updatedSub.CategoryImage;
+                    // update sub category 
+                    var existingSub = existingCategory.SubCategories
+                        .FirstOrDefault(sc => sc.CategoryId == updatedSub.CategoryId);
+                    if (existingSub != null)
+                    {
+                        existingSub.CategoryName = updatedSub.CategoryName;
+                        existingSub.CategoryDescription = updatedSub.CategoryDescription;
+                        existingSub.CategoryImage = updatedSub.CategoryImage;
+                    }
+                }
+                else
+                {
+                    // create sub category
+                    updatedSub.ParentCategoryId = existingCategory.CategoryId;
+                    existingCategory.SubCategories.Add(updatedSub);
                 }
             }
             db.Categories.Update(existingCategory);
