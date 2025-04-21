@@ -14,7 +14,7 @@ namespace Blink_API.Controllers.Product
         private readonly ProductService productService;
         private readonly ReviewSuppliedProductService reviewSuppliedProductsService;
         private readonly ProductReviewService productReviewService;
-        public ProductController(ProductService _productService , ReviewSuppliedProductService _reviewSuppliedProductsService, ProductReviewService _productReviewService)
+        public ProductController(ProductService _productService, ReviewSuppliedProductService _reviewSuppliedProductsService, ProductReviewService _productReviewService)
         {
             productService = _productService;
             reviewSuppliedProductsService = _reviewSuppliedProductsService;
@@ -42,17 +42,17 @@ namespace Blink_API.Controllers.Product
             return Ok(count);
         }
         [HttpGet("GetPagesCountWithUser/{pgSize}/{UserId}")]
-        public async Task<ActionResult> GetPagesCount(int pgSize,string UserId)
+        public async Task<ActionResult> GetPagesCount(int pgSize, string UserId)
         {
-            var count = await productService.GetPagesCountWithUser(pgSize,UserId);
+            var count = await productService.GetPagesCountWithUser(pgSize, UserId);
             if (count == 0)
                 return NotFound();
             return Ok(count);
         }
         [HttpGet("GetAllWithPaging/{pgNumber}/{pgSize}")]
-        public async Task<ActionResult> GetAllPagginated(int pgNumber,int pgSize)
+        public async Task<ActionResult> GetAllPagginated(int pgNumber, int pgSize)
         {
-            var products = await productService.GetAllPagginated(pgNumber,pgSize);
+            var products = await productService.GetAllPagginated(pgNumber, pgSize);
             if (products == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
@@ -63,9 +63,9 @@ namespace Blink_API.Controllers.Product
             return Ok(products);
         }
         [HttpGet("GetAllWithPagingWithUser/{pgNumber}/{pgSize}/{UserId}")]
-        public async Task<ActionResult> GetAllPagginatedWithUser(int pgNumber, int pgSize,string UserId)
+        public async Task<ActionResult> GetAllPagginatedWithUser(int pgNumber, int pgSize, string UserId)
         {
-            var products = await productService.GetAllPagginatedWithUser(pgNumber, pgSize,UserId);
+            var products = await productService.GetAllPagginatedWithUser(pgNumber, pgSize, UserId);
             if (products == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
@@ -91,8 +91,8 @@ namespace Blink_API.Controllers.Product
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(int id)
         {
-            var product = await productService.GetById(id);  
-            if(product == null)
+            var product = await productService.GetById(id);
+            if (product == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
             product.ProductImages = product.ProductImages.Select(img => $"{baseUrl}{img.Replace("wwwroot/", "")}").ToList();
@@ -136,7 +136,7 @@ namespace Blink_API.Controllers.Product
                 return BadRequest();
             var result = await productService.Add(productDTO);
             if (result == 0)
-                return BadRequest(new {Message="Product Name Are Found Or Failed To Create Product"});
+                return BadRequest(new { Message = "Product Name Are Found Or Failed To Create Product" });
             return Ok(result);
         }
         [HttpPut("{id}")]
@@ -188,7 +188,7 @@ namespace Blink_API.Controllers.Product
             if (filterAttributes == null)
                 return BadRequest();
             var result = await productService.AddFilterAttribute(filterAttributes);
-            if(result.StatusCode != 200)
+            if (result.StatusCode != 200)
                 return BadRequest("There is an error happened");
             return Ok("Attribute Saved Success");
         }
@@ -216,7 +216,7 @@ namespace Blink_API.Controllers.Product
                 return BadRequest(ModelState);
             if (attributes.Count == 0)
                 await productService.DeleteProductAttributes(productId);
-                //return BadRequest("List Was Empty");
+            //return BadRequest("List Was Empty");
             await productService.AddProductAttribute(attributes);
             return Ok(new { success = "ProductAttributes Inserted Success" });
         }
@@ -227,7 +227,7 @@ namespace Blink_API.Controllers.Product
             return Ok(productAttributes);
         }
         [HttpGet("GetFillteredProducts/{pgNumber}/{fromPrice}/{toPrice}/{rating}/{categoryId}")]
-        public async Task<ActionResult> GetFillteredProducts(int pgNumber,decimal fromPrice,decimal toPrice,int rating,int categoryId)
+        public async Task<ActionResult> GetFillteredProducts(int pgNumber, decimal fromPrice, decimal toPrice, int rating, int categoryId)
         {
             var filters = HttpContext.Request.Query;
             var filtersProduct = new Dictionary<int, List<string>>();
@@ -243,7 +243,7 @@ namespace Blink_API.Controllers.Product
                     filtersProduct[attributeId].AddRange(filters[key]);
                 }
             }
-            var products = await productService.GetFillteredProducts(filtersProduct, pgNumber,fromPrice,toPrice,rating,categoryId);
+            var products = await productService.GetFillteredProducts(filtersProduct, pgNumber, fromPrice, toPrice, rating, categoryId);
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
             foreach (var product in products)
             {
@@ -262,12 +262,12 @@ namespace Blink_API.Controllers.Product
             return Ok(productStock);
         }
         [HttpGet("GetProductStockInInventory/{SourceId}/{ProductId}")]
-        public async Task<ActionResult> GetProductStockInInventory(int SourceId,int ProductId)
+        public async Task<ActionResult> GetProductStockInInventory(int SourceId, int ProductId)
         {
             if (SourceId == 0)
                 return BadRequest(new { Message = "Inventory Source Id Should Be More Than Zero" });
-            var product=  await productService.GetProductStockInInventory(SourceId, ProductId);
-            if(product != null)
+            var product = await productService.GetProductStockInInventory(SourceId, ProductId);
+            if (product != null)
             {
                 return Ok(product);
             }
@@ -294,7 +294,7 @@ namespace Blink_API.Controllers.Product
             if (reviewSuppliedProduct == null)
                 return NotFound();
             string baseUrl = $"{Request.Scheme}://{Request.Host}/";
-            if(reviewSuppliedProduct.ProductImages.Count > 0)
+            if (reviewSuppliedProduct.ProductImages.Count > 0)
             {
                 foreach (var ProductImage in reviewSuppliedProduct.ProductImages)
                 {
@@ -307,7 +307,7 @@ namespace Blink_API.Controllers.Product
             return Ok(reviewSuppliedProduct);
         }
         [HttpPost("AddRequestSuppliedProduct")]
-        public async Task<ActionResult> AddRequestProduct([FromForm]InsertReviewSuppliedProductDTO insertReviewSuppliedProductDTO)
+        public async Task<ActionResult> AddRequestProduct([FromForm] InsertReviewSuppliedProductDTO insertReviewSuppliedProductDTO)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -317,13 +317,13 @@ namespace Blink_API.Controllers.Product
             return Ok();
         }
         [HttpPut("UpdateRequestSuppliedProduct/{requestId}")]
-        public async Task<ActionResult> UpdateRequestSupplierProduct( int requestId, [FromBody]ReadReviewSuppliedProductDTO model)
+        public async Task<ActionResult> UpdateRequestSupplierProduct(int requestId, [FromBody] ReadReviewSuppliedProductDTO model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { error = "Model State is Invalid" });
-            if(model == null)
+            if (model == null)
                 return BadRequest(new { error = "Model is Null" });
-            await reviewSuppliedProductsService.UpdateRequestProduct(requestId,model);
+            await reviewSuppliedProductsService.UpdateRequestProduct(requestId, model);
             return Ok(new { success = "Product Reviewed Success" });
         }
         #endregion
@@ -370,11 +370,11 @@ namespace Blink_API.Controllers.Product
             return Ok(result);
         }
         [HttpDelete("{ProductId}/{ImagePath}")]
-        public async Task<ActionResult> DeleteProductImage(int ProductId,string ImagePath)
+        public async Task<ActionResult> DeleteProductImage(int ProductId, string ImagePath)
         {
             if (ProductId == 0 || ImagePath == null || ImagePath == string.Empty)
                 return BadRequest(new { Message = "Product Id And Image path Are Required" });
-            bool result = await productService.DeleteProductImage(ProductId,ImagePath);
+            bool result = await productService.DeleteProductImage(ProductId, ImagePath);
             if (result)
             {
                 return Ok();
@@ -393,7 +393,7 @@ namespace Blink_API.Controllers.Product
         [HttpGet("GetSuppliedProductsByUserIDWithPaggination/{pgNumber}/{UserId}")]
         public async Task<ActionResult> GetSuppliedProductsByUserID(int pgNumber, string UserId)
         {
-            var result = await productService.GetSuppliedProductsByUserID(pgNumber,UserId);
+            var result = await productService.GetSuppliedProductsByUserID(pgNumber, UserId);
             return Ok(result);
         }
         [HttpGet("SearchProducts/{searchText}")]
@@ -405,7 +405,7 @@ namespace Blink_API.Controllers.Product
             return Ok(result);
         }
         [HttpGet("SearchProductsById/{searchText}/{inventoryId}")]
-        public async Task<ActionResult> SearchProducts(string searchText,int inventoryId)
+        public async Task<ActionResult> SearchProducts(string searchText, int inventoryId)
         {
             if (searchText == string.Empty)
                 return BadRequest(new { Message = "Can't Search Products with Null Search Filed" });
