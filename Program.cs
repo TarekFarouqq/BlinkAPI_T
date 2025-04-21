@@ -151,7 +151,7 @@ namespace Blink_API
             });
             #endregion
             // for email service :
-            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<EmailService>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();

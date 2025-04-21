@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Blink_API.Controllers.Account
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -22,9 +23,9 @@ namespace Blink_API.Controllers.Account
         private readonly IMemoryCache _cache;
         // add signIn manager for login : 
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IEmailService _emailService;
+        private readonly EmailService _emailService;
         private AuthServiceUpdated authServiceUpdated;
-        public AccountController(AuthServiceUpdated _authServiceUpdated,UserManager<ApplicationUser> userManager, IAuthServices authServices, SignInManager<ApplicationUser> signInManager, IEmailService emailService, IMemoryCache cache)
+        public AccountController(AuthServiceUpdated _authServiceUpdated,UserManager<ApplicationUser> userManager, IAuthServices authServices, SignInManager<ApplicationUser> signInManager, EmailService emailService, IMemoryCache cache)
         {
             _userManager = userManager;
             _authServices = authServices;
@@ -142,126 +143,63 @@ namespace Blink_API.Controllers.Account
         #endregion
 
         #region ForgetPassward
-        [HttpPost("forgetPassward")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgetPassward model)
+        [HttpPost("forgetPassword")]
+        public async Task<ActionResult<ApiResponse<object>>> ForgotPassword([FromBody] ForgetPassward model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null || user.Email == null)
-            {
-                return BadRequest(new { message = "Email not found" });
-            }
-            //var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _emailService.SendResetCodeAsync(model.Email);
+            if (!result)
+                return BadRequest(new ApiResponse<object>(400, "Email not found"));
 
-            //// Create the reset password link :
-            //var resetLink = Url.Action("ResetPassword", "Account", new { email = user.Email, token }, Request.Scheme);
-
-            //// Send email
-            //await _emailService.SendEmailAsync(user.Email, "Reset Password",
-            //    $"Click here to reset your password: <a href='https://localhost:7027/Reset-password?userId={user.Email}&token={token}'>Reset Password</a>");
-            //return Ok(new { message = "Password reset link has been sent to your email" });
-            //---------------------------------
-            // Create the reset password code of 6 nums : 
-            var verificationCode = new Random().Next(100000, 999999).ToString();
-
-
-            _cache.Set(model.Email, verificationCode, TimeSpan.FromMinutes(5));
-
-            // Send email
-            await _emailService.SendEmailAsync(user.Email, "Password Reset Code",
-                $"Your reset code is: {verificationCode}");
-
-            return Ok(new { message = "Password reset code has been sent to your email" });
+            return Ok(new ApiResponse<object>(200, "Code sent successfully"));
         }
+
         #endregion
 
-        #region Reset passward
-        /*
-        [HttpPost("Resetpassword")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto model)
+
+        #region verify code
+        [HttpPost("verifyCode")]
+        public async Task<ActionResult<ApiResponse<object>>> VerifyCode([FromBody] VerifyCodeDto model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
-            {
-                return BadRequest(new { message = "Invalid email, please try agin !" });
-            }
+            var result = await _emailService.VerifyCodeAsync(model.Email, model.Code);
+            if (!result)
+                return BadRequest(new ApiResponse<object>(400, "Invalid or expired code"));
 
-            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
-            if (result.Succeeded)
-            {
-                return Ok(new { message = "Password has been reset successfully" });
-            }
-
-            return BadRequest(new { message = "Enable to reset password" });
+            return Ok(new ApiResponse<object>(200, "Code verified successfully", new { isValid = true }));
         }
-        */
 
         #endregion
+
 
         // after forget pass and enter el email , verify with code sent : 
-        #region verify code
-        [Authorize]
-        [HttpPost("verifyCode")]
-        public async Task<IActionResult> VerifyCode([FromBody] VerifyCodeDto model)
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-
-            if (string.IsNullOrEmpty(email))
-                return Unauthorized(new { message = "Email not found in token" });
-            var cachedCode = _cache.Get<string>(email);
-
-            if (cachedCode == null)
-                return BadRequest(new { message = "Code expired or not found" });
-
-            if (cachedCode != model.code)
-                return BadRequest(new { message = "Invalid code" });
-
-             
-            _cache.Set(email + "_verified", true, TimeSpan.FromMinutes(10));
-
-            return Ok(new { message = "Code verified successfully", isValid = true });
-
-        }
-        #endregion
 
         // set new password :
         #region set new password
-
         [HttpPost("setNewPassword")]
-        public async Task<IActionResult> SetNewPassword([FromBody] SetNewPasswordDto model)
+        public async Task<ActionResult<ApiResponse<object>>> SetNewPassword([FromBody] SetNewPasswordDto model)
         {
-
-            var user = await _userManager.GetUserAsync(User);   
+            var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
-            {
-                return BadRequest(new { message = "User not found" });
-            }
+                return BadRequest(new ApiResponse<object>(400, "User not found"));
 
-            // check matching passwords :
             if (model.NewPassword != model.ConfirmPassword)
-            {
-                return BadRequest(new { message = "Passwords do not match" });
-            }
+                return BadRequest(new ApiResponse<object>(400, "Passwords do not match"));
 
-      // remove old pass and update it then:
-            var result = await _userManager.RemovePasswordAsync(user);  
-            if (result.Succeeded)
-            {
-                var updateResult = await _userManager.AddPasswordAsync(user, model.NewPassword);  
-                if (updateResult.Succeeded)
-                {
-                    return Ok(new { message = "Password has been successfully updated" });
-                }
-                else
-                {
-                    return BadRequest(new { message = "Unable to update password" });
-                }
-            }
-            else
-            {
-                return BadRequest(new { message = "Unable to remove old password" });
-            }
+            var result = await _userManager.RemovePasswordAsync(user);
+            if (!result.Succeeded)
+                return BadRequest(new ApiResponse<object>(400, "Unable to remove old password"));
+
+            var updateResult = await _userManager.AddPasswordAsync(user, model.NewPassword);
+            if (!updateResult.Succeeded)
+                return BadRequest(new ApiResponse<object>(400, "Unable to update password"));
+
+            // Generate JWT token
+            var token = await _authServices.CreateTokenAsync(user, _userManager); 
+
+            return Ok(new ApiResponse<object>(200, "Password has been successfully updated", new { token }));
         }
+
+
         #endregion
 
 

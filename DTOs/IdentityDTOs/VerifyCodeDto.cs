@@ -1,11 +1,12 @@
-﻿namespace Blink_API.DTOs.IdentityDTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+public class VerifyCodeDto
 {
-    public class VerifyCodeDto
-    {
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
 
-     //   public string Email { get; set; }
-        public string code { get; set; }
-         
-
-    }
+    [Required]
+    [StringLength(6, MinimumLength = 6)]
+    public string Code { get; set; } = string.Empty;
 }

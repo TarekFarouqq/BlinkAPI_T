@@ -329,16 +329,15 @@ public class orderService :IOrderServices
         var order = await _unitOfWork.OrderRepo.GetOrderByIdWithDetails(orderId);
 
         if (order is null) return false;
-        else
-        {
-            foreach (var item in order.OrderDetails)
-            {
-                item.IsDeleted = true;
-                _unitOfWork.OrderDetailRepo.Update(item);
-            }
-            order.IsDeleted = true;
+       
+            //foreach (var item in order.OrderDetails)
+            //{
+            //    //item.IsDeleted = true;
+            //    _unitOfWork.OrderDetailRepo.Update(item);
+            //}
+            //order.IsDeleted = true;
             order.OrderStatus = "cancelled";
-        }
+        
         _unitOfWork.OrderRepo.Update(order);
 
         var inventoryReturned = await _inventoryService.ReturnInventoryQuantityAfterOrderDelete(orderId);

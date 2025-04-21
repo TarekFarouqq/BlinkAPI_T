@@ -25,16 +25,16 @@ namespace Blink_API.Controllers.Payment
             _stripeServices = stripeServices;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateOrUpdatePaymentIntent()
+        [HttpPost("{userId}")]
+        public async Task<IActionResult> CreateOrUpdatePaymentIntent(string userId)
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized(new ApiResponse<CartPaymentDTO>(401));
-                }
+                //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                //if (string.IsNullOrEmpty(userId))
+                //{
+                //    return Unauthorized(new ApiResponse<CartPaymentDTO>(401));
+                //}
 
                 var cart = await _unitOfWork.CartRepo.GetByUserId(userId);
                 if (cart == null)
@@ -63,16 +63,16 @@ namespace Blink_API.Controllers.Payment
             }
         }
 
-        [HttpPost("confirmPayment")]
-        public async Task<ActionResult<ApiResponse<OrderToReturnDto>>> ConfirmPayment([FromBody] ConfirmPaymentDTO dto)
+        [HttpPost("confirmPayment/{userId}")]
+        public async Task<ActionResult<ApiResponse<OrderToReturnDto>>> ConfirmPayment([FromBody] ConfirmPaymentDTO dto,string userId)
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized(new ApiResponse<CartPaymentDTO>(401));
-                }
+                //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                //if (string.IsNullOrEmpty(userId))
+                //{
+                //    return Unauthorized(new ApiResponse<CartPaymentDTO>(401));
+                //}
                 var user = await _unitOfWork.UserRepo.GetById(userId);
                 var createOrderDto = new CreateOrderDTO()
                 {
