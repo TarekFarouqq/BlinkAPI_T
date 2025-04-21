@@ -60,5 +60,18 @@ namespace Blink_API.Controllers.ProductTransfers
             await productTransferService.UpdateTransaction(id,insertTransactionHistoryDTO);
             return Ok(new { Message = "Transaction is Updated Successfull" });
         }
+        [HttpGet("GetTotalPages/{pgSize}")]
+        public async Task<int> GetTotalPages(int pgSize)
+        {
+            return await productTransferService.GetTotalPages(pgSize);
+        }
+        [HttpGet("GetDataWithPaginated/{pgNumber}/{pgSize}")]
+        public async Task<ActionResult> GetDataWithPagination(int pgNumber,int pgSize)
+        {
+            if (pgNumber <= 0 && pgSize <= 0)
+                return BadRequest();
+            var result = await productTransferService.GetDataWithPagination(pgNumber, pgSize);
+            return Ok(result);
+        }
     }
 }

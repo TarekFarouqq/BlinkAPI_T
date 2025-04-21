@@ -172,6 +172,9 @@ namespace Blink_API.MapperConfigs
                 .ForMember(dest=>dest.StockQuantity,option=>option.MapFrom(src=>src.StockProductInventories.Sum(spi=>spi.StockQuantity)))
                 .ReverseMap();
             // ------------------------------------------------------------------------
+            CreateMap<Product, ReadProductsDataDTO>().ReverseMap();
+            CreateMap<StockProductInventory, ReadProductStockDataDTO>().ReverseMap();
+            // ------------------------------------------------------------------------
         }
     }
 }
