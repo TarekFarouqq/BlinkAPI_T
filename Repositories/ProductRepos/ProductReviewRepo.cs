@@ -33,7 +33,7 @@ namespace Blink_API.Repositories.ProductRepos
             var review = await db.Reviews.FindAsync(reviewId);
             if (review != null)
             {
-                reviewComment.CommentId = db.ReviewComments.Any() ? db.ReviewComments.Max(rc => rc.CommentId) + 1 : 1;
+                //reviewComment.CommentId = db.ReviewComments.Any() ? db.ReviewComments.Max(rc => rc.CommentId) + 1 : 1;
                 db.ReviewComments.Add(reviewComment);
             }
             await SaveChanges();
