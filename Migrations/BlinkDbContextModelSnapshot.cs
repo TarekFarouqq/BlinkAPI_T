@@ -17,7 +17,7 @@ namespace Blink_API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -635,7 +635,10 @@ namespace Blink_API.Migrations
             modelBuilder.Entity("Blink_API.Models.ProductImage", b =>
                 {
                     b.Property<int>("ProductImageId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductImageId"));
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -691,7 +694,10 @@ namespace Blink_API.Migrations
             modelBuilder.Entity("Blink_API.Models.ReviewComment", b =>
                 {
                     b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
 
                     b.Property<int>("ReviewId")
                         .HasColumnType("int");

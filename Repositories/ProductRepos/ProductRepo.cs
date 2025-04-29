@@ -246,7 +246,7 @@ namespace Blink_API.Repositories
 
                 foreach (ProductImage image in prdImages)
                 {
-                    image.ProductImageId = db.ProductImages.Any() ? db.ProductImages.Max(pi => pi.ProductImageId) + 1 : 1;
+                    //image.ProductImageId = db.ProductImages.Any() ? db.ProductImages.Max(pi => pi.ProductImageId) + 1 : 1;
                     db.ProductImages.Add(image);
                     await SaveChanges();
                 }

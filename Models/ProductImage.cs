@@ -6,6 +6,8 @@ namespace Blink_API.Models
     public class ProductImage
     {
         // id is not identity !!!!!!!
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProductImageId { get; set; }
         [Required]
         [StringLength(500, ErrorMessage = "Image path is too long.")]
