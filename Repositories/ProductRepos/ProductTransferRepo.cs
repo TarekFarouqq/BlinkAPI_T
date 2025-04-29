@@ -101,5 +101,28 @@ namespace Blink_API.Repositories.ProductRepos
 
             await SaveChanges();
         }
+        public async Task<int> GetTotalPages(int pgSize)
+        {
+            var count = await db.InventoryTransactionHeaders
+               .Where(p => !p.IsDeleted && p.InventoryTransactionType == 3)
+               .CountAsync();
+            return (int)Math.Ceiling((double)count / pgSize);
+        }
+        public async Task<List<InventoryTransactionHeader>> GetAllTransactionHeader(int pgNumber,int pgSize)
+        {
+            return await db.InventoryTransactionHeaders
+                .OrderBy(th=>th.InventoryTransactionDate)
+                .Include(td => td.TransactionDetail)
+                .ThenInclude(src => src.SrcInventory)
+                .Include(td => td.TransactionDetail)
+                .ThenInclude(dest => dest.DistInventory)
+                .Include(tp => tp.TransactionProducts)
+                .ThenInclude(p => p.Product)
+                .Where(p => p.TransactionProducts.Any(p => !p.Product.IsDeleted))
+                .Where(ith => !ith.IsDeleted && ith.InventoryTransactionType == 3)
+                .Skip((pgNumber - 1) * pgSize)
+                .Take(pgSize)
+                .ToListAsync();
+        }
     }
 }

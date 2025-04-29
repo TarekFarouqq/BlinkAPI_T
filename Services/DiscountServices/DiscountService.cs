@@ -63,5 +63,11 @@ namespace Blink_API.Services.DiscountServices
         {
             await unitOfWork.DiscountRepo.DeleteDiscount(id);
         }
+        public async Task<List<DiscountDetailsDTO>> GetDiscountsBetween2Dates(DateTime startDate, DateTime endDate)
+        {
+            var result = await unitOfWork.DiscountRepo.GetDiscountBetween2Dates(startDate,endDate);
+            var mappedDiscount = mapper.Map<List<DiscountDetailsDTO>>(result);
+            return mappedDiscount;
+        }
     }
 }

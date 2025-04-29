@@ -25,16 +25,16 @@ namespace Blink_API.Controllers.Payment
             _stripeServices = stripeServices;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateOrUpdatePaymentIntent()
+        [HttpPost("{userId}")]
+        public async Task<IActionResult> CreateOrUpdatePaymentIntent(string userId)
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized(new ApiResponse<CartPaymentDTO>(401));
-                }
+                //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                //if (string.IsNullOrEmpty(userId))
+                //{
+                //    return Unauthorized(new ApiResponse<CartPaymentDTO>(401));
+                //}
 
                 var cart = await _unitOfWork.CartRepo.GetByUserId(userId);
                 if (cart == null)
@@ -63,18 +63,34 @@ namespace Blink_API.Controllers.Payment
             }
         }
 
-        [HttpPost("confirmPayment")]
-        public async Task<ActionResult<ApiResponse<orderDTO>>> ConfirmPayment([FromBody] ConfirmPaymentDTO dto)
+        [HttpPost("confirmPayment/{userId}")]
+        public async Task<ActionResult<ApiResponse<OrderToReturnDto>>> ConfirmPayment([FromBody] ConfirmPaymentDTO dto,string userId)
         {
             try
             {
-                var order = await _stripeServices.UpdatePaymentIntentToSucceededOrFailed(dto.paymentIntentId, dto.isSucceeded);
-                if (order == null)
+                //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                //if (string.IsNullOrEmpty(userId))
+                //{
+                //    return Unauthorized(new ApiResponse<CartPaymentDTO>(401));
+                //}
+                var user = await _unitOfWork.UserRepo.GetById(userId);
+                var createOrderDto = new CreateOrderDTO()
                 {
-                    return NotFound(new ApiResponse<orderDTO>(404, "Order not found"));
+                    UserId = userId,
+                    Address = user.Address,
+                    Lat = dto.Lat,
+                    Long = dto.Long,
+                    PhoneNumber = user.PhoneNumber,
+                    PaymentMethod = "card"
+
+                };
+                var order = await _stripeServices.ConfirmPaymentAndCreateOrderAsync(userId, dto.paymentIntentId, createOrderDto );
+                if (order.StatusCode != 200)
+                {
+                    return NotFound(new ApiResponse<OrderToReturnDto>(404, "Order not found"));
                 }
 
-                return Ok(new ApiResponse<orderDTO>(200, "Payment confirmed", order));
+                return Ok(order);
             }
             catch (Exception ex)
             {

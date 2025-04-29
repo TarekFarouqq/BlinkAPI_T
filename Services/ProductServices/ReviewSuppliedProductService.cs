@@ -31,28 +31,26 @@ namespace Blink_API.Services.ProductServices
         }
         public async Task AddRequestProduct(InsertReviewSuppliedProductDTO insertReviewSuppliedProductDTO)
         {
-            
-            
-            var reviewSuppliedProduct = mapper.Map<ReviewSuppliedProduct>(insertReviewSuppliedProductDTO);
-            var requestId = await unitOfWork.ProductSupplierRepo.AddRequestProduct(reviewSuppliedProduct);
-            List< ReviewSuppliedProductImages > resultImages = new List<ReviewSuppliedProductImages>();
-            foreach (var file in insertReviewSuppliedProductDTO.ProductImages)
+            var mappedReview = mapper.Map<ReviewSuppliedProduct>(insertReviewSuppliedProductDTO);
+            int requestId = await unitOfWork.ProductSupplierRepo.AddRequestProduct(mappedReview);
+            if (requestId > 0)
             {
-                if (file.Length > 0)
-                {
-                    var filePath = await SaveFileAsync(file);
-                    var reviewSupply = new ReviewSuppliedProductImages()
+                List<ReviewSuppliedProductImages> resultImages = new List<ReviewSuppliedProductImages>();
+                foreach (var file in insertReviewSuppliedProductDTO.ProductImages)
+                {   
+                    if (file.Length > 0)
                     {
-                        RequestId = requestId,
-                        ImagePath = filePath
-                    };
-                    resultImages.Add(reviewSupply);
+                        var filePath = await SaveFileAsync(file);
+                        var reviewSupply = new ReviewSuppliedProductImages()
+                        {
+                            RequestId = requestId, // Set the generated ID
+                            ImagePath = filePath
+                        };
+                        resultImages.Add(reviewSupply);
+                    }
                 }
+                await unitOfWork.ProductSupplierRepo.AddRequestImages(resultImages);
             }
-            await unitOfWork.ProductSupplierRepo.AddRequestedProductImages(resultImages);
-
-
-            //return requestId;
         }
         public async Task UpdateRequestProduct(int requestId, ReadReviewSuppliedProductDTO model)
         {
@@ -162,6 +160,6 @@ namespace Blink_API.Services.ProductServices
                 ContentType = contentType
             };
         }
-
+        
     }
 }

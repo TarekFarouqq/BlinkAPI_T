@@ -30,9 +30,20 @@ namespace Blink_API.Services.Product
             var count = await unitOfWork.ProductRepo.GetPagesCount(pgSize);
             return count;
         }
+        public async Task<int> GetPagesCountWithUser(int pgSize,string UserId)
+        {
+            var count = await unitOfWork.ProductRepo.GetPagesCountWithUser(pgSize,UserId);
+            return count;
+        }
         public async Task<ICollection<ProductDiscountsDTO>> GetAllPagginated(int pgNumber,int pgSize)
         {
             var products = await unitOfWork.ProductRepo.GetAllPagginated(pgNumber, pgSize);
+            var result = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
+            return result;
+        }
+        public async Task<ICollection<ProductDiscountsDTO>> GetAllPagginatedWithUser(int pgNumber, int pgSize,string UserId)
+        {
+            var products = await unitOfWork.ProductRepo.GetAllPagginatedWithUser(pgNumber, pgSize,UserId);
             var result = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
             return result;
         }
@@ -70,35 +81,41 @@ namespace Blink_API.Services.Product
             var mappedStockProducts = mapper.Map<ICollection<StockProductInventory>>(productDTO.ProductStocks);
             mappedProduct.StockProductInventories = mappedStockProducts;
             var productId = await unitOfWork.ProductRepo.AddProduct(mappedProduct);
-            #region Add Product To Inventory Transaction Header
-            List<InsertInputTrasactionProductDTO> newListProducts = new List<InsertInputTrasactionProductDTO>();
-            newListProducts.Add(new InsertInputTrasactionProductDTO { TransactionQuantity = mappedStockProducts.Sum(s => s.StockQuantity), ProductId = productId });
-            InsertInputTransferProductDTO newTransaction = new InsertInputTransferProductDTO()
+            if(productId > 0)
             {
-                InventoryTransactionDate = DateTime.UtcNow,
-                InventoryTransactionType = 1,
-                TransactionProducts = newListProducts
-            };
-            await productTransferService.AddInputInventory(newTransaction);
-            #endregion
-
+                #region Add Product To Inventory Transaction Header
+                List<InsertInputTrasactionProductDTO> newListProducts = new List<InsertInputTrasactionProductDTO>();
+                newListProducts.Add(new InsertInputTrasactionProductDTO { TransactionQuantity = mappedStockProducts.Sum(s => s.StockQuantity), ProductId = productId });
+                InsertInputTransferProductDTO newTransaction = new InsertInputTransferProductDTO()
+                {
+                    InventoryTransactionDate = DateTime.UtcNow,
+                    InventoryTransactionType = 1,
+                    TransactionProducts = newListProducts
+                };
+                await productTransferService.AddInputInventory(newTransaction);
+                #endregion
+            }
             return productId;
         }
-        public async Task Update(int id, UpdateProductDTO productDTO)
+        public async Task<bool> Update(int id, UpdateProductDTO productDTO)
         {
-            if(productDTO == null)
-                return;
+            if (productDTO == null)
+                return false;
             var product = mapper.Map<Models.Product>(productDTO);
             int ProductId = id;
             List<InsertProductImagesDTO> ProductImageList = await CheckImagesToSaveInUpdate(id,productDTO.NewProductImages,productDTO.OldProductImages);
-            await unitOfWork.ProductRepo.UpdateProduct(id, product);
-            var mappedStockProducts = mapper.Map<ICollection<StockProductInventory>>(productDTO.ProductStocks);
-            foreach (var stockProduct in mappedStockProducts)
+            bool result = await unitOfWork.ProductRepo.UpdateProduct(id, product);
+            if (result)
             {
-                stockProduct.ProductId = ProductId;
+                var mappedStockProducts = mapper.Map<ICollection<StockProductInventory>>(productDTO.ProductStocks);
+                foreach (var stockProduct in mappedStockProducts)
+                {
+                    stockProduct.ProductId = ProductId;
+                }
+                await unitOfWork.ProductRepo.UpdateStockProducts(mappedStockProducts);
+                await AddProductImage(ProductImageList);
             }
-            await unitOfWork.ProductRepo.UpdateStockProducts(mappedStockProducts);
-            await AddProductImage(ProductImageList);
+            return result;
         }
         public async Task Delete(int id)
         {
@@ -113,15 +130,27 @@ namespace Blink_API.Services.Product
         }
         private async Task<string> SaveFileAsync(IFormFile file)
         {
-            var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
-            if(!Directory.Exists(uploadFolder))
+            // 1. Correct path construction
+            var uploadFolder = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "images",
+                "products"
+            );
+
+            // 2. Create directory if needed
+            if (!Directory.Exists(uploadFolder))
                 Directory.CreateDirectory(uploadFolder);
-            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(uploadFolder, uniqueFileName);  
-            using(var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(fileStream);
-            }
+
+            // 3. Generate unique filename
+            var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var filePath = Path.Combine(uploadFolder, uniqueFileName);
+
+            // 4. Save file
+            using var fileStream = new FileStream(filePath, FileMode.Create);
+            await file.CopyToAsync(fileStream);
+
+            // 5. Return web-accessible path
             return $"/images/products/{uniqueFileName}";
         }
         private async Task<List<ProductImage>> CheckImagesToSaveInInsert(Models.Product product, List<IFormFile> images)
@@ -259,36 +288,12 @@ namespace Blink_API.Services.Product
         {
             await unitOfWork.ProductRepo.DeleteOldProductAttributes(productId);
         }
-        //public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct, int pgNumber, decimal fromPrice, decimal toPrice, int rating, int categoryId)
-        //{
-        //    var products = await unitOfWork.ProductRepo.GetFillteredProducts(categoryId);
-        //    foreach (var filter in filtersProduct)
-        //    {
-        //        foreach (var value in filter.Value)
-        //        {
-        //            products = products.Where(p => p.ProductAttributes.Any(pa => pa.AttributeId == filter.Key && pa.AttributeValue == value)).ToList();
-        //        }
-        //    }
-        //    var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
-        //    if (fromPrice > 0)
-        //        mappedProducts = mappedProducts.Where(p => (p.ProductPrice - p.DiscountAmount) >= fromPrice).ToList();
-        //    if (toPrice > 0)
-        //        mappedProducts = mappedProducts.Where(p => (p.ProductPrice - p.DiscountAmount) <= toPrice).ToList();
-        //    if (rating > 0)
-        //        mappedProducts = mappedProducts.Where(p => p.AverageRate >= rating).ToList();
-        //    mappedProducts = mappedProducts.Skip((pgNumber - 1) * 16)
-        //        .Take(16).ToList();
-        //    return mappedProducts;
-        //}
-
-
         public async Task<ICollection<ProductDiscountsDTO>> GetFillteredProducts(Dictionary<int, List<string>> filtersProduct, int pgNumber, decimal fromPrice, decimal toPrice, int rating, int categoryId)
         {
             var products = await unitOfWork.ProductRepo.GetFillteredProducts(filtersProduct,pgNumber,fromPrice,toPrice,rating,categoryId);
             var mappedProducts = mapper.Map<ICollection<ProductDiscountsDTO>>(products);
             return mappedProducts;
         }
-
         public async Task<ICollection<StockProductInventory>> GetProductStock(int ProductId)
         {
             var productStock = await unitOfWork.ProductRepo.GetProductStock(ProductId);
@@ -310,6 +315,78 @@ namespace Blink_API.Services.Product
             var result = await unitOfWork.ProductRepo.GetProductStockInInventory(SourceId, productId);
             return result;
 
+        }
+        public async Task<List<Brand>> GetListOfBrands()
+        {
+            return await unitOfWork.ProductRepo.GetListOfBrands();
+        }
+        public async Task<List<Category>> GetSubCategories()
+        {
+            return await unitOfWork.ProductRepo.GetSubCategories();
+        }
+        public async Task<List<Inventory>> GetListOfInventory()
+        {
+            return await unitOfWork.ProductRepo.GetListOfInventory();
+        }
+        public async Task<bool> DeleteProductImage(int ProductId,string imagePath)
+        {
+            string decodedUrl = Uri.UnescapeDataString(imagePath);
+            int startIndex = decodedUrl.IndexOf("/images/", StringComparison.OrdinalIgnoreCase);
+            if (startIndex == -1)
+                return false;
+            string relativePath = decodedUrl.Substring(startIndex).TrimStart('/');
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+            bool isDeleted = false;
+            if (File.Exists(fullPath))
+            {
+                relativePath = "/" + relativePath;
+                isDeleted = await unitOfWork.ProductRepo.DeleteProductImage(ProductId, relativePath.Replace("\\", "/"));
+                if (isDeleted)
+                {
+                    File.Delete(fullPath);
+                }
+            }
+            return isDeleted;
+        }
+        public async Task<List<ReadReviewSuppliedProductDTO>> GetSuppliedProductsByUserID(int pgNumber, string UserId)
+        {
+            var result = await unitOfWork.ProductRepo.GetSuppliedProductsByUserID(pgNumber, UserId);
+            var mappedReviewSuppliedProducts = mapper.Map<List<ReadReviewSuppliedProductDTO>>(result);
+            return mappedReviewSuppliedProducts;
+        }
+        public int GetTotalPageForReviewProducts(string UserId)
+        {
+            return unitOfWork.ProductRepo.GetTotalPageForReviewProducts(UserId);
+        }
+        public async Task<List<ProductDiscountsDTO>> SearchProducts(string searchText)
+        {
+            var result = await unitOfWork.ProductRepo.SearchProducts(searchText);
+            var mappedResult = mapper.Map<List<ProductDiscountsDTO>>(result);
+            return mappedResult;    
+        }
+        public async Task<List<ProductDiscountsDTO>> SearchProducts(string searchText,int inventoryId)
+        {
+            var result = await unitOfWork.ProductRepo.SearchProducts(searchText, inventoryId);
+            var mappedResult = mapper.Map<List<ProductDiscountsDTO>>(result);
+            return mappedResult;
+        }
+        public async Task<List<ProductDiscountsDTO>> GetProductsByBrandId(int id)
+        {
+            var result = await unitOfWork.ProductRepo.GetProductsByBrandId(id);
+            var mappedResult = mapper.Map<List<ProductDiscountsDTO>>(result);
+            return mappedResult;
+        }
+        public async Task<List<ProductDiscountsDTO>> GetProductsByCategoryId(int id)
+        {
+            var result = await unitOfWork.ProductRepo.GetProductsByCategoryId(id);
+            var mappedResult = mapper.Map<List<ProductDiscountsDTO>>(result);
+            return mappedResult;
+        }
+        public async Task <List<ReadProductsDataDTO>> GetProductsByInventoryId(int id)
+        {
+            var result = await unitOfWork.ProductRepo.GetProductsByInventoryId(id);
+            var mappedResult = mapper.Map<List<ReadProductsDataDTO>>(result);
+            return mappedResult;
         }
         #endregion
     }

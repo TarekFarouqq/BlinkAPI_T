@@ -93,7 +93,7 @@ namespace Blink_API.Services
             category.CategoryImage = dto.CategoryImage;
             category.ParentCategoryId = dto.ParentCategoryId;
 
-            //await unitOfWork.CategoryRepo.UpdateCategoryAsync(category);
+            await unitOfWork.CategoryRepo.UpdateCategoryWithChildren(category);
 
             return "Category updated successfully.";
         }
@@ -161,7 +161,7 @@ namespace Blink_API.Services
                 string imagePath = dto.OldImage.Substring(indexOfLink + 1);
                 category.CategoryImage = "wwwroot/" + imagePath;
             }
-            category.SubCategories = new List<Category>();
+            List<Category> subCategoriess = new List<Category>();
             if (dto.SubCategories != null && dto.SubCategories.Any())
             {
                 foreach (var subDto in dto.SubCategories)
@@ -183,9 +183,10 @@ namespace Blink_API.Services
                         string imagePath = subDto.OldImage.Substring(indexOfLink + 1);
                         subCategory.CategoryImage = "wwwroot/" + imagePath;
                     }
-                    category.SubCategories.Add(subCategory);
+                    subCategoriess.Add(subCategory);
                 }
             }
+            category.SubCategories = subCategoriess;
             return await unitOfWork.CategoryRepo.UpdateCategoryWithChildren(category);
         }
         public async Task<string> SaveImageAsync(IFormFile imageFile)

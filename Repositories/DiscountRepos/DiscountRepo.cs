@@ -111,5 +111,16 @@ namespace Blink_API.Repositories.DiscountRepos
                 await SaveChanges();
             }
         }
+        public async Task<List<Discount>> GetDiscountBetween2Dates(DateTime startDate,DateTime endDate)
+        {
+            return await db.Discounts
+                 .Include(d => d.ProductDiscounts)
+                 .Where(d => d.DiscountFromDate >= startDate)
+                 .Where(d => d.DiscountEndDate <= endDate)
+                 .Where(d => !d.IsDeleted)
+                 .Where(d => d.ProductDiscounts.Any(pd => !pd.IsDeleted))
+                 .OrderByDescending(d => d.DiscountFromDate)
+                 .ToListAsync();
+        }
     }
 }

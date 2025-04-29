@@ -51,7 +51,7 @@ public class orderService :IOrderServices
             {
                 Method = createOrderDTO.PaymentMethod,
                 PaymentDate = DateTime.UtcNow,
-                PaymentStatus = "succeeded"
+                PaymentStatus = "pending"
             };
 
             _unitOfWork.PaymentRepository.Add(payment);
@@ -68,7 +68,7 @@ public class orderService :IOrderServices
 
     public async Task<OrderToReturnDto> CreateOrderInternalAsync(Cart cart, CreateOrderDTO dto, Payment payment)
     {
-        List<OrderDetail> orderDetails = new();
+        List<OrderDetail> orderDetails = new List<OrderDetail>();
         decimal orderSubTotal = 0;
 
         foreach (var cartDetail in cart.CartDetails)
@@ -78,7 +78,7 @@ public class orderService :IOrderServices
 
             var sortedInventories = inventories
                 .Where(i => i.StockQuantity > 0)
-                .OrderBy(i => Helper.CalculateDistance(dto.Lat, dto.Long, i.Inventory.Lat, i.Inventory.Long))
+                .OrderBy(i => Helper.CalculateDistance(dto.Lat, dto.Long,i.Inventory.Lat,i.Inventory.Long))
                 .ToList();
 
             int remainingQty = cartDetail.Quantity;
@@ -103,6 +103,8 @@ public class orderService :IOrderServices
 
             if (totalTaken < cartDetail.Quantity)
                 throw new Exception($"Not enough inventory for product {cartDetail.ProductId}");
+            if (totalTaken == 0)
+                throw new Exception($"No stock taken for product {cartDetail.ProductId}, unable to calculate price.");
 
             decimal avgPrice = totalPrice / totalTaken;
             orderSubTotal += avgPrice * totalTaken;
@@ -327,16 +329,15 @@ public class orderService :IOrderServices
         var order = await _unitOfWork.OrderRepo.GetOrderByIdWithDetails(orderId);
 
         if (order is null) return false;
-        else
-        {
-            foreach (var item in order.OrderDetails)
-            {
-                item.IsDeleted = true;
-                _unitOfWork.OrderDetailRepo.Update(item);
-            }
-            order.IsDeleted = true;
+       
+            //foreach (var item in order.OrderDetails)
+            //{
+            //    //item.IsDeleted = true;
+            //    _unitOfWork.OrderDetailRepo.Update(item);
+            //}
+            //order.IsDeleted = true;
             order.OrderStatus = "cancelled";
-        }
+        
         _unitOfWork.OrderRepo.Update(order);
 
         var inventoryReturned = await _inventoryService.ReturnInventoryQuantityAfterOrderDelete(orderId);

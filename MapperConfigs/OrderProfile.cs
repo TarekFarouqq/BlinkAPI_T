@@ -57,6 +57,7 @@ namespace Blink_API.MapperConfigs
                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.OrderDetails));
 
             CreateMap<OrderDetail, ConfirmedOrderItemDTO>()
+                .ForMember(dest=>dest.ProductId,opt=>opt.MapFrom(src=>src.ProductId))
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.product.ProductName))
                 .ForMember(dest => dest.ProductImageUrl, opt => opt.MapFrom(src =>
                     src.product.ProductImages.Any() ? src.product.ProductImages.First().ProductImagePath : string.Empty
