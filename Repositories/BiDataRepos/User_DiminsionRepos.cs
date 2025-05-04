@@ -1,5 +1,7 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.Hubs;
+using Blink_API.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BiDataRepos
@@ -7,9 +9,10 @@ namespace Blink_API.Repositories.BiDataRepos
     public class User_DiminsionRepos : GenericRepo<ApplicationUser, string>
     {
         private readonly BlinkDbContext _blinkDbContext;
-        public User_DiminsionRepos(BlinkDbContext blinkDbContext) : base(blinkDbContext)
+        public User_DiminsionRepos(BlinkDbContext _db)
+            : base(_db)
         {
-            _blinkDbContext = blinkDbContext;
+            _blinkDbContext = _db;
         }
         //public async override Task<List<ApplicationUser>> GetAll()
         //{

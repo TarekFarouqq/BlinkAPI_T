@@ -1,16 +1,19 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.Hubs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.CartRepos
 {
     public class CartDetailsRepo : GenericRepo<CartDetail, int>
     {
-        private readonly BlinkDbContext db;
-        public CartDetailsRepo(BlinkDbContext _db) : base(_db)
+      
+        public CartDetailsRepo(BlinkDbContext db)
+            : base(db)
         {
-            db = _db;
         }
-         public async Task<CartDetail?> GetById(int cartId, int productId)
+
+        public async Task<CartDetail?> GetById(int cartId, int productId)
         {
             return await db.CartDetails
                 .AsNoTracking()

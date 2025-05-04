@@ -60,9 +60,12 @@ namespace Blink_API.Services.ProductServices
             {
                 if (Convert.ToBoolean(model.RequestStatus))
                 {
+                    //adding product
                     Models.Product newProduct = mapper.Map<Models.Product>(mappedModel);
                     int NewProductId = await unitOfWork.ProductRepo.AddProduct(newProduct);
                     var requestedImages = await unitOfWork.ProductSupplierRepo.GetRequestImages(model.RequestId);
+
+                    //adding product images
                     List<ProductImage> newImageList = new List<ProductImage>();
                     foreach (var image in requestedImages)
                     {
@@ -77,6 +80,19 @@ namespace Blink_API.Services.ProductServices
 
                     }
                     await unitOfWork.ProductRepo.AddProductImage(newImageList);
+
+                    //adding product stock and price 
+                    var stockEntry = new StockProductInventory
+                    {
+                        ProductId = NewProductId,
+                        InventoryId = model.InventoryId,
+                        StockUnitPrice = (decimal)model.ProductPrice, 
+                        StockQuantity = model.ProductQuantity,       
+                    };
+                    unitOfWork.StockProductInventoryRepo.Add(stockEntry);
+                    await unitOfWork.CompleteAsync();
+
+
                 }
             }
         }

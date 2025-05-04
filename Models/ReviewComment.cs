@@ -6,7 +6,8 @@ namespace Blink_API.Models
     public class ReviewComment
     {
         // id is not identity !!!!!!!
-
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int CommentId { get; set; }
         [Required]
         public int ReviewId { get; set; }

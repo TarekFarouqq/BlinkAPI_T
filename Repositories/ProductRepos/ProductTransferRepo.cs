@@ -1,11 +1,17 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.Hubs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.ProductRepos
 {
     public class ProductTransferRepo:GenericRepo<InventoryTransactionHeader,int>
     {
-        public ProductTransferRepo(BlinkDbContext db):base(db){}
+        public ProductTransferRepo(BlinkDbContext _db)
+            : base(_db)
+        {
+           
+        }
         public async Task<List<InventoryTransactionHeader>> GetAllTransactionHeader()
         {
             return await db.InventoryTransactionHeaders

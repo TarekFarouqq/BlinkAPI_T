@@ -15,15 +15,15 @@ using Blink_API.Repositories.UserRepos;
 using Blink_API.Repositories.StockProductInventoryRepo;
 using Blink_API.Repositories.Payment;
 using Blink_API.Repositories.WishlistRepos;
-
-
-
+using Microsoft.AspNetCore.SignalR;
+using Blink_API.Hubs;
 
 namespace Blink_API
 {
     public class UnitOfWork
     {
         private readonly BlinkDbContext db;
+        private readonly IHubContext<NotificationHub> _hubContext;
         internal object cart_DiminsionRepos;
         public DbContext Context => db;
         BrandRepos brandRepo;
@@ -60,9 +60,10 @@ namespace Blink_API
         InventoryTransaction_factRepos inventoryTransactionfactRepo;
         Product_DiminsionRepos _productDiminsionRepos;
 
-        public UnitOfWork(BlinkDbContext _db)
+        public UnitOfWork(BlinkDbContext _db, IHubContext<NotificationHub> hubContext)
         {
             db = _db;
+            _hubContext = hubContext;
         }
        
         // user :
@@ -164,7 +165,7 @@ namespace Blink_API
             {
                 if (stockProductInventoryRepo == null)
                 {
-                    stockProductInventoryRepo = new StockProductInventoryRepository(db);
+                    stockProductInventoryRepo = new StockProductInventoryRepository(db, _hubContext);
                 }
                 return stockProductInventoryRepo;
             }
@@ -459,5 +460,6 @@ namespace Blink_API
         public async Task<int> CompleteAsync()
          => await db.SaveChangesAsync();
 
+       
     }
 }

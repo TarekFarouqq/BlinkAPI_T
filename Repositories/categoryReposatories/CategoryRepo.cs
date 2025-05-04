@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Blink_API.DTOs.OrdersDTO;
+using Blink_API.Hubs;
 using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 
@@ -8,7 +10,12 @@ namespace Blink_API.Repositories
 {
     public class CategoryRepo:GenericRepo<Category,int>
     {
-        public CategoryRepo(BlinkDbContext db) : base(db){}
+        public CategoryRepo(BlinkDbContext _db)
+            : base(_db)
+        {
+           
+        }
+
         public async Task<List<Category>> GetParentCategories()
         {
             return await db.Categories
