@@ -1,21 +1,24 @@
 ﻿using System.Linq.Expressions;
+using Blink_API.Hubs;
 using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BranchRepos
 {
     public class BranchRepos : GenericRepo<Branch,int>
     {
-        private readonly BlinkDbContext _blinkDbContext;
+        
 
-        public BranchRepos(BlinkDbContext blinkDbContext ):base(blinkDbContext) 
+        public BranchRepos(BlinkDbContext db)
+            : base(db)
         {
-            _blinkDbContext = blinkDbContext;
+            
         }
 
         public async Task<List<Branch>> GetAll(int pgNumber,int pgSize)
         {
-            return await _blinkDbContext.Branches
+            return await db.Branches
                 .Where(b => b.IsDeleted==false)
                 .Skip((pgNumber - 1) * pgSize)  
                 .Take(pgSize)
@@ -25,7 +28,7 @@ namespace Blink_API.Repositories.BranchRepos
 
         public async override Task<Branch?> GetById(int id)
         {
-            return await _blinkDbContext.Branches
+            return await db.Branches
                 .Where(b => b.BranchId == id && b.IsDeleted == false)
                 .Include(b => b.Inventories) 
                 .FirstOrDefaultAsync();
@@ -34,7 +37,7 @@ namespace Blink_API.Repositories.BranchRepos
 
         public async Task<bool> Update(int id, Branch updatedBranch)
         {
-            var existingBranch = await _blinkDbContext.Branches.FindAsync(id);
+            var existingBranch = await db.Branches.FindAsync(id);
             if (existingBranch == null || existingBranch.IsDeleted)
                 return false;
 
@@ -42,14 +45,14 @@ namespace Blink_API.Repositories.BranchRepos
             existingBranch.BranchAddress = updatedBranch.BranchAddress;
             existingBranch.Phone = updatedBranch.Phone;
 
-            _blinkDbContext.Branches.Update(existingBranch);
-            await _blinkDbContext.SaveChangesAsync();
+            db.Branches.Update(existingBranch);
+            await db.SaveChangesAsync();
             return true;
         }
 
         public async Task<Branch?> GetFirstOrDefaultAsync(Expression<Func<Branch, bool>> predicate)
         {
-            return await _blinkDbContext.Set<Branch>().FirstOrDefaultAsync(predicate);
+            return await db.Set<Branch>().FirstOrDefaultAsync(predicate);
         }
 
 

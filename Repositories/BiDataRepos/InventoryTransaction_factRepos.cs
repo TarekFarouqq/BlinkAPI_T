@@ -1,4 +1,6 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.Hubs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BiDataRepos
@@ -6,9 +8,10 @@ namespace Blink_API.Repositories.BiDataRepos
     public class InventoryTransaction_factRepos : GenericRepo<TransactionProduct, int>
     {
         private readonly BlinkDbContext _blinkDbContext;
-        public InventoryTransaction_factRepos(BlinkDbContext blinkDbContext) : base(blinkDbContext)
+        public InventoryTransaction_factRepos(BlinkDbContext _db)
+            : base(_db)
         {
-            _blinkDbContext = blinkDbContext;
+            _blinkDbContext = _db;
         }
         public async IAsyncEnumerable<TransactionProduct> GetAllAsStream()
         {

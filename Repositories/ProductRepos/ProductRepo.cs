@@ -1,11 +1,17 @@
 ﻿using Blink_API.DTOs.ProductDTOs;
+using Blink_API.Hubs;
 using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 namespace Blink_API.Repositories
 {
     public class ProductRepo : GenericRepo<Product, int>
     {
-        public ProductRepo(BlinkDbContext db) : base(db){}
+        public ProductRepo(BlinkDbContext db)
+            : base(db)
+        {
+
+        }
         public override async Task<List<Product>> GetAll()
         {
             return await db.Products

@@ -1,17 +1,20 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.Hubs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.WishlistRepos
 {
     public class WishlistRepo : GenericRepo<WishList, int>
     {
-        private readonly BlinkDbContext db;
+       
 
-
-        public WishlistRepo(BlinkDbContext _db) : base(_db)
+        public WishlistRepo(BlinkDbContext db)
+            : base(db)
         {
-            db = _db;
+          
         }
+       
 
 
         public async Task<List<WishList>> GetAll(int pgNumber, int pgSize)

@@ -1,18 +1,23 @@
 ﻿using AutoMapper;
+using Blink_API.Hubs;
 using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.UserRepos
 {
     public class UserRepos : GenericRepo<ApplicationUser, string>
     {
-        private readonly BlinkDbContext db;
+
        
-        public UserRepos(BlinkDbContext _db) : base(_db)
+        public UserRepos(BlinkDbContext db)
+            : base(db)
         {
-            db = _db;
-            
+
         }
+
+
+
         // Get All Active Users :
         public override async Task<List<ApplicationUser>> GetAll()
         {

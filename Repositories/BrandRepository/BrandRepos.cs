@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Blink_API.Hubs;
 using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BrandRepository
@@ -7,11 +9,12 @@ namespace Blink_API.Repositories.BrandRepository
     public class BrandRepos : GenericRepo<Brand, int>
     {
         private readonly BlinkDbContext db;
-        public BrandRepos(BlinkDbContext _db) : base(_db)
+        public BrandRepos(BlinkDbContext _db)
+            : base(_db)
         {
             db = _db;
-
         }
+
         public override async Task<List<Brand>> GetAll()
         {
             return await db.Brands

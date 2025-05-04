@@ -81,28 +81,42 @@ public class orderService :IOrderServices
                 .OrderBy(i => Helper.CalculateDistance(dto.Lat, dto.Long,i.Inventory.Lat,i.Inventory.Long))
                 .ToList();
 
-            int remainingQty = cartDetail.Quantity;
+            int orderedQty = cartDetail.Quantity;
             decimal totalPrice = 0;
             int totalTaken = 0;
 
+            var tempInventoryUpdates = new List<(StockProductInventory inventory, int takeQty)>();
+
             foreach (var inventory in sortedInventories)
             {
-                if (remainingQty <= 0) break;
+                if (orderedQty <= 0) break;
 
-                int takeQty = Math.Min(inventory.StockQuantity, remainingQty);
-                inventory.StockQuantity -= takeQty;
+                int takeQty = Math.Min(inventory.StockQuantity, orderedQty);
+                tempInventoryUpdates.Add((inventory, takeQty));
                 totalPrice += takeQty * inventory.StockUnitPrice;
                 totalTaken += takeQty;
-                remainingQty -= takeQty;
+                orderedQty -= takeQty;
+            }
+
+            
+            if (totalTaken < cartDetail.Quantity)
+                throw new Exception($"Not enough inventory for product {cartDetail.ProductId}");
+
+            
+            foreach (var (inventory, takeQty) in tempInventoryUpdates)
+            {
+                inventory.StockQuantity -= takeQty;
 
                 if (inventory.StockQuantity <= 0)
                     inventory.IsDeleted = true;
 
                 _unitOfWork.StockProductInventoryRepo.Update(inventory);
+                await _unitOfWork.CompleteAsync();
+
+                await _unitOfWork.StockProductInventoryRepo.CheckStockAndNotify(inventory.ProductId);
             }
 
-            if (totalTaken < cartDetail.Quantity)
-                throw new Exception($"Not enough inventory for product {cartDetail.ProductId}");
+
             if (totalTaken == 0)
                 throw new Exception($"No stock taken for product {cartDetail.ProductId}, unable to calculate price.");
 

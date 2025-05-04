@@ -1,13 +1,18 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.Hubs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 namespace Blink_API.Repositories
 {
     public class GenericRepo<TEntity, Tkey> where TEntity : class
     {
         protected readonly BlinkDbContext db;
+
+
         public GenericRepo(BlinkDbContext _db)
         {
             db = _db;
+
         }
         public virtual async Task<List<TEntity>> GetAll()
         {

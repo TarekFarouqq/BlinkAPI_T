@@ -23,6 +23,7 @@ using Blink_API.Services.ProductServices;
 using Blink_API.Services.UserService;
 using Blink_API.Repositories.ProductRepos;
 using Blink_API.Services.WishlistServices;
+using Blink_API.Hubs;
 namespace Blink_API
 {
     public class Program
@@ -118,12 +119,10 @@ namespace Blink_API
             // to store verify code :
             builder.Services.AddMemoryCache();
 
-            //        builder.Services.AddControllers()
-            //.AddJsonOptions(options =>
-            //{
-            //    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-            //});
-
+            //SignalR
+            builder.Services.AddSignalR(o => {
+    o.EnableDetailedErrors = true; // 🔍 Debugging
+});
 
             #region Add AUTH SERVICES
 
@@ -159,9 +158,12 @@ namespace Blink_API
             {
                 options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.AllowAnyOrigin()
+                    policy
+                          .WithOrigins("http://localhost:4200", "http://localhost:50135")
                           .AllowAnyHeader()
-                          .AllowAnyMethod();
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+
                 });
             });
             var app = builder.Build();
@@ -175,10 +177,13 @@ namespace Blink_API
             app.UseSwaggerUI(app => app.SwaggerEndpoint("/openapi/v1.json", "v1"));
             app.UseStaticFiles();
             app.UseHttpsRedirection();
+            app.UseRouting();
             app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
+            app.MapHub<NotificationHub>("/notificationHub");
             app.MapControllers();
+
             app.Run();
         }
     }

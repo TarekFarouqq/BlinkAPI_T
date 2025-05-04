@@ -1,4 +1,6 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.Hubs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 
@@ -6,11 +8,13 @@ namespace Blink_API.Repositories.ProductRepos
 {
     public class ProductReviewRepo:GenericRepo<Review,int>
     {
-        private readonly BlinkDbContext db;
-        public ProductReviewRepo(BlinkDbContext _db) : base(_db)
+        
+        public ProductReviewRepo(BlinkDbContext db)
+            : base(db)
         {
-            db = _db;
+
         }
+
         public async Task AddUserReview(Review review)
         {
             var existingReview = await db.Reviews

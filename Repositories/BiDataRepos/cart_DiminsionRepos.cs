@@ -1,4 +1,6 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.Hubs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.BiDataRepos
@@ -7,9 +9,10 @@ namespace Blink_API.Repositories.BiDataRepos
 
     {
         private readonly BlinkDbContext _blinkDbContext;
-        public cart_DiminsionRepos(BlinkDbContext blinkDbContext) : base(blinkDbContext)
+        public cart_DiminsionRepos(BlinkDbContext _db)
+            : base(_db)
         {
-            _blinkDbContext = blinkDbContext;
+            _blinkDbContext = _db;
         }
         public async IAsyncEnumerable<CartDetail> GetAllAsStream()
         {
