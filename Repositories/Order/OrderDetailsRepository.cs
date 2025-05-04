@@ -1,19 +1,23 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.Hubs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.Order
 {
     public class OrderDetailsRepository:GenericRepo<OrderDetail,int>
     {
-        private readonly BlinkDbContext _blinkDbContext;
+       
 
-        public OrderDetailsRepository(BlinkDbContext blinkDbContext):base(blinkDbContext)
+        public OrderDetailsRepository(BlinkDbContext db)
+            : base(db)
         {
-            _blinkDbContext = blinkDbContext;
+           
         }
+
         public async Task<List<OrderDetail>> GetDetailsByOrderId(int orderId)
         {
-            return await _blinkDbContext.OrderDetails
+            return await db.OrderDetails
                .Include(od => od.product)
                .ThenInclude(p => p.StockProductInventories)
                .Where(od => od.OrderHeaderId == orderId && !od.IsDeleted)

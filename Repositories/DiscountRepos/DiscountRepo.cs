@@ -1,12 +1,19 @@
 using System.Runtime.Intrinsics.Arm;
+using Blink_API.Hubs;
 using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.DiscountRepos
 {
     public class DiscountRepo:GenericRepo<Discount,int>
     {
-        public DiscountRepo(BlinkDbContext db):base(db){}
+        public DiscountRepo(BlinkDbContext db)
+            : base(db)
+        {
+           
+        }
+
         public async Task<ICollection<Discount>> GetRunningDiscounts()
         {
             return await db.Discounts

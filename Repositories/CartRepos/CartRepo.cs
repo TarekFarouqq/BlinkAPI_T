@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Blink_API.DTOs.CartDTOs;
 using Blink_API.DTOs.PaymentCart;
+using Blink_API.Hubs;
 using Blink_API.Models;
 using Blink_API.Services.PaymentServices;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Text.Json;
@@ -11,12 +13,12 @@ namespace Blink_API.Repositories.CartRepos
 {
     public class CartRepo : GenericRepo<Cart, int>
     {
-        private readonly BlinkDbContext db;
-      
 
-        public CartRepo(BlinkDbContext _db ) : base(_db)
+
+        public CartRepo(BlinkDbContext _db)
+            : base(_db)
         {
-            db = _db;
+           
         }
 
 

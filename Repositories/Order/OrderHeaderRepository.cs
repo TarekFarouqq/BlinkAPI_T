@@ -1,20 +1,22 @@
-﻿using Blink_API.Models;
+﻿using Blink_API.Hubs;
+using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.Order
 {
     public class OrderHeaderRepository:GenericRepo<OrderHeader,int>
     {
-        private readonly BlinkDbContext _db;
-
-        public OrderHeaderRepository(BlinkDbContext db) : base(db)
+       
+        public OrderHeaderRepository(BlinkDbContext db)
+            : base(db)
         {
-            _db = db;
+           
         }
 
         public async Task<List<OrderHeader>> GetOrdersByUserIdAsync(string userId)
         {
-            var order = await _db.OrderHeaders.Include(o => o.OrderDetails.Where(od => !od.IsDeleted))
+            var order = await db.OrderHeaders.Include(o => o.OrderDetails.Where(od => !od.IsDeleted))
                     .ThenInclude(od => od.product)
                     .ThenInclude(od => od.ProductImages)
                 //.Include(o => o.Payment)
@@ -27,7 +29,7 @@ namespace Blink_API.Repositories.Order
 
         public async Task<List<OrderHeader>> GetOrdersWithDetails()
         {
-            return await _db.OrderHeaders
+            return await db.OrderHeaders
                 .Include(o => o.OrderDetails)
                 .Include(o => o.Payment)
                 .Include(o => o.Cart)
@@ -37,7 +39,7 @@ namespace Blink_API.Repositories.Order
         }
         public async Task<OrderHeader?> GetOrderByIdWithDetails(int orderId)
         {
-            var order = await _db.OrderHeaders.Include(o => o.OrderDetails.Where(od => !od.IsDeleted))
+            var order = await db.OrderHeaders.Include(o => o.OrderDetails.Where(od => !od.IsDeleted))
                     .ThenInclude(od => od.product) 
                     .ThenInclude(od=>od.ProductImages)
                 //.Include(o => o.Payment) 
@@ -50,7 +52,7 @@ namespace Blink_API.Repositories.Order
 
         public async Task<OrderHeader?> GetOrderByPaymentIntentId(string paymentIntentId)
         {
-            return await _db.OrderHeaders
+            return await db.OrderHeaders
                 .Include(o => o.OrderDetails)
                     .ThenInclude(p => p.product)
                         .ThenInclude(p => p.ProductImages)

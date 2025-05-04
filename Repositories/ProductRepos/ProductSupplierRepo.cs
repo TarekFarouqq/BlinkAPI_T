@@ -1,16 +1,19 @@
 ﻿using System.Configuration;
 using Blink_API.DTOs.ProductDTOs;
+using Blink_API.Hubs;
 using Blink_API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blink_API.Repositories.ProductRepos
 {
     public class ProductSupplierRepo: GenericRepo<ReviewSuppliedProduct, int>
     {
-        private BlinkDbContext db;
-        public ProductSupplierRepo(BlinkDbContext _db):base(_db)
+       
+        public ProductSupplierRepo(BlinkDbContext db)
+            : base(db)
         {
-            db = _db;
+            
         }
         public async Task<List<ReviewSuppliedProduct>> GetSuppliedProducts()
         {
