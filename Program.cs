@@ -159,10 +159,10 @@ namespace Blink_API
                 options.AddPolicy("AllowAll", policy =>
                 {
                     policy
-                          .WithOrigins("http://localhost:4200", "http://localhost:50135")
+                          .AllowAnyOrigin()
                           .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials();
+                          .AllowAnyMethod();
+                          //.AllowCredentials();
 
                 });
             });
