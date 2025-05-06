@@ -18,8 +18,6 @@ namespace Blink_API.Models
         [Phone]
         public string Phone { get; set; }
         public bool IsDeleted { get; set; } = false;
-
-
         public virtual ICollection<Inventory> Inventories { get; set; } = new HashSet<Inventory>();
 
     }

@@ -18,7 +18,8 @@ namespace Blink_API.MapperConfigs
                     ProductName = r.Product.ProductName,
                     ProductImageUrl = r.Product.ProductImages.FirstOrDefault().ProductImagePath,
                     ProductUnitPrice = r.Product.StockProductInventories.Any() == true ? r.Product.StockProductInventories.Average(p => p.StockUnitPrice) : 0,
-                    Quantity = r.Quantity
+                    Quantity = r.Quantity,
+                    DiscountAmount = r.Product.ProductDiscounts.Where(pd => !pd.IsDeleted && !pd.Discount.IsDeleted && pd.Discount.DiscountFromDate <= DateTime.UtcNow && pd.Discount.DiscountEndDate >= DateTime.UtcNow).Sum(pd => pd.DiscountAmount)
                 }))).ReverseMap();
             // ------------------------------------------------------------------------
             CreateMap<CartDetail, CartDetailsDTO>()
@@ -31,7 +32,8 @@ namespace Blink_API.MapperConfigs
                       .OrderByDescending(d => d.DiscountAmount)
                       .Select(d => d.DiscountAmount)
                       .FirstOrDefault()))
-              .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity));
+              .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
+              .ForMember(dest => dest.DiscountAmount, option => option.MapFrom(src => src.Product.ProductDiscounts.Where(pd => !pd.IsDeleted && !pd.Discount.IsDeleted && pd.Discount.DiscountFromDate <= DateTime.UtcNow && pd.Discount.DiscountEndDate >= DateTime.UtcNow).Sum(pd => pd.DiscountAmount)));
             // ------------------------------------------------------------------------
             CreateMap<ReadCartDTO, CartPaymentDTO>().ReverseMap();
             // ------------------------------------------------------------------------
