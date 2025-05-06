@@ -15,6 +15,7 @@ namespace Blink_API.DTOs.CartDTOs
         public string ProductName { get; set; }
         public decimal ProductUnitPrice { get; set; }
         public string ProductImageUrl { get; set; }
+        public decimal DiscountAmount { get; set; }
         public int Quantity { get; set; }
     }
 }

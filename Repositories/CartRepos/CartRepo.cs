@@ -32,6 +32,10 @@ namespace Blink_API.Repositories.CartRepos
                 .Include(c => c.CartDetails.Where(cd => !cd.IsDeleted))
                     .ThenInclude(c => c.Product)
                         .ThenInclude(p => p.ProductImages)
+                .Include(cd => cd.CartDetails)
+                .ThenInclude(p => p.Product)
+                .ThenInclude(pd => pd.ProductDiscounts)
+                .ThenInclude(d => d.Discount)
                 .Where(p => !p.IsDeleted)
                 .ToListAsync();
 
@@ -47,6 +51,10 @@ namespace Blink_API.Repositories.CartRepos
                 .Include(c => c.CartDetails.Where(cd => !cd.IsDeleted))
                     .ThenInclude(c => c.Product)
                         .ThenInclude(p => p.ProductImages)
+                .Include(cd=>cd.CartDetails)
+                .ThenInclude(p=>p.Product)
+                .ThenInclude(pd=>pd.ProductDiscounts)
+                .ThenInclude(d=>d.Discount)
                 .Where(p => !p.IsDeleted)
                 .FirstOrDefaultAsync(p => p.UserId == id);
         }
@@ -97,7 +105,12 @@ namespace Blink_API.Repositories.CartRepos
 
         public async Task<Cart?> GetCartByUserId(string userId)
         {
-            var cart = await db.Carts.FirstOrDefaultAsync(u => u.UserId == userId && !u.IsDeleted);
+            var cart = await db.Carts
+                .Include(cd => cd.CartDetails)
+                .ThenInclude(p => p.Product)
+                .ThenInclude(pd => pd.ProductDiscounts)
+                .ThenInclude(d => d.Discount)
+                .FirstOrDefaultAsync(u => u.UserId == userId && !u.IsDeleted);
             if(cart == null)
             {
                 return new Cart()
